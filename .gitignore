@@ -5,3 +5,9 @@
 *.agdai
 *.agda~
 MAlonzo/**
+
+# Rust
+*/target
+
+# Others
+drafts/*

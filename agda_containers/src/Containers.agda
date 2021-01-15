@@ -32,10 +32,36 @@ module Containers where
   _→ᶜ_ : Container → Container → Set
   (Sh₁ ◁ Po₁) →ᶜ (Sh₂ ◁ Po₂) = Σ (Sh₁ → Sh₂) λ f → (s : Sh₁) → Po₂ (f s) → Po₁ s
 
-  _/ᶜ_ : ∀ {C₁ C₂} → C₁ →ᶜ C₂ → ∀ {X} → ⟦ C₁ ⟧ X → ⟦ C₂ ⟧ X
+  _/ᶜ_ : ∀ {C₁ C₂ X} → C₁ →ᶜ C₂ → ⟦ C₁ ⟧ X → ⟦ C₂ ⟧ X
   (to , from) /ᶜ (Sh , f) = to Sh , f ∘ from Sh
 
+  -- Abstract the container morphism definition into a record
+  record _⇒_ (C₁ C₂ : Container) : Set₁ where
+    constructor _◀_
+    field
+      shape : Shape C₁ → Shape C₂
+      position : ∀ {s} → Position C₂ (shape s) → Position C₁ s
 
+    ⟪_⟫ : ∀ {X : Set} → ⟦ C₁ ⟧ X → ⟦ C₂ ⟧ X
+    ⟪ Sh , f ⟫ = shape Sh , f ∘ position
+  open _⇒_ public
+
+  idᵐ : ∀ {C} → C ⇒ C
+  idᵐ = id ◀ id
+
+  _oᵐ_ : ∀ {C₁ C₂ C₃} → C₂ ⇒ C₃ → C₁ ⇒ C₂ → C₁ ⇒ C₃
+  (shape₁ ◀ position₁) oᵐ (shape₂ ◀ position₂) = (shape₁ ∘ shape₂) ◀ (position₂ ∘ position₁)
+
+  ListC : ∀ {X : Set} → Set
+  ListC {X} = ⟦ ℕ ◁ Fin ⟧ X
+
+  -- id of a list
+  idL : ∀ {X : Set} → ⟦ ℕ ◁ Fin ⟧ X → ⟦ ℕ ◁ Fin ⟧ X
+  idL = {!!}
+
+  -- reversing a list
+  revL : ∀ {X : Set} → ⟦ ℕ ◁ Fin ⟧ X → ⟦ ℕ ◁ Fin ⟧ X
+  revL = {!!}
 
   -- Closure Properties
   Kᶜ : Set → Container
