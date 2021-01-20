@@ -15,6 +15,10 @@ impl<T> UniqueVec<T> {
         UniqueVec { v: Vec::with_capacity(capacity) }
     }
 
+    pub fn content(&self) -> &Vec<T> {
+        &self.v
+    }
+
     pub fn len(&self) -> usize {
         self.v.len()
     }
