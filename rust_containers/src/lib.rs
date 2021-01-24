@@ -164,7 +164,7 @@ mod tests {
     #[test]
     fn unique_macro_two() {
         let mut vec = unique_vec![1; 4];
-        assert_eq!(vec.len(), 4);
+        assert_eq!(vec.len(), 1);
     }
 
     /* TODO: fix this
