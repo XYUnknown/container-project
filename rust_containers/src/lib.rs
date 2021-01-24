@@ -3,6 +3,26 @@
 
 mod vectors;
 
+#[macro_export]
+macro_rules! unique_vec {
+    ($($x:expr),*) => {
+        {
+            let mut vec = UniqueVec::new();
+            $(
+                vec.push($x);
+            )*
+            vec
+        }
+    };
+    ($elem:expr; $n:expr) => {
+        {
+            let mut vec = UniqueVec::new();
+            vec.push($elem);
+            vec
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use crate::vectors::UniqueVec;
@@ -134,4 +154,31 @@ mod tests {
         }
         assert_eq!(vec.get(0..2), Some(&[0, 1][..]));
     }
+
+    #[test]
+    fn unique_macro_one() {
+        let mut vec = unique_vec![1, 1];
+        assert_eq!(vec.len(), 1);
+    }
+
+    #[test]
+    fn unique_macro_two() {
+        let mut vec = unique_vec![1; 4];
+        assert_eq!(vec.len(), 4);
+    }
+
+    /* TODO: fix this
+    #[test]
+    fn unique_append_works() {
+        let mut vec = UniqueVec::new();
+        let mut other = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        for x in 2..7 {
+            other.push(x);
+        }
+        assert_eq!(*vec.content(), [0, 1, 2, 3, 4, 5, 6])
+    }
+    */
 }
