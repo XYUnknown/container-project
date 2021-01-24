@@ -1,7 +1,10 @@
 use std::vec::Vec;
+use std::iter::Iterator;
 use core::slice::SliceIndex;
 //use std::cmp::Ordering;
 
+
+// A Unique Vector
 pub struct UniqueVec<T> {
     v: Vec<T>,
 }
@@ -15,6 +18,7 @@ impl<T> UniqueVec<T> {
         UniqueVec { v: Vec::with_capacity(capacity) }
     }
 
+    // TODO change here
     pub fn content(&self) -> &Vec<T> {
         &self.v
     }
@@ -37,6 +41,8 @@ impl<T> UniqueVec<T> {
     /**
      * Modifying the vector
      */
+
+    // Duplicated push will be discarded
     pub fn push(&mut self, value: T) 
     where
         T: PartialEq<T>, 
@@ -50,6 +56,7 @@ impl<T> UniqueVec<T> {
         self.v.pop()
     }
 
+    // Duplicated insertion will be discarded
     pub fn insert(&mut self, index: usize, element: T) 
     where
         T: PartialEq<T>, 
@@ -71,6 +78,17 @@ impl<T> UniqueVec<T> {
         self.truncate(0);
     }
 
+    /* TODO fix this
+    pub fn append(&mut self, other: &mut UniqueVec<T>) 
+    where
+        T: PartialEq<T>,
+        {
+            for val in other.content().iter() {
+                self.v.push(val);
+            }
+        }
+    */
+
     /**
      * Accessing elements
      */
@@ -87,5 +105,36 @@ impl<T> UniqueVec<T> {
         I: SliceIndex<[T]>,
         {
             self.v.get(index)
+        }    
+}
+
+
+// A Sorted Vector
+pub struct SortedVec<T> {
+    v: Vec<T>
+}
+
+impl<T> SortedVec<T> {
+    pub const fn new() -> SortedVec<T> {
+        SortedVec { v: Vec::new() }
+    }
+
+    pub fn with_capacity(capacity: usize) -> SortedVec<T> {
+        SortedVec { v: Vec::with_capacity(capacity) }
+    }
+
+    pub fn len(&self) -> usize {
+        self.v.len()
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.v.capacity()
+    }
+
+    pub fn contains(&self, x: &T) -> bool
+    where
+        T: PartialEq<T>, 
+        {
+            self.v.contains(x)
         }
 }
