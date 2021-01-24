@@ -94,7 +94,7 @@ mod tests {
             vec.push(x);
         }
         vec.truncate(3);
-        assert_eq!(*vec.content(), [0, 1, 2]);
+        assert_eq!(*vec, [0, 1, 2]);
     }
 
     #[test]

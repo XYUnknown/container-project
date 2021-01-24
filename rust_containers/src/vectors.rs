@@ -18,11 +18,6 @@ impl<T> UniqueVec<T> {
         UniqueVec { v: Vec::with_capacity(capacity) }
     }
 
-    // TODO change here
-    pub fn content(&self) -> &Vec<T> {
-        &self.v
-    }
-
     pub fn len(&self) -> usize {
         self.v.len()
     }
@@ -108,6 +103,14 @@ impl<T> UniqueVec<T> {
         }    
 }
 
+// Accessing the single field of a UniqueVec
+impl<T> std::ops::Deref for UniqueVec<T> {
+    type Target = Vec<T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.v
+    }
+}
 
 // A Sorted Vector
 pub struct SortedVec<T> {
