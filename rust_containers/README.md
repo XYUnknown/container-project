@@ -17,9 +17,9 @@
 | -------------- | ----------- | ----------- | ----------- |
 | Container Type |   Vector    |    List     | Binary Tree |
 | Not sorted and allow dupilcation |[std Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)|       |       |
-| Not sorted and no duplication    |[implementation](https://github.com/XYUnknown/container-project/blob/ea14b8fd2ae72b904885d17fbf94530ab74245be/rust_containers/src/vectors.rs#L5), [test](https://github.com/XYUnknown/container-project/blob/ea14b8fd2ae72b904885d17fbf94530ab74245be/rust_containers/src/lib.rs#L7)|       |       |
-| Sorted and allow duplication     |       |       |       |
-| Sorted and no duplication        |       |       |       |
+| Not sorted and no duplication    |[implementation](https://github.com/XYUnknown/container-project/blob/main/rust_containers/src/sorted_vector.rs), [tests](https://github.com/XYUnknown/container-project/blob/7cfc256445a2925d2b031b00e221d1d8c559ea1a/rust_containers/src/lib.rs#L75)|       |       |
+| Sorted and allow duplication     |[implementation](https://github.com/XYUnknown/container-project/blob/main/rust_containers/src/sorted_vector.rs), [tests](https://github.com/XYUnknown/container-project/blob/7cfc256445a2925d2b031b00e221d1d8c559ea1a/rust_containers/src/lib.rs#L238)|       |       |
+| Sorted and no duplication        |[implementation](https://github.com/XYUnknown/container-project/blob/main/rust_containers/src/unique_sorted_vector.rs), [tests](https://github.com/XYUnknown/container-project/blob/7cfc256445a2925d2b031b00e221d1d8c559ea1a/rust_containers/src/lib.rs#L285)|       |       |
 
 # Compiler setup
 To add some restriction on generic types: `impl<T: PartialEq> UniqueVec<T> `, we need to <[link](https://stackoverflow.com/questions/48593858/how-to-execute-cargo-test-using-the-nightly-channel)>:
