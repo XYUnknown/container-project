@@ -7,7 +7,7 @@ pub struct UniqueVec<T> {
     v: Vec<T>,
 }
 
-impl<T> UniqueVec<T> {
+impl<T: PartialEq> UniqueVec<T> {
     pub const fn new() -> UniqueVec<T> {
         UniqueVec { v: Vec::new() }
     }
@@ -16,19 +16,16 @@ impl<T> UniqueVec<T> {
         UniqueVec { v: Vec::with_capacity(capacity) }
     }
 
-    pub fn from_vec(src: &mut Vec<T>) -> UniqueVec<T> 
-    where
-        T: PartialEq<T>, 
-        {
-            let mut vec = Vec::new();
-            while !src.is_empty() {
-                let x = src.remove(0);
-                if !vec.contains(&x) {
-                    vec.push(x);
-                }
+    pub fn from_vec(src: &mut Vec<T>) -> UniqueVec<T> {
+        let mut vec = Vec::new();
+        while !src.is_empty() {
+            let x = src.remove(0);
+            if !vec.contains(&x) {
+                vec.push(x);
             }
-            UniqueVec { v: vec }
         }
+        UniqueVec { v: vec }
+    }
 
     pub fn len(&self) -> usize {
         self.v.len()
@@ -38,12 +35,9 @@ impl<T> UniqueVec<T> {
         self.v.capacity()
     }
 
-    pub fn contains(&self, x: &T) -> bool
-    where
-        T: PartialEq<T>, 
-        {
-            self.v.contains(x)
-        }
+    pub fn contains(&self, x: &T) -> bool {
+        self.v.contains(x)
+    }
 
     pub fn is_empty(&self) -> bool {
         self.len() == 0
@@ -54,27 +48,22 @@ impl<T> UniqueVec<T> {
      */
 
     // Duplicated elements will be discarded
-    pub fn push(&mut self, value: T) 
-    where
-        T: PartialEq<T>, 
-        {
-            if !self.contains(&value) {
-                self.v.push(value);
-            }
+    pub fn push(&mut self, value: T) {
+        if !self.contains(&value) {
+            self.v.push(value);
         }
+    }
 
     pub fn pop(&mut self) -> Option<T> {
         self.v.pop()
     }
+
     // Duplicated elements will be discarded
-    pub fn insert(&mut self, index: usize, element: T) 
-    where
-        T: PartialEq<T>, 
-        {
-            if !self.contains(&element) {
-                self.v.insert(index, element);
-            }
+    pub fn insert(&mut self, index: usize, element: T) {
+        if !self.contains(&element) {
+            self.v.insert(index, element);
         }
+    }
 
     pub fn remove(&mut self, index: usize) -> T {
         self.v.remove(index)
@@ -89,14 +78,11 @@ impl<T> UniqueVec<T> {
     }
 
     // TODO: make this faster
-    pub fn append(&mut self, other: &mut Self) 
-    where
-        T: PartialEq<T>,
-        {
-            while !other.is_empty() {
-                self.push(other.remove(0)); // preserve ordering
-            }
+    pub fn append(&mut self, other: &mut Self) {
+        while !other.is_empty() {
+            self.push(other.remove(0)); // preserve ordering
         }
+    }
 
     /**
      * Accessing elements
