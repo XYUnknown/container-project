@@ -26,6 +26,7 @@ macro_rules! unique_vec {
 #[cfg(test)]
 mod tests {
     use crate::vectors::UniqueVec;
+    use crate::vectors::SortedVec;
     #[test]
     fn unique_creation_works() {
         let vec = UniqueVec::<u32>::new();
@@ -156,18 +157,17 @@ mod tests {
     }
 
     #[test]
-    fn unique_macro_one() {
+    fn unique_macro_one_works() {
         let mut vec = unique_vec![1, 1];
         assert_eq!(vec.len(), 1);
     }
 
     #[test]
-    fn unique_macro_two() {
+    fn unique_macro_two_works() {
         let mut vec = unique_vec![1; 4];
         assert_eq!(vec.len(), 1);
     }
 
-    /* TODO: fix this
     #[test]
     fn unique_append_works() {
         let mut vec = UniqueVec::new();
@@ -178,7 +178,13 @@ mod tests {
         for x in 2..7 {
             other.push(x);
         }
-        assert_eq!(*vec.content(), [0, 1, 2, 3, 4, 5, 6])
+        vec.append(&mut other);
+        assert_eq!(*vec, [0, 1, 2, 3, 4, 5, 6])
     }
-    */
+
+    #[test]
+    fn sorted_contains_works() {
+        let mut vec = SortedVec::<u32>::new();
+        assert_eq!(vec.contains(&1), false);
+    }
 }
