@@ -16,7 +16,7 @@
 |                | Indexed     |    Not Indexed            ||
 | -------------- | ----------- | ----------- | ----------- |
 | Container Type |   Vector    |    List     | Binary Tree |
-| Not sorted and allow dupilcation |std Vec|       |       |
+| Not sorted and allow dupilcation |[std Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html)|       |       |
 | Not sorted and no duplication    |[implementation](https://github.com/XYUnknown/container-project/blob/ea14b8fd2ae72b904885d17fbf94530ab74245be/rust_containers/src/vectors.rs#L5), [test](https://github.com/XYUnknown/container-project/blob/ea14b8fd2ae72b904885d17fbf94530ab74245be/rust_containers/src/lib.rs#L7)|       |       |
 | Sorted and allow duplication     |       |       |       |
 | Sorted and no duplication        |       |       |       |
