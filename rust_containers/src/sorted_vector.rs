@@ -45,6 +45,13 @@ impl<T: Ord> SortedVec<T> {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /**
+     * Modifying the vector
+     */
     pub fn push(&mut self, x: T) {
         let index = self.v.binary_search(&x).unwrap_or_else(|i| i);
         self.v.insert(index, x);
