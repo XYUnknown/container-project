@@ -1,7 +1,7 @@
 use std::vec::Vec;
 use std::iter::Iterator;
 use core::slice::SliceIndex;
-//use std::cmp::Ordering;
+use std::cmp::Ordering;
 
 
 // A Unique Vector
@@ -32,6 +32,10 @@ impl<T> UniqueVec<T> {
         {
             self.v.contains(x)
         }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 
     /**
      * Modifying the vector
@@ -73,16 +77,15 @@ impl<T> UniqueVec<T> {
         self.truncate(0);
     }
 
-    /* TODO fix this
-    pub fn append(&mut self, other: &mut UniqueVec<T>) 
+    // TODO: make this faster
+    pub fn append(&mut self, other: &mut Self) 
     where
         T: PartialEq<T>,
         {
-            for val in other.content().iter() {
-                self.v.push(val);
+            while !other.is_empty() {
+                self.push(other.remove(0)); // preserve ordering
             }
         }
-    */
 
     /**
      * Accessing elements
@@ -134,10 +137,17 @@ impl<T> SortedVec<T> {
         self.v.capacity()
     }
 
+    /** 
+     * Use binary search to check if a given element is in the sorted vector
+     * O(log n)
+     */
     pub fn contains(&self, x: &T) -> bool
     where
-        T: PartialEq<T>, 
+        T: Ord, 
         {
-            self.v.contains(x)
+            match self.v.binary_search(x) {
+                Ok(_) => true,
+                Err(_) => false,
+            }
         }
 }
