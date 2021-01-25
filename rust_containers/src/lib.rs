@@ -1,10 +1,13 @@
-//#![feature(const_fn)] // enabling impl<T: PartialEq> 
+#![feature(const_fn)] // enabling impl<T: Ord> 
 #![allow(unused)]
 
-mod vectors;
+mod unique_vector;
+mod sorted_vector;
+mod unique_sorted_vector;
 
 #[macro_export]
-macro_rules! unique_vec {
+// UniqueVec creations
+macro_rules! unique_vec { // e.g., unique_vec![1, 2, 3]
     ($($x:expr),*) => {
         {
             let mut vec = UniqueVec::new();
@@ -14,7 +17,7 @@ macro_rules! unique_vec {
             vec
         }
     };
-    ($elem:expr; $n:expr) => {
+    ($elem:expr; $n:expr) => { // e.g., unique_vec![1; 3]
         {
             let mut vec = UniqueVec::new();
             vec.push($elem);
@@ -23,10 +26,32 @@ macro_rules! unique_vec {
     };
 }
 
+// SortedVec creations
+macro_rules! sorted_vec {
+    ($($x:expr),*) => { // e.g., sorted_vec![1, 2, 3]
+        {
+            let mut vec = SortedVec::new();
+            $(
+                vec.push($x);
+            )*
+            vec
+        }
+    };
+    ($elem:expr; $n:expr) => { // e.g., sorted_vec![1; 3]
+        {
+            let mut src = std::vec::from_elem($elem, $n);
+            let mut vec = SortedVec::from_vec(&mut src);
+            vec
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::vectors::UniqueVec;
-    use crate::vectors::SortedVec;
+    use crate::unique_vector::UniqueVec;
+    use crate::sorted_vector::SortedVec;
+    use std::cmp::Reverse;
+    //use crate::unique_sorted_vector::UniqueSortedVec;
     #[test]
     fn unique_creation_works() {
         let vec = UniqueVec::<u32>::new();
@@ -37,6 +62,13 @@ mod tests {
     fn unique_creation_with_capacity_works() {
         let vec = UniqueVec::<u32>::with_capacity(10);
         assert_eq!(vec.capacity(), 10);
+    }
+
+    #[test]
+    fn unique_creation_from_vec() {
+        let mut src = vec![1, 2, 3];
+        let vec = UniqueVec::from_vec(&mut src);
+        assert_eq!(*vec, [1, 2, 3]);
     }
 
     #[test]
@@ -183,8 +215,49 @@ mod tests {
     }
 
     #[test]
+    fn sorted_creation_from_vec_works() {
+        let mut src = vec![3, 1, 2, 3];
+        let vec = SortedVec::from_vec(&mut src);
+        assert_eq!(*vec, [1, 2, 3, 3]);
+    }
+
+    fn sorted_macro_one_works() {
+        let vec = sorted_vec![3, 7, 2, 1, 5, 4, 3];
+        assert_eq!(*vec, [1, 2, 3, 3, 4, 5, 7])
+    }
+
+    fn sorted_macro_two_works() {
+        let vec = sorted_vec![1; 3];
+        assert_eq!(*vec, [1, 1, 1])
+    }
+
+    #[test]
     fn sorted_contains_works() {
         let mut vec = SortedVec::<u32>::new();
         assert_eq!(vec.contains(&1), false);
     }
+
+    #[test]
+    fn sorted_push_works() {
+        let mut vec = SortedVec::new();
+        for x in 0..5 {
+            vec.push(4 - x);
+        }
+        assert_eq!(*vec, [0, 1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn sorted_append_works() {
+        let mut vec = SortedVec::new();
+        let mut other = SortedVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        for x in 2..7 {
+            other.push(x);
+        }
+        vec.append(&mut other);
+        assert_eq!(*vec, [0, 1, 2, 2, 3, 3, 4, 4, 5, 6])
+    }
+
 }
