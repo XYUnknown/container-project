@@ -1,8 +1,6 @@
 use std::vec::Vec;
-use std::iter::Iterator;
+use std::ops::Deref;
 use core::slice::SliceIndex;
-use std::cmp::Ordering;
-
 
 // A Unique Vector
 pub struct UniqueVec<T> {
@@ -17,6 +15,20 @@ impl<T> UniqueVec<T> {
     pub fn with_capacity(capacity: usize) -> UniqueVec<T> {
         UniqueVec { v: Vec::with_capacity(capacity) }
     }
+
+    pub fn from_vec(src: &mut Vec<T>) -> UniqueVec<T> 
+    where
+        T: PartialEq<T>, 
+        {
+            let mut vec = Vec::new();
+            while !src.is_empty() {
+                let x = src.remove(0);
+                if !vec.contains(&x) {
+                    vec.push(x);
+                }
+            }
+            UniqueVec { v: vec }
+        }
 
     pub fn len(&self) -> usize {
         self.v.len()
@@ -54,7 +66,6 @@ impl<T> UniqueVec<T> {
     pub fn pop(&mut self) -> Option<T> {
         self.v.pop()
     }
-
     // Duplicated insertion will be discarded
     pub fn insert(&mut self, index: usize, element: T) 
     where
@@ -103,11 +114,11 @@ impl<T> UniqueVec<T> {
         I: SliceIndex<[T]>,
         {
             self.v.get(index)
-        }    
+        }
 }
 
 // Accessing the single field of a UniqueVec
-impl<T> std::ops::Deref for UniqueVec<T> {
+impl<T> Deref for UniqueVec<T> {
     type Target = Vec<T>;
 
     fn deref(&self) -> &Self::Target {
@@ -115,39 +126,12 @@ impl<T> std::ops::Deref for UniqueVec<T> {
     }
 }
 
-// A Sorted Vector
-pub struct SortedVec<T> {
-    v: Vec<T>
-}
-
-impl<T> SortedVec<T> {
-    pub const fn new() -> SortedVec<T> {
-        SortedVec { v: Vec::new() }
+impl<T: Clone> Clone for UniqueVec<T> {
+    fn clone(&self) -> Self {
+        UniqueVec { v: self.v.clone() }
     }
 
-    pub fn with_capacity(capacity: usize) -> SortedVec<T> {
-        SortedVec { v: Vec::with_capacity(capacity) }
+    fn clone_from(&mut self, source: &Self) {
+        self.v.clone_from(&source.v);
     }
-
-    pub fn len(&self) -> usize {
-        self.v.len()
-    }
-
-    pub fn capacity(&self) -> usize {
-        self.v.capacity()
-    }
-
-    /** 
-     * Use binary search to check if a given element is in the sorted vector
-     * O(log n)
-     */
-    pub fn contains(&self, x: &T) -> bool
-    where
-        T: Ord, 
-        {
-            match self.v.binary_search(x) {
-                Ok(_) => true,
-                Err(_) => false,
-            }
-        }
 }
