@@ -53,7 +53,7 @@ impl<T> UniqueVec<T> {
      * Modifying the vector
      */
 
-    // Duplicated push will be discarded
+    // Duplicated elements will be discarded
     pub fn push(&mut self, value: T) 
     where
         T: PartialEq<T>, 
@@ -66,7 +66,7 @@ impl<T> UniqueVec<T> {
     pub fn pop(&mut self) -> Option<T> {
         self.v.pop()
     }
-    // Duplicated insertion will be discarded
+    // Duplicated elements will be discarded
     pub fn insert(&mut self, index: usize, element: T) 
     where
         T: PartialEq<T>, 

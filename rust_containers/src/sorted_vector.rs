@@ -38,7 +38,7 @@ impl<T: Ord> SortedVec<T> {
      * Use binary search to check if a given element is in the sorted vector
      * O(log n)
      */
-    pub fn contains(&self, x: &T) -> bool{
+    pub fn contains(&self, x: &T) -> bool {
         match self.v.binary_search(x) {
             Ok(_) => true,
             Err(_) => false,
@@ -52,9 +52,9 @@ impl<T: Ord> SortedVec<T> {
     /**
      * Modifying the vector
      */
-    pub fn push(&mut self, x: T) {
-        let index = self.v.binary_search(&x).unwrap_or_else(|i| i);
-        self.v.insert(index, x);
+    pub fn push(&mut self, value: T) {
+        let index = self.v.binary_search(&value).unwrap_or_else(|i| i);
+        self.v.insert(index, value);
     }
 
     // By default get the maximum element
@@ -75,6 +75,11 @@ impl<T: Ord> SortedVec<T> {
 
     pub fn clear(&mut self) {
         self.truncate(0);
+    }
+
+    // Removes consecutive repeated elements 
+    pub fn dedup(&mut self) {
+        self.v.dedup();
     }
 
     /**
