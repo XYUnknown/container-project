@@ -46,12 +46,33 @@ macro_rules! sorted_vec {
     };
 }
 
+// UniqueSortedVec creations
+macro_rules! unique_sorted_vec {
+    ($($x:expr),*) => { // e.g., unique_sorted_vec![1, 2, 3]
+        {
+            let mut vec = UniqueSortedVec::new();
+            $(
+                vec.push($x);
+            )*
+            vec
+        }
+    };
+    ($elem:expr; $n:expr) => { // e.g., unique_sorted_vec![1; 3]
+        {
+            let mut vec = UniqueSortedVec::new();
+            vec.push($elem);
+            vec
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use crate::unique_vector::UniqueVec;
     use crate::sorted_vector::SortedVec;
-    use std::cmp::Reverse;
-    //use crate::unique_sorted_vector::UniqueSortedVec;
+    use crate::unique_sorted_vector::UniqueSortedVec;
+    
+    /** Unique Vector*/
     #[test]
     fn unique_creation_works() {
         let vec = UniqueVec::<u32>::new();
@@ -214,6 +235,7 @@ mod tests {
         assert_eq!(*vec, [0, 1, 2, 3, 4, 5, 6])
     }
 
+    /* Sorted Vector */
     #[test]
     fn sorted_creation_from_vec_works() {
         let mut src = vec![3, 1, 2, 3];
@@ -260,4 +282,43 @@ mod tests {
         assert_eq!(*vec, [0, 1, 2, 2, 3, 3, 4, 4, 5, 6])
     }
 
+    /* Unique Sorted Vector */
+    fn unique_sorted_creation_from_vec_works() {
+        let mut src = vec![3, 1, 2, 3];
+        let vec = UniqueSortedVec::from_vec(&mut src);
+        assert_eq!(*vec, [1, 2, 3]);
+    }
+
+    fn unique_sorted_macro_one_works() {
+        let vec = unique_sorted_vec![3, 7, 2, 1, 5, 4, 3];
+        assert_eq!(*vec, [1, 2, 3, 4, 5, 7])
+    }
+
+    fn unique_sorted_macro_two_works() {
+        let vec = unique_sorted_vec![1; 3];
+        assert_eq!(*vec, [1])
+    }
+
+    #[test]
+    fn unique_sorted_push_works() {
+        let mut src = vec![0, 1, 2, 3, 4];
+        let mut vec = UniqueSortedVec::from_vec(&mut src);
+        vec.push(5);
+        vec.push(4);
+        assert_eq!(*vec, [0, 1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn unique_sorted_append_works() {
+        let mut vec = UniqueSortedVec::new();
+        let mut other = UniqueSortedVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        for x in 2..7 {
+            other.push(x);
+        }
+        vec.append(&mut other);
+        assert_eq!(*vec, [0, 1, 2, 3, 4, 5, 6])
+    }
 }
