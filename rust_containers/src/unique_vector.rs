@@ -1,4 +1,5 @@
 use std::vec::Vec;
+use std::slice::Iter;
 use std::ops::Deref;
 use core::slice::SliceIndex;
 
@@ -101,6 +102,10 @@ impl<T: PartialEq> UniqueVec<T> {
         {
             self.v.get(index)
         }
+    
+    pub fn iter(&self) -> Iter<'_, T> {
+        self.v.iter()
+    }
 }
 
 // Accessing the single field of a UniqueVec

@@ -1,4 +1,5 @@
 use std::vec::Vec;
+use std::slice::Iter;
 use std::ops::Deref;
 use std::cmp::Ordering;
 use core::slice::SliceIndex;
@@ -65,6 +66,12 @@ impl<T: Ord + PartialEq> UniqueSortedVec<T> {
         self.truncate(0);
     }
 
+    // Append and then remove consecutive repeated elements
+    pub fn append(&mut self, other: &mut Self) {
+        self.v.append(&mut other.v);
+        self.v.dedup();
+    }
+
     /**
      * Accessing elements
      */
@@ -82,11 +89,9 @@ impl<T: Ord + PartialEq> UniqueSortedVec<T> {
         {
             self.v.get(index)
         }
-    
-    // Append and then remove consecutive repeated elements
-    pub fn append(&mut self, other: &mut Self) {
-        self.v.append(&mut other.v);
-        self.v.dedup();
+
+    pub fn iter(&self) -> Iter<'_, T> {
+        self.v.iter()
     }
 }
 

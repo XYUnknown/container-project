@@ -1,4 +1,5 @@
 use std::vec::Vec;
+use std::slice::Iter;
 use std::ops::Deref;
 use std::cmp::Ordering;
 use core::slice::SliceIndex;
@@ -82,24 +83,6 @@ impl<T: Ord> SortedVec<T> {
         self.v.dedup();
     }
 
-    /**
-     * Accessing elements
-     */
-     pub fn first(&mut self) -> Option<&T> {
-        self.v.first()
-    }
-
-    pub fn last(&mut self) -> Option<&T> {
-        self.v.last()
-    }
-
-    pub fn get<I>(&self, index: I) -> Option<&I::Output>
-    where
-        I: SliceIndex<[T]>,
-        {
-            self.v.get(index)
-        }
-
     // Merge them into one vector
     pub fn append(&mut self, other: &mut Self) {
         let mut temp = Vec::new();
@@ -127,6 +110,28 @@ impl<T: Ord> SortedVec<T> {
             }
         }
         self.v = temp.drain(..).collect();
+    }
+    
+    /**
+     * Accessing elements
+     */
+     pub fn first(&mut self) -> Option<&T> {
+        self.v.first()
+    }
+
+    pub fn last(&mut self) -> Option<&T> {
+        self.v.last()
+    }
+
+    pub fn get<I>(&self, index: I) -> Option<&I::Output>
+    where
+        I: SliceIndex<[T]>,
+        {
+            self.v.get(index)
+        }
+    
+    pub fn iter(&self) -> Iter<'_, T> {
+        self.v.iter()
     }
 }
 
