@@ -4,6 +4,7 @@
 mod unique_vector;
 mod sorted_vector;
 mod unique_sorted_vector;
+mod unique_linked_list;
 
 #[macro_export]
 // UniqueVec creations
@@ -71,29 +72,30 @@ mod tests {
     use crate::unique_vector::UniqueVec;
     use crate::sorted_vector::SortedVec;
     use crate::unique_sorted_vector::UniqueSortedVec;
+    use crate::unique_linked_list::UniqueLinkedList;
     
     /** Unique Vector*/
     #[test]
-    fn unique_creation_works() {
+    fn unique_vec_creation_works() {
         let vec = UniqueVec::<u32>::new();
         assert_eq!(vec.len(), 0);
     }
 
     #[test]
-    fn unique_creation_with_capacity_works() {
+    fn unique_vec_creation_with_capacity_works() {
         let vec = UniqueVec::<u32>::with_capacity(10);
         assert_eq!(vec.capacity(), 10);
     }
 
     #[test]
-    fn unique_creation_from_vec() {
+    fn unique_vec_creation_from_vec() {
         let mut src = vec![1, 2, 3];
         let vec = UniqueVec::from_vec(&mut src);
         assert_eq!(*vec, [1, 2, 3]);
     }
 
     #[test]
-    fn unique_contains_works() {
+    fn unique_vec_contains_works() {
         let mut vec = UniqueVec::new();
         vec.push(1);
         assert_eq!(vec.contains(&1), true);
@@ -101,7 +103,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_push_works() {
+    fn unique_vec_push_works() {
         let mut vec = UniqueVec::new();
         for x in 0..10000 {
             vec.push(x);
@@ -111,13 +113,13 @@ mod tests {
     }
 
     #[test]
-    fn unique_pop_none_works() {
+    fn unique_vec_pop_none_works() {
         let mut vec = UniqueVec::<u32>::new();
         assert_eq!(vec.pop(), None);
     }
 
     #[test]
-    fn unique_pop_some_works() {
+    fn unique_vec_pop_some_works() {
         let mut vec = UniqueVec::new();
         vec.push(1);
         vec.push(2);
@@ -125,7 +127,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_insert_works() {
+    fn unique_vec_insert_works() {
         let mut vec = UniqueVec::new();
         vec.insert(0, 10);
         vec.insert(1, 10);
@@ -133,7 +135,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_remove_works() {
+    fn unique_vec_remove_works() {
         let mut vec = UniqueVec::new();
         vec.push(1);
         vec.push(2);
@@ -142,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_truncate_works() {
+    fn unique_vec_truncate_works() {
         let mut vec = UniqueVec::new();
         for x in 0..5 {
             vec.push(x);
@@ -152,7 +154,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_clear_works() {
+    fn unique_vec_clear_works() {
         let mut vec = UniqueVec::new();
         for x in 0..5 {
             vec.push(x);
@@ -162,13 +164,13 @@ mod tests {
     }
 
     #[test]
-    fn unique_first_none_works() {
+    fn unique_vec_first_none_works() {
         let mut vec = UniqueVec::<u32>::new();
         assert_eq!(vec.first(), None);
     }
 
     #[test]
-    fn unique_first_works() {
+    fn unique_vec_first_works() {
         let mut vec = UniqueVec::new();
         for x in 0..5 {
             vec.push(x);
@@ -177,13 +179,13 @@ mod tests {
     }
 
     #[test]
-    fn unique_last_none_works() {
+    fn unique_vec_last_none_works() {
         let mut vec = UniqueVec::<u32>::new();
         assert_eq!(vec.last(), None);
     }
 
     #[test]
-    fn unique_last_works() {
+    fn unique_vec_last_works() {
         let mut vec = UniqueVec::new();
         for x in 0..5 {
             vec.push(x);
@@ -192,7 +194,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_get_element_works() {
+    fn unique_vec_get_element_works() {
         let mut vec = UniqueVec::new();
         for x in 0..5 {
             vec.push(x);
@@ -201,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_get_slice_works() {
+    fn unique_vec_get_slice_works() {
         let mut vec = UniqueVec::new();
         for x in 0..5 {
             vec.push(x);
@@ -210,19 +212,19 @@ mod tests {
     }
 
     #[test]
-    fn unique_macro_one_works() {
+    fn unique_vec_macro_one_works() {
         let mut vec = unique_vec![1, 1];
         assert_eq!(vec.len(), 1);
     }
 
     #[test]
-    fn unique_macro_two_works() {
+    fn unique_vec_macro_two_works() {
         let mut vec = unique_vec![1; 4];
         assert_eq!(vec.len(), 1);
     }
 
     #[test]
-    fn unique_append_works() {
+    fn unique_vec_append_works() {
         let mut vec = UniqueVec::new();
         let mut other = UniqueVec::new();
         for x in 0..5 {
@@ -237,30 +239,30 @@ mod tests {
 
     /* Sorted Vector */
     #[test]
-    fn sorted_creation_from_vec_works() {
+    fn sorted_vec_creation_from_vec_works() {
         let mut src = vec![3, 1, 2, 3];
         let vec = SortedVec::from_vec(&mut src);
         assert_eq!(*vec, [1, 2, 3, 3]);
     }
 
-    fn sorted_macro_one_works() {
+    fn sorted_vec_macro_one_works() {
         let vec = sorted_vec![3, 7, 2, 1, 5, 4, 3];
         assert_eq!(*vec, [1, 2, 3, 3, 4, 5, 7])
     }
 
-    fn sorted_macro_two_works() {
+    fn sorted_vec_macro_two_works() {
         let vec = sorted_vec![1; 3];
         assert_eq!(*vec, [1, 1, 1])
     }
 
     #[test]
-    fn sorted_contains_works() {
+    fn sorted_vec_contains_works() {
         let mut vec = SortedVec::<u32>::new();
         assert_eq!(vec.contains(&1), false);
     }
 
     #[test]
-    fn sorted_push_works() {
+    fn sorted_vec_push_works() {
         let mut vec = SortedVec::new();
         for x in 0..5 {
             vec.push(4 - x);
@@ -269,7 +271,7 @@ mod tests {
     }
 
     #[test]
-    fn sorted_append_works() {
+    fn sorted_vec_append_works() {
         let mut vec = SortedVec::new();
         let mut other = SortedVec::new();
         for x in 0..5 {
@@ -283,24 +285,24 @@ mod tests {
     }
 
     /* Unique Sorted Vector */
-    fn unique_sorted_creation_from_vec_works() {
+    fn unique_sorted_vec_creation_from_vec_works() {
         let mut src = vec![3, 1, 2, 3];
         let vec = UniqueSortedVec::from_vec(&mut src);
         assert_eq!(*vec, [1, 2, 3]);
     }
 
-    fn unique_sorted_macro_one_works() {
+    fn unique_sorted_vec_macro_one_works() {
         let vec = unique_sorted_vec![3, 7, 2, 1, 5, 4, 3];
         assert_eq!(*vec, [1, 2, 3, 4, 5, 7])
     }
 
-    fn unique_sorted_macro_two_works() {
+    fn unique_sorted_vec_macro_two_works() {
         let vec = unique_sorted_vec![1; 3];
         assert_eq!(*vec, [1])
     }
 
     #[test]
-    fn unique_sorted_push_works() {
+    fn unique_sorted_vec_push_works() {
         let mut src = vec![0, 1, 2, 3, 4];
         let mut vec = UniqueSortedVec::from_vec(&mut src);
         vec.push(5);
@@ -309,7 +311,7 @@ mod tests {
     }
 
     #[test]
-    fn unique_sorted_append_works() {
+    fn unique_sorted_vec_append_works() {
         let mut vec = UniqueSortedVec::new();
         let mut other = UniqueSortedVec::new();
         for x in 0..5 {
@@ -321,4 +323,52 @@ mod tests {
         vec.append(&mut other);
         assert_eq!(*vec, [0, 1, 2, 3, 4, 5, 6])
     }
+
+    /* Unique List */
+    #[test]
+    fn unique_ll_creation_works() {
+        let l = UniqueLinkedList::<u32>::new();
+        assert_eq!(l.len(), 0);
+    }
+
+    #[test]
+    fn unique_ll_push_front_works() {
+        let mut l = UniqueLinkedList::new();
+        for x in 0..10000 {
+            l.push_front(x);
+            l.push_front(x);
+        }
+        assert_eq!(l.len(), 10000); // no duplication
+    }
+
+    fn unique_ll_push_back_works() {
+        let mut l = UniqueLinkedList::new();
+        for x in 0..10000 {
+            l.push_back(x);
+            l.push_back(x);
+        }
+        assert_eq!(l.len(), 10000); // no duplication
+    }
+
+    fn unique_ll_append_works() {
+        let mut l = UniqueLinkedList::new();
+        let mut other = UniqueLinkedList::new();
+        for x in 0..5 {
+            l.push_back(x);
+        }
+        for x in 2..7 {
+            other.push_back(x);
+        }
+        l.append(&mut other);
+        let mut iter = l.iter();
+        assert_eq!(iter.next(), Some(&0));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), Some(&5));
+        assert_eq!(iter.next(), Some(&6));
+        assert_eq!(iter.next(), None);
+    }
+
 }
