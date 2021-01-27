@@ -7,6 +7,7 @@ mod sorted_vector;
 mod unique_sorted_vector;
 mod unique_linked_list;
 mod sorted_linked_list;
+mod unique_sorted_linked_list;
 
 #[macro_export]
 // UniqueVec creations
@@ -76,6 +77,7 @@ mod tests {
     use crate::unique_sorted_vector::UniqueSortedVec;
     use crate::unique_linked_list::UniqueLinkedList;
     use crate::sorted_linked_list::SortedLinkedList;
+    use crate::unique_sorted_linked_list::UniqueSortedLinkedList;
     
     /** Unique Vector*/
     #[test]
@@ -344,6 +346,7 @@ mod tests {
         assert_eq!(l.len(), 10000); // no duplication
     }
 
+    #[test]
     fn unique_ll_push_back_works() {
         let mut l = UniqueLinkedList::new();
         for x in 0..10000 {
@@ -353,6 +356,7 @@ mod tests {
         assert_eq!(l.len(), 10000); // no duplication
     }
 
+    #[test]
     fn unique_ll_append_works() {
         let mut l = UniqueLinkedList::new();
         let mut other = UniqueLinkedList::new();
@@ -372,6 +376,16 @@ mod tests {
         assert_eq!(iter.next(), Some(&5));
         assert_eq!(iter.next(), Some(&6));
         assert_eq!(iter.next(), None);
+    }
+    
+    #[test]
+    fn unique_ll_clear_works() {
+        let mut l = UniqueLinkedList::new();
+        for x in 0..5 {
+            l.push_back(x);
+        }
+        l.clear();
+        assert!(l.is_empty());
     }
 
     /* Sorted List */
@@ -438,6 +452,95 @@ mod tests {
         assert_eq!(iter.next(), Some(&5));
         assert_eq!(iter.next(), Some(&6));
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn sorted_ll_clear_works() {
+        let mut l = SortedLinkedList::new();
+        for x in 0..5 {
+            l.push_back(x);
+        }
+        l.clear();
+        assert!(l.is_empty());
+    }
+
+    /* Unique Sorted List */
+    #[test]
+    fn unique_sorted_ll_creation_works() {
+        let l = UniqueSortedLinkedList::<u32>::new();
+        assert_eq!(l.len(), 0);
+    }
+
+    #[test]
+    fn unique_sorted_ll_push_front_works() {
+        let mut l = UniqueSortedLinkedList::<u32>::new();
+        l.push_front(4);
+        l.push_front(4);
+        l.push_front(0);
+        l.push_front(3);
+        l.push_front(3);
+        l.push_front(1);
+        l.push_front(1);
+        l.push_front(2);
+        let mut iter = l.iter();
+        assert_eq!(iter.next(), Some(&0));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn unique_sorted_ll_push_back_works() {
+        let mut l = UniqueSortedLinkedList::<u32>::new();
+        l.push_back(4);
+        l.push_back(4);
+        l.push_back(0);
+        l.push_back(0);
+        l.push_back(3);
+        l.push_back(1);
+        l.push_back(3);
+        l.push_back(2);
+        let mut iter = l.iter();
+        assert_eq!(iter.next(), Some(&0));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn unique_sorted_ll_append_works() {
+        let mut l = UniqueSortedLinkedList::new();
+        let mut other = UniqueSortedLinkedList::new();
+        for x in 0..5 {
+            other.push_back(x);
+        }
+        for x in 2..7 {
+            l.push_back(x);
+        }
+        l.append(&mut other); // 0->1->2->3->4->5->6
+        let mut iter = l.iter();
+        assert_eq!(iter.next(), Some(&0));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), Some(&5));
+        assert_eq!(iter.next(), Some(&6));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn unique_sorted_ll_clear_works() {
+        let mut l = UniqueSortedLinkedList::new();
+        for x in 0..5 {
+            l.push_back(x);
+        }
+        l.clear();
+        assert!(l.is_empty());
     }
 
 }
