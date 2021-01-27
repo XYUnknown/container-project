@@ -60,16 +60,7 @@ impl<T: PartialEq> UniqueLinkedList<T> {
             }
         }
     }
-
-    pub fn prepend(&mut self, other: &mut Self) {
-        loop {
-            match other.pop_back() {
-                Some(x) => self.push_front(x),
-                None => break
-            }
-        }
-    }
-
+    
     // Removes the element at the given index and returns it.
     // O(n) complexity
     // nightly feature in std
