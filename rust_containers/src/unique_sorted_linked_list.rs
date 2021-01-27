@@ -98,7 +98,7 @@ impl<T: Ord + PartialEq> UniqueSortedLinkedList<T> {
                 }
             }
         }
-        *self.ll = temp;
+        *self.ll = temp; // deref mut
     }
 
     /**
@@ -116,4 +116,22 @@ impl<T: Ord + PartialEq> UniqueSortedLinkedList<T> {
         self.ll.iter()
     }
     
+}
+
+impl<T> Deref for UniqueSortedLinkedList<T> {
+    type Target = LinkedList<T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.ll.deref()
+    }
+}
+
+impl<T: Clone> Clone for UniqueSortedLinkedList<T> {
+    fn clone(&self) -> Self {
+        UniqueSortedLinkedList { ll: self.ll.clone() }
+    }
+
+    fn clone_from(&mut self, source: &Self) {
+        self.ll.clone_from(&source.ll);
+    }
 }
