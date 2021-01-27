@@ -49,7 +49,7 @@ impl<T: PartialEq> UniqueLinkedList<T> {
     }
 
     pub fn clear(&mut self) {
-        self.ll.clear()
+        self.ll.clear();
     }
 
     pub fn append(&mut self, other: &mut Self) {

@@ -1,8 +1,9 @@
 use std::collections::LinkedList;
 use std::ops::Deref;
+use std::ops::DerefMut;
 use std::cmp::Ordering;
 use std::collections::linked_list::Iter;
-// nightly feature
+// nightly features
 use std::collections::linked_list::Cursor;
 use std::collections::linked_list::CursorMut;
 
@@ -88,7 +89,7 @@ impl <T: Ord> SortedLinkedList<T> {
     }
 
     pub fn clear(&mut self) {
-        self.ll.clear()
+        self.ll.clear();
     }
 
     pub fn append(&mut self, other: &mut Self) {
@@ -166,6 +167,12 @@ impl<T> Deref for SortedLinkedList<T> {
 
     fn deref(&self) -> &Self::Target {
         &self.ll
+    }
+}
+
+impl<T> DerefMut for SortedLinkedList<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.ll
     }
 }
 
