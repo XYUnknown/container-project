@@ -6,7 +6,7 @@ use std::collections::linked_list::Iter;
 use std::collections::linked_list::Cursor;
 use std::collections::linked_list::CursorMut;
 
-// A Unique doubly linked-list
+// A sorted doubly linked-list
 pub struct SortedLinkedList<T> {
     ll: LinkedList<T>,
 }

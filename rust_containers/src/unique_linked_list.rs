@@ -3,7 +3,7 @@ use std::ops::Deref;
 use std::collections::linked_list::Iter;
 //use std::collections::linked_list::IterMut;
 
-// A Unique doubly linked-list
+// A unique doubly linked-list
 pub struct UniqueLinkedList<T> {
     ll: LinkedList<T>,
 }
@@ -60,7 +60,7 @@ impl<T: PartialEq> UniqueLinkedList<T> {
             }
         }
     }
-    
+
     // Removes the element at the given index and returns it.
     // O(n) complexity
     // nightly feature in std
