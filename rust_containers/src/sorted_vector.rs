@@ -92,9 +92,8 @@ impl<T: Ord> SortedVec<T> {
                     match other.first() {
                         Some(x2) => {
                             match x1.cmp(x2) {
-                                Ordering::Less => temp.push(self.remove(0)),
-                                Ordering::Greater => temp.push(other.remove(0)),
-                                Ordering::Equal => temp.push(self.remove(0)),
+                                Ordering::Less | Ordering::Equal => temp.push(self.remove(0)),
+                                Ordering::Greater => temp.push(other.remove(0))
                             }
                         },
                         None => {
