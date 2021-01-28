@@ -36,6 +36,20 @@
 |   pop   | YES |    YES    |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
 |pop_front| NO  |    NO     |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
 |pop_back | NO  |    NO     |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+|insert(by index)| YES |  YES  |  NO    |       NO        |    NO      |        NO        |        NO        |           NO           |          |                 |
+|remove(by index)| YES |  YES  |  YES   |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
+|truncate | YES |    YES    |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
+|  clear  | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|  append | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|first(front)| YES |   YES  |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|last(back)| YES |   YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|get(by index)| YES |  YES  |  YES      |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
+|  iter   | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|cursor_front| NO  |    NO  |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+|cursor_front_mut| NO  |  NO   |   NO   |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+|cursor_back| NO  |    NO   |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+|cursor_back_mut| NO  |  NO    |   NO   |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+
 
 # Compiler setup
 To add some restriction on generic types: `impl<T: PartialEq> UniqueVec<T> `, we need to <[link](https://stackoverflow.com/questions/48593858/how-to-execute-cargo-test-using-the-nightly-channel)>:
