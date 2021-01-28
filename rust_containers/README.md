@@ -21,6 +21,22 @@
 | Sorted and allow duplication     |[implementation](https://github.com/XYUnknown/container-project/blob/main/rust_containers/src/sorted_vector.rs), [tests](https://github.com/XYUnknown/container-project/blob/7cfc256445a2925d2b031b00e221d1d8c559ea1a/rust_containers/src/lib.rs#L238)|[implementation](https://github.com/XYUnknown/container-project/blob/main/rust_containers/src/sorted_linked_list.rs), [tests](https://github.com/XYUnknown/container-project/blob/1b6cae47e7006adec605625198e93b4e53423d15/rust_containers/src/lib.rs#L391)|       |
 | Sorted and no duplication        |[implementation](https://github.com/XYUnknown/container-project/blob/main/rust_containers/src/unique_sorted_vector.rs), [tests](https://github.com/XYUnknown/container-project/blob/7cfc256445a2925d2b031b00e221d1d8c559ea1a/rust_containers/src/lib.rs#L285)|[implementation](https://github.com/XYUnknown/container-project/blob/main/rust_containers/src/unique_sorted_linked_list.rs), [tests](https://github.com/XYUnknown/container-project/blob/1b6cae47e7006adec605625198e93b4e53423d15/rust_containers/src/lib.rs#L467)|       |
 
+## Operations
+|         | Vec | UniqueVec | SortedVec | UniqueSortedVec | LinkedList | UniqueLinkedList | SortedLinkedList | UniqueSortedLinkedList | AVL Tree | Unique AVL Tree |
+|---------|-----|-----------|-----------|-----------------|------------|------------------|------------------|------------------------|----------|-----------------|
+|   new   | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|with_capacity| YES |  YES  |    NO     |       NO        |    NO      |        NO        |        NO        |           NO           |          |                 |
+|from_vec | YES |    YES    |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
+|   len   | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|is_empty | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
+|capacity | YES |    YES    |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
+|   push  | YES |    YES    |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
+|push_front| NO |    NO     |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+|push_back| NO  |    NO     |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+|   pop   | YES |    YES    |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
+|pop_front| NO  |    NO     |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+|pop_back | NO  |    NO     |    NO     |       NO        |    YES     |        YES       |        YES       |           YES          |          |                 |
+
 # Compiler setup
 To add some restriction on generic types: `impl<T: PartialEq> UniqueVec<T> `, we need to <[link](https://stackoverflow.com/questions/48593858/how-to-execute-cargo-test-using-the-nightly-channel)>:
 - Rust nightly channel required: `rustup install nightly`
