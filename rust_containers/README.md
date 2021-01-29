@@ -25,7 +25,7 @@
 |         | Vec | UniqueVec | SortedVec | UniqueSortedVec | LinkedList | UniqueLinkedList | SortedLinkedList | UniqueSortedLinkedList | AVL Tree | Unique AVL Tree |
 |---------|-----|-----------|-----------|-----------------|------------|------------------|------------------|------------------------|----------|-----------------|
 |   new   | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
-|with_capacity| YES |  YES  |    NO     |       NO        |    NO      |        NO        |        NO        |           NO           |          |                 |
+|with_capacity| YES |  YES  |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
 |from_vec | YES |    YES    |    YES    |       YES       |    NO      |        NO        |        NO        |           NO           |          |                 |
 |   len   | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
 |is_empty | YES |    YES    |    YES    |       YES       |    YES     |        YES       |        YES       |           YES          |          |                 |
