@@ -8,6 +8,7 @@ mod unique_sorted_vector;
 mod unique_linked_list;
 mod sorted_linked_list;
 mod unique_sorted_linked_list;
+mod binary_search_tree;
 
 #[macro_export]
 // UniqueVec creations
@@ -78,6 +79,7 @@ mod tests {
     use crate::unique_linked_list::UniqueLinkedList;
     use crate::sorted_linked_list::SortedLinkedList;
     use crate::unique_sorted_linked_list::UniqueSortedLinkedList;
+    use crate::binary_search_tree::BinarySearchTree;
     
     /** Unique Vector*/
     #[test]
@@ -543,4 +545,9 @@ mod tests {
         assert!(l.is_empty());
     }
 
+    // test Binary Search Tree
+    fn bst_creation_works() {
+        let t = BinarySearchTree::<u32>::new();
+        assert!(t.is_empty());
+    }
 }
