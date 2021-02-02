@@ -564,4 +564,49 @@ mod tests {
         assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 4, 4, 6]);
         assert_eq!(t.len(), 8);
     }
+
+    #[test]
+    fn bst_deletion_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        t.insert(0);
+        t.insert(6);
+        t.insert(4);
+        t.delete(4);
+        assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 6]);
+        assert_eq!(t.len(), 6);
+    }
+
+    #[test]
+    fn bst_deletion_all_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(6);
+        }
+        t.delete(6);
+        assert_eq!(t.to_vec(), []);
+        assert_eq!(t.len(), 0);
+    }
+
+    #[test]
+    fn bst_contains_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        assert!(t.contains(4));
+        assert!(!t.contains(5));
+    }
+
+    #[test]
+    fn bst_clear_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        t.clear();
+        assert!(t.is_empty());
+    }
 }
