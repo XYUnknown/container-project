@@ -1,6 +1,7 @@
 use std::cmp;
 use std::cmp::Ordering;
-use std::fmt;
+use std::vec::Vec;
+
 pub struct Node<T: Ord> {
     value: T,
     height: i64,
@@ -91,8 +92,8 @@ pub fn insert<T: Ord> (v: T, mut parent: Option<Box<Node<T>>>) -> Option<Box<Nod
     match parent {
         Some(mut p) => {
             match p.value.cmp(&v) {
-                Ordering::Less => p.left = insert(v, p.left.take()),
-                Ordering::Equal | Ordering::Greater => p.right = insert(v, p.right.take())
+                Ordering::Less | Ordering::Equal => p.right = insert(v, p.right.take()),
+                Ordering::Greater => p.left = insert(v, p.left.take())
             }
             update_height(&mut p);
             Some(balance(p))
@@ -103,52 +104,52 @@ pub fn insert<T: Ord> (v: T, mut parent: Option<Box<Node<T>>>) -> Option<Box<Nod
     }
 }
 
-pub fn in_order_print<T:Ord + std::fmt::Display> (node: &Option<Box<Node<T>>>) {
+pub fn in_order_to_vec<T:Ord> (node: &Option<Box<Node<T>>>, vec: &mut Vec<T>) 
+where
+    T: Copy,
+{
     match node {
         Some(n) => {
-            in_order_print(&n.left);
-            println!("{}", n);
-            in_order_print(&n.right);
+            in_order_to_vec(&n.left, vec);
+            vec.push(n.value);
+            in_order_to_vec(&n.right, vec);
         },
         None => {
-            println!("empty");
+            return;
         },
     }
 }
 
-impl<T: Ord + fmt::Display> fmt::Display for Node<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "(value: {})", self.value)
-    }
-}
 
 pub struct BinarySearchTree<T: Ord> {
     root: Option<Box<Node<T>>>,
     size: u32,
 }
 
-impl <T: Ord> BinarySearchTree<T> 
-where
-    T: fmt::Display,
-    {
-        pub const fn new() -> BinarySearchTree<T>{
-            BinarySearchTree{ root: None, size: 0 }
-        }
-
-        pub fn len(&self) -> u32 {
-            self.size
-        }
-
-        pub fn is_empty(&self) -> bool {
-            self.len() == 0
-        }
-
-        pub fn insert(mut self, v: T) {
-            self.root = insert(v, self.root);
-            self.size += 1;
-        }
-
-        pub fn in_order_print(&self) {
-            in_order_print(&self.root);
-        }
+impl <T: Ord> BinarySearchTree<T> {
+    pub const fn new() -> BinarySearchTree<T>{
+        BinarySearchTree{ root: None, size: 0 }
     }
+
+    pub fn len(&self) -> u32 {
+        self.size
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn insert(&mut self, v: T) {
+        self.root = insert(v, self.root.take());
+        self.size += 1;
+    }
+
+    pub fn to_vec(&self) -> Vec<T> 
+    where
+        T: Copy,
+    {
+        let mut vec = Vec::new();
+        in_order_to_vec(&self.root, &mut vec);
+        vec
+    }
+}
