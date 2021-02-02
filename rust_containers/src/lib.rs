@@ -546,8 +546,22 @@ mod tests {
     }
 
     // test Binary Search Tree
+    #[test]
     fn bst_creation_works() {
         let t = BinarySearchTree::<u32>::new();
         assert!(t.is_empty());
+    }
+
+    #[test]
+    fn bst_insertion_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        t.insert(0);
+        t.insert(6);
+        t.insert(4);
+        assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 4, 4, 6]);
+        assert_eq!(t.len(), 8);
     }
 }
