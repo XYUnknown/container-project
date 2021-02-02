@@ -1,6 +1,7 @@
 #![feature(const_fn)] // enabling impl<T: Ord> 
 #![allow(unused)]
 #![feature(linked_list_cursors)]
+#![feature(test)]
 
 mod unique_vector;
 mod sorted_vector;
@@ -9,6 +10,8 @@ mod unique_linked_list;
 mod sorted_linked_list;
 mod unique_sorted_linked_list;
 mod binary_search_tree;
+
+extern crate test;
 
 #[macro_export]
 // UniqueVec creations
@@ -81,6 +84,9 @@ mod tests {
     use crate::unique_sorted_linked_list::UniqueSortedLinkedList;
     use crate::binary_search_tree::BinarySearchTree;
     
+    use test::Bencher;
+    use std::collections::BTreeSet;
+
     /** Unique Vector*/
     #[test]
     fn unique_vec_creation_works() {
@@ -545,7 +551,7 @@ mod tests {
         assert!(l.is_empty());
     }
 
-    // test Binary Search Tree
+    // test Binary Search Tree (Allow Duplication)
     #[test]
     fn bst_creation_works() {
         let t = BinarySearchTree::<u32>::new();
@@ -563,6 +569,16 @@ mod tests {
         t.insert(4);
         assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 4, 4, 6]);
         assert_eq!(t.len(), 8);
+    }
+
+    #[test]
+    fn bst_insertion_many_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..10000 {
+            t.insert(x);
+        }
+        let vec: Vec<u32> = (0..10000).collect();
+        assert_eq!(t.to_vec(), vec);
     }
 
     #[test]
@@ -608,5 +624,21 @@ mod tests {
         }
         t.clear();
         assert!(t.is_empty());
+    }
+
+    #[bench]
+    fn bst_insertion(b: &mut Bencher) {
+        let mut t = BinarySearchTree::new();
+        b.iter(|| for x in 0..10000 {
+            t.insert(x);
+        });
+    }
+
+    #[bench]
+    fn btreeset_insertion(b: &mut Bencher) {
+        let mut t = BTreeSet::new();
+        b.iter(|| for x in 0..10000 {
+            t.insert(x);
+        });
     }
 }
