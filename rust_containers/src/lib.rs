@@ -3,15 +3,13 @@
 #![feature(linked_list_cursors)]
 #![feature(test)]
 
-mod unique_vector;
-mod sorted_vector;
-mod unique_sorted_vector;
-mod unique_linked_list;
-mod sorted_linked_list;
-mod unique_sorted_linked_list;
-mod binary_search_tree;
-
-extern crate test;
+pub mod unique_vector;
+pub mod sorted_vector;
+pub mod unique_sorted_vector;
+pub mod unique_linked_list;
+pub mod sorted_linked_list;
+pub mod unique_sorted_linked_list;
+pub mod binary_search_tree;
 
 #[macro_export]
 // UniqueVec creations
@@ -78,13 +76,14 @@ macro_rules! unique_sorted_vec {
 mod tests {
     use crate::unique_vector::UniqueVec;
     use crate::sorted_vector::SortedVec;
+    use crate::sorted_vector::SortedVecAlt;
     use crate::unique_sorted_vector::UniqueSortedVec;
     use crate::unique_linked_list::UniqueLinkedList;
     use crate::sorted_linked_list::SortedLinkedList;
     use crate::unique_sorted_linked_list::UniqueSortedLinkedList;
     use crate::binary_search_tree::BinarySearchTree;
     
-    use test::Bencher;
+    //use test::Bencher;
     use std::collections::BTreeSet;
 
     /** Unique Vector*/
@@ -258,11 +257,13 @@ mod tests {
         assert_eq!(*vec, [1, 2, 3, 3]);
     }
 
+    #[test]
     fn sorted_vec_macro_one_works() {
         let vec = sorted_vec![3, 7, 2, 1, 5, 4, 3];
         assert_eq!(*vec, [1, 2, 3, 3, 4, 5, 7])
     }
 
+    #[test]
     fn sorted_vec_macro_two_works() {
         let vec = sorted_vec![1; 3];
         assert_eq!(*vec, [1, 1, 1])
@@ -551,7 +552,7 @@ mod tests {
         assert!(l.is_empty());
     }
 
-    // test Binary Search Tree (Allow Duplication)
+    /* Test Binary Search Tree (Allow Duplication) */
     #[test]
     fn bst_creation_works() {
         let t = BinarySearchTree::<u32>::new();
@@ -626,55 +627,50 @@ mod tests {
         assert!(t.is_empty());
     }
 
-    #[bench]
-    fn bst_insertion(b: &mut Bencher) {
-        let mut t = BinarySearchTree::new();
-        b.iter(|| for x in 0..10000 {
-            t.insert(x);
-        });
+    /* SortedVecAlt */
+    #[test]
+    fn sorted_vec_alt_creation_from_vec_works() {
+        let mut src = vec![3, 1, 2, 3];
+        let mut vec = SortedVecAlt::from_vec(&mut src);
+        assert_eq!(*vec.to_vec(), [1, 2, 3, 3]);
     }
 
-    #[bench]
-    fn bst_contains(b: &mut Bencher) {
-        let mut t = BinarySearchTree::new();
-        for x in 0..10000 {
-            t.insert(x);
+    #[test]
+    fn sorted_vec_alt_contains_works() {
+        let mut vec = SortedVecAlt::<u32>::new();
+        assert_eq!(vec.contains(&1), false);
+    }
+
+    #[test]
+    fn sorted_vec_alt_push_works() {
+        let mut vec = SortedVecAlt::new();
+        for x in 0..5 {
+            vec.push(4 - x);
         }
-        b.iter(|| t.contains(1));
+        assert_eq!(*vec.to_vec(), [0, 1, 2, 3, 4]);
     }
 
-    #[bench]
-    fn bst_remove(b: &mut Bencher) {
-        let mut t = BinarySearchTree::new();
-        for x in 0..10000 {
-            t.insert(x);
+    #[test]
+    fn sorted_vec_alt_pop_works() {
+        let mut vec = SortedVecAlt::new();
+        for x in 0..5 {
+            vec.push(4 - x);
         }
-        b.iter(|| t.remove(5));
+        assert_eq!(vec.pop(), Some(4));
     }
 
-    #[bench]
-    fn btreeset_insertion(b: &mut Bencher) {
-        let mut t = BTreeSet::new();
-        b.iter(|| for x in 0..10000 {
-            t.insert(x);
-        });
-    }
-
-    #[bench]
-    fn btreeset_contains(b: &mut Bencher) {
-        let mut t = BTreeSet::new();
-        for x in 0..10000 {
-            t.insert(x);
+    #[test]
+    fn sorted_vec_alt_append_works() {
+        let mut vec = SortedVecAlt::new();
+        let mut other = SortedVecAlt::new();
+        for x in 0..5 {
+            vec.push(x);
         }
-        b.iter(|| t.contains(&1));
+        for x in 2..7 {
+            other.push(x);
+        }
+        vec.append(&mut other);
+        assert_eq!(*vec.to_vec(), [0, 1, 2, 2, 3, 3, 4, 4, 5, 6])
     }
 
-    #[bench]
-    fn btreeset_remove(b: &mut Bencher) {
-        let mut t = BTreeSet::new();
-        for x in 0..10000 {
-            t.insert(x);
-        }
-        b.iter(|| t.remove(&5));
-    }
 }
