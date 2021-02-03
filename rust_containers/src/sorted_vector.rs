@@ -152,3 +152,126 @@ impl<T: Clone> Clone for SortedVec<T> {
         self.v.clone_from(&source.v);
     }
 }
+
+// An Alternative Sorted Vector
+pub struct SortedVecAlt<T> {
+    v: Vec<T>,
+}
+
+impl<T: Ord> SortedVecAlt<T> {
+    pub const fn new() -> SortedVecAlt<T> {
+        SortedVecAlt { v: Vec::new() }
+    }
+
+    pub fn with_capacity(capacity: usize) -> SortedVecAlt<T> {
+        SortedVecAlt { v: Vec::with_capacity(capacity) }
+    }
+
+    pub fn from_vec(src: &mut Vec<T>) -> SortedVecAlt<T> 
+    where
+        T: Clone
+        {
+            SortedVecAlt { v: src.to_vec() }
+        }
+
+    pub fn len(&self) -> usize {
+        self.v.len()
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.v.capacity()
+    }
+
+    // Not sorted, O(n)
+    pub fn contains(&self, x: &T) -> bool {
+        self.v.contains(x)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /**
+     * Modifying the vector
+     */
+    pub fn push(&mut self, value: T) {
+        let index = self.v.binary_search(&value).unwrap_or_else(|i| i);
+        self.v.insert(index, value);
+    }
+
+    
+    //Sort and then pop
+    // By default get the maximum element  
+    pub fn pop(&mut self) -> Option<T> {
+        self.v.sort(); 
+        self.v.pop()
+    }
+
+    // It is not very meaningful to remove by index
+    // given the index does not maintain the insertion order
+    // but can be mainful for operations like looking for the median
+    pub fn remove(&mut self, index: usize) -> T {
+        self.v.sort();
+        self.v.remove(index)
+    }
+
+    pub fn truncate(&mut self, len: usize) {
+        self.v.sort();
+        self.v.truncate(len);
+    }
+
+    pub fn clear(&mut self) {
+        self.v.truncate(0);
+    }
+
+    // Removes consecutive repeated elements 
+    pub fn dedup(&mut self) {
+        self.v.dedup();
+    }
+
+    // Merge them into one vector
+    pub fn append(&mut self, other: &mut Self) {
+        self.v.append(&mut other.v);
+    }
+    
+    /**
+     * Accessing elements
+     */
+     pub fn first(&mut self) -> Option<&T> {
+        self.v.sort(); // sort first
+        self.v.first()
+    }
+
+    pub fn last(&mut self) -> Option<&T> {
+        self.v.sort();
+        self.v.last()
+    }
+
+    pub fn get<I>(&mut self, index: I) -> Option<&I::Output>
+    where
+        I: SliceIndex<[T]>,
+        {
+            self.v.sort();
+            self.v.get(index)
+        }
+    
+    pub fn iter(&mut self) -> Iter<'_, T> {
+        self.v.sort();
+        self.v.iter()
+    }
+
+    pub fn to_vec(&mut self) -> &Vec<T> {
+        self.v.sort();
+        &self.v
+    }
+}
+
+impl<T: Clone> Clone for SortedVecAlt<T> {
+    fn clone(&self) -> Self {
+        SortedVecAlt { v: self.v.clone() }
+    }
+
+    fn clone_from(&mut self, source: &Self) {
+        self.v.clone_from(&source.v);
+    }
+}
