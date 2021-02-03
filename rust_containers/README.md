@@ -57,7 +57,7 @@ To add some restriction on generic types: `impl<T: PartialEq> UniqueVec<T> `, we
 - Running tests: `cargo +nightly test`
 
 # Benchmarks 
-Benchmarks are are mearsured using criterion:
+Benchmarks are measured using criterion:
 - [criterion docs](https://docs.rs/criterion/0.3.4/criterion/index.html)
 - [criterion references](https://bheisler.github.io/criterion.rs/book/criterion_rs.html)
 - Running benchmarks: `$ cargo +nightly bench`
