@@ -590,7 +590,7 @@ mod tests {
         t.insert(0);
         t.insert(6);
         t.insert(4);
-        t.delete(4);
+        t.remove(4);
         assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 6]);
         assert_eq!(t.len(), 6);
     }
@@ -601,7 +601,7 @@ mod tests {
         for x in 0..5 {
             t.insert(6);
         }
-        t.delete(6);
+        t.remove(6);
         assert_eq!(t.to_vec(), []);
         assert_eq!(t.len(), 0);
     }
@@ -635,10 +635,46 @@ mod tests {
     }
 
     #[bench]
+    fn bst_contains(b: &mut Bencher) {
+        let mut t = BinarySearchTree::new();
+        for x in 0..10000 {
+            t.insert(x);
+        }
+        b.iter(|| t.contains(1));
+    }
+
+    #[bench]
+    fn bst_remove(b: &mut Bencher) {
+        let mut t = BinarySearchTree::new();
+        for x in 0..10000 {
+            t.insert(x);
+        }
+        b.iter(|| t.remove(5));
+    }
+
+    #[bench]
     fn btreeset_insertion(b: &mut Bencher) {
         let mut t = BTreeSet::new();
         b.iter(|| for x in 0..10000 {
             t.insert(x);
         });
+    }
+
+    #[bench]
+    fn btreeset_contains(b: &mut Bencher) {
+        let mut t = BTreeSet::new();
+        for x in 0..10000 {
+            t.insert(x);
+        }
+        b.iter(|| t.contains(&1));
+    }
+
+    #[bench]
+    fn btreeset_remove(b: &mut Bencher) {
+        let mut t = BTreeSet::new();
+        for x in 0..10000 {
+            t.insert(x);
+        }
+        b.iter(|| t.remove(&5));
     }
 }
