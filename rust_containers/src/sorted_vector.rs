@@ -195,8 +195,7 @@ impl<T: Ord> SortedVecAlt<T> {
      * Modifying the vector
      */
     pub fn push(&mut self, value: T) {
-        let index = self.v.binary_search(&value).unwrap_or_else(|i| i);
-        self.v.insert(index, value);
+        self.v.push(value);
     }
 
     
@@ -226,6 +225,7 @@ impl<T: Ord> SortedVecAlt<T> {
 
     // Removes consecutive repeated elements 
     pub fn dedup(&mut self) {
+        self.v.sort();
         self.v.dedup();
     }
 
