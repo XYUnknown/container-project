@@ -29,7 +29,7 @@ fn bst_contains(c: &mut Criterion) {
     for x in 0..10000 {
         t.insert(x);
     }
-    c.bench_function("bst contains", |b| b.iter(|| t.contains(1)));
+    c.bench_function("bst contains", |b| b.iter(|| t.contains(&1)));
 }
 
 fn bst_remove(c: &mut Criterion) {
@@ -37,7 +37,7 @@ fn bst_remove(c: &mut Criterion) {
     for x in 0..10000 {
         t.insert(x);
     }
-    c.bench_function("bst remove", |b| b.iter(|| t.remove(5)));
+    c.bench_function("bst remove", |b| b.iter(|| t.remove(&5)));
 }
 
 fn btreeset_insertion(c: &mut Criterion) {

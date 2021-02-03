@@ -120,10 +120,10 @@ fn find_min<T: Ord> (mut node: Box<Node<T>>) -> (Option<Box<Node<T>>>, Box<Node<
     }
 }
 
-pub fn remove<T: Ord> (v: T, mut parent: Option<Box<Node<T>>>, size: &mut u32) -> Option<Box<Node<T>>> {
+pub fn remove<T: Ord> (v: &T, mut parent: Option<Box<Node<T>>>, size: &mut u32) -> Option<Box<Node<T>>> {
     match parent {
         Some(mut p) => {
-            match p.value.cmp(&v) {
+            match p.value.cmp(v) {
                 Ordering::Less => p.right = remove(v, p.right.take(), size),
                 Ordering::Greater => p.left = remove(v, p.left.take(), size),
                 Ordering::Equal => {
@@ -205,8 +205,8 @@ impl <T: Ord> BinarySearchTree<T> {
         self.len() == 0
     }
 
-    pub fn contains(&self, v: T) -> bool {
-        contains(&v, &self.root)
+    pub fn contains(&self, v: &T) -> bool {
+        contains(v, &self.root)
     }
 
     pub fn insert(&mut self, v: T) {
@@ -214,7 +214,7 @@ impl <T: Ord> BinarySearchTree<T> {
         self.size += 1;
     }
 
-    pub fn remove(&mut self, v: T) {
+    pub fn remove(&mut self, v: &T) {
         self.root = remove(v, self.root.take(), &mut self.size);
     }
 

@@ -591,7 +591,7 @@ mod tests {
         t.insert(0);
         t.insert(6);
         t.insert(4);
-        t.remove(4);
+        t.remove(&4);
         assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 6]);
         assert_eq!(t.len(), 6);
     }
@@ -602,7 +602,7 @@ mod tests {
         for x in 0..5 {
             t.insert(6);
         }
-        t.remove(6);
+        t.remove(&6);
         assert_eq!(t.to_vec(), []);
         assert_eq!(t.len(), 0);
     }
@@ -613,8 +613,8 @@ mod tests {
         for x in 0..5 {
             t.insert(x);
         }
-        assert!(t.contains(4));
-        assert!(!t.contains(5));
+        assert!(t.contains(&4));
+        assert!(!t.contains(&5));
     }
 
     #[test]
