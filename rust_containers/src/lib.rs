@@ -627,6 +627,26 @@ mod tests {
         assert!(t.is_empty());
     }
 
+    #[test]
+    fn bst_first_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        assert_eq!(t.first(), None);
+        for x in 0..100 {
+            t.insert(x);
+        }
+        assert_eq!(t.first(), Some(&0));
+    }
+
+    #[test]
+    fn bst_last_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        assert_eq!(t.last(), None);
+        for x in 0..100 {
+            t.insert(x);
+        }
+        assert_eq!(t.last(), Some(&99));
+    }
+
     /* SortedVecAlt */
     #[test]
     fn sorted_vec_alt_creation_from_vec_works() {
@@ -672,5 +692,4 @@ mod tests {
         vec.append(&mut other);
         assert_eq!(*vec.to_vec(), [0, 1, 2, 2, 3, 3, 4, 4, 5, 6])
     }
-
 }
