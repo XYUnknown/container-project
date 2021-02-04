@@ -78,9 +78,11 @@ mod tests {
     use crate::sorted_vector::SortedVec;
     use crate::sorted_vector::SortedVecAlt;
     use crate::unique_sorted_vector::UniqueSortedVec;
+    use crate::unique_sorted_vector::UniqueSortedVecAlt;
     use crate::unique_linked_list::UniqueLinkedList;
     use crate::sorted_linked_list::SortedLinkedList;
     use crate::unique_sorted_linked_list::UniqueSortedLinkedList;
+    use crate::unique_sorted_linked_list::UniqueSortedLinkedListAlt;
     use crate::binary_search_tree::BinarySearchTree;
     
     //use test::Bencher;
@@ -299,17 +301,20 @@ mod tests {
     }
 
     /* Unique Sorted Vector */
+    #[test]
     fn unique_sorted_vec_creation_from_vec_works() {
         let mut src = vec![3, 1, 2, 3];
         let vec = UniqueSortedVec::from_vec(&mut src);
         assert_eq!(*vec, [1, 2, 3]);
     }
 
+    #[test]
     fn unique_sorted_vec_macro_one_works() {
         let vec = unique_sorted_vec![3, 7, 2, 1, 5, 4, 3];
         assert_eq!(*vec, [1, 2, 3, 4, 5, 7])
     }
 
+    #[test]
     fn unique_sorted_vec_macro_two_works() {
         let vec = unique_sorted_vec![1; 3];
         assert_eq!(*vec, [1])
@@ -692,4 +697,115 @@ mod tests {
         vec.append(&mut other);
         assert_eq!(*vec.to_vec(), [0, 1, 2, 2, 3, 3, 4, 4, 5, 6])
     }
+
+    /* Unique Sorted Vector Alternative */
+    #[test]
+    fn unique_sorted_vec_alt_creation_from_vec_works() {
+        let mut src = vec![3, 1, 2, 3];
+        let vec = UniqueSortedVecAlt::from_vec(&mut src);
+        assert_eq!(*vec, [1, 2, 3]);
+    }
+
+    #[test]
+    fn unique_sorted_vec_alt_push_works() {
+        let mut src = vec![0, 1, 2, 3, 4];
+        let mut vec = UniqueSortedVecAlt::from_vec(&mut src);
+        vec.push(5);
+        vec.push(4);
+        assert_eq!(*vec, [0, 1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn unique_sorted_vec_alt_append_works() {
+        let mut vec = UniqueSortedVecAlt::new();
+        let mut other = UniqueSortedVecAlt::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        for x in 2..7 {
+            other.push(x);
+        }
+        vec.append(&mut other);
+        assert_eq!(*vec, [0, 1, 2, 3, 4, 5, 6])
+    }
+
+    /* Unique Sorted List Alternative */
+    #[test]
+    fn unique_sorted_ll_alt_creation_works() {
+        let l = UniqueSortedLinkedListAlt::<u32>::new();
+        assert_eq!(l.len(), 0);
+    }
+
+    #[test]
+    fn unique_sorted_ll_alt_push_front_works() {
+        let mut l = UniqueSortedLinkedListAlt::<u32>::new();
+        l.push_front(4);
+        l.push_front(4);
+        l.push_front(0);
+        l.push_front(3);
+        l.push_front(3);
+        l.push_front(1);
+        l.push_front(1);
+        l.push_front(2);
+        let mut iter = l.iter();
+        assert_eq!(iter.next(), Some(&0));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn unique_sorted_ll_alt_push_back_works() {
+        let mut l = UniqueSortedLinkedListAlt::<u32>::new();
+        l.push_back(4);
+        l.push_back(4);
+        l.push_back(0);
+        l.push_back(0);
+        l.push_back(3);
+        l.push_back(1);
+        l.push_back(3);
+        l.push_back(2);
+        let mut iter = l.iter();
+        assert_eq!(iter.next(), Some(&0));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn unique_sorted_ll_alt_append_works() {
+        let mut l = UniqueSortedLinkedListAlt::new();
+        let mut other = UniqueSortedLinkedListAlt::new();
+        for x in 0..5 {
+            other.push_back(x);
+        }
+        for x in 2..7 {
+            l.push_back(x);
+        }
+        l.append(&mut other); // 0->1->2->3->4->5->6
+        let mut iter = l.iter();
+        assert_eq!(iter.next(), Some(&0));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), Some(&5));
+        assert_eq!(iter.next(), Some(&6));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn unique_sorted_ll_alt_clear_works() {
+        let mut l = UniqueSortedLinkedListAlt::new();
+        for x in 0..5 {
+            l.push_back(x);
+        }
+        l.clear();
+        assert!(l.is_empty());
+    }
+
 }
