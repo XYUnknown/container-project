@@ -1,7 +1,7 @@
 use std::collections::LinkedList;
 use std::ops::Deref;
+use std::ops::DerefMut;
 use std::collections::linked_list::Iter;
-//use std::collections::linked_list::IterMut;
 
 // A unique doubly linked-list
 pub struct UniqueLinkedList<T> {
@@ -101,6 +101,12 @@ impl<T> Deref for UniqueLinkedList<T> {
 
     fn deref(&self) -> &Self::Target {
         &self.ll
+    }
+}
+
+impl<T> DerefMut for UniqueLinkedList<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.ll
     }
 }
 
