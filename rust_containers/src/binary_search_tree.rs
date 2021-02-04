@@ -167,6 +167,30 @@ pub fn contains<T: Ord> (v: &T, parent: &Option<Box<Node<T>>>) -> bool {
     }
 }
 
+pub fn first<T: Ord>(parent: &Option<Box<Node<T>>>) -> Option<&T> {
+    match parent {
+        Some(p) => {
+            match p.left {
+                Some(_) => return first(&p.left),
+                None => return Some(&p.value),
+            }
+        },
+        None => return None
+    }
+}
+
+pub fn last<T: Ord>(parent: &Option<Box<Node<T>>>) -> Option<&T> {
+    match parent {
+        Some(p) => {
+            match p.right {
+                Some(_) => return last(&p.right),
+                None => return Some(&p.value),
+            }
+        },
+        None => return None
+    }
+}
+
 pub fn in_order_to_vec<T:Ord> (node: &Option<Box<Node<T>>>, vec: &mut Vec<T>) 
 where
     T: Copy,
@@ -214,6 +238,7 @@ impl <T: Ord> BinarySearchTree<T> {
         self.size += 1;
     }
 
+    // remove all appearance of v
     pub fn remove(&mut self, v: &T) {
         self.root = remove(v, self.root.take(), &mut self.size);
     }
@@ -223,6 +248,14 @@ impl <T: Ord> BinarySearchTree<T> {
         self.size = 0;
     }
 
+    pub fn first(&self) -> Option<&T> {
+        first(&self.root)
+    }
+
+    pub fn last(&self) -> Option<&T> {
+        last(&self.root)
+    }
+    
     pub fn to_vec(&self) -> Vec<T> 
     where
         T: Copy,

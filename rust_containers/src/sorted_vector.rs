@@ -156,22 +156,23 @@ impl<T: Clone> Clone for SortedVec<T> {
 // An Alternative Sorted Vector
 pub struct SortedVecAlt<T> {
     v: Vec<T>,
+    is_sorted: bool
 }
 
 impl<T: Ord> SortedVecAlt<T> {
     pub const fn new() -> SortedVecAlt<T> {
-        SortedVecAlt { v: Vec::new() }
+        SortedVecAlt { v: Vec::new(), is_sorted: true }
     }
 
     pub fn with_capacity(capacity: usize) -> SortedVecAlt<T> {
-        SortedVecAlt { v: Vec::with_capacity(capacity) }
+        SortedVecAlt { v: Vec::with_capacity(capacity), is_sorted: true }
     }
 
     pub fn from_vec(src: &mut Vec<T>) -> SortedVecAlt<T> 
     where
         T: Clone
         {
-            SortedVecAlt { v: src.to_vec() }
+            SortedVecAlt { v: src.to_vec(), is_sorted: false }
         }
 
     pub fn len(&self) -> usize {
@@ -196,13 +197,17 @@ impl<T: Ord> SortedVecAlt<T> {
      */
     pub fn push(&mut self, value: T) {
         self.v.push(value);
+        self.is_sorted = false;
     }
 
     
-    //Sort and then pop
+    // Sort and then pop
     // By default get the maximum element  
     pub fn pop(&mut self) -> Option<T> {
-        self.v.sort(); 
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         self.v.pop()
     }
 
@@ -210,12 +215,18 @@ impl<T: Ord> SortedVecAlt<T> {
     // given the index does not maintain the insertion order
     // but can be mainful for operations like looking for the median
     pub fn remove(&mut self, index: usize) -> T {
-        self.v.sort();
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         self.v.remove(index)
     }
 
     pub fn truncate(&mut self, len: usize) {
-        self.v.sort();
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         self.v.truncate(len);
     }
 
@@ -225,25 +236,35 @@ impl<T: Ord> SortedVecAlt<T> {
 
     // Removes consecutive repeated elements 
     pub fn dedup(&mut self) {
-        self.v.sort();
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         self.v.dedup();
     }
 
     // Merge them into one vector
     pub fn append(&mut self, other: &mut Self) {
         self.v.append(&mut other.v);
+        self.is_sorted = false;
     }
     
     /**
      * Accessing elements
      */
      pub fn first(&mut self) -> Option<&T> {
-        self.v.sort(); // sort first
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         self.v.first()
     }
 
     pub fn last(&mut self) -> Option<&T> {
-        self.v.sort();
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         self.v.last()
     }
 
@@ -251,24 +272,33 @@ impl<T: Ord> SortedVecAlt<T> {
     where
         I: SliceIndex<[T]>,
         {
-            self.v.sort();
+            if !self.is_sorted{
+                self.v.sort();
+                self.is_sorted = true;
+            }
             self.v.get(index)
         }
     
     pub fn iter(&mut self) -> Iter<'_, T> {
-        self.v.sort();
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         self.v.iter()
     }
 
     pub fn to_vec(&mut self) -> &Vec<T> {
-        self.v.sort();
+        if !self.is_sorted{
+            self.v.sort();
+            self.is_sorted = true;
+        }
         &self.v
     }
 }
 
 impl<T: Clone> Clone for SortedVecAlt<T> {
     fn clone(&self) -> Self {
-        SortedVecAlt { v: self.v.clone() }
+        SortedVecAlt { v: self.v.clone(), is_sorted: self.is_sorted.clone()  }
     }
 
     fn clone_from(&mut self, source: &Self) {
