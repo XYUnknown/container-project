@@ -5,7 +5,7 @@ use std::vec::Vec;
 pub struct Node<T: Ord> {
     value: T,
     height: i64,
-    count: u32,
+    count: usize,
     left: Option<Box<Node<T>>>,
     right: Option<Box<Node<T>>>
 }
@@ -190,7 +190,7 @@ fn remove_max<T: Clone + Ord> (mut node: Box<Node<T>>) -> (Option<Box<Node<T>>>,
     }
 }
 
-pub fn remove<T: Ord> (v: &T, mut parent: Option<Box<Node<T>>>, size: &mut u32) -> Option<Box<Node<T>>> {
+pub fn remove<T: Ord> (v: &T, mut parent: Option<Box<Node<T>>>, size: &mut usize) -> Option<Box<Node<T>>> {
     match parent {
         Some(mut p) => {
             match p.value.cmp(v) {
@@ -283,7 +283,7 @@ where
 
 pub struct BinarySearchTree<T: Ord> {
     root: Option<Box<Node<T>>>,
-    size: u32,
+    size: usize,
 }
 
 impl <T: Ord> BinarySearchTree<T> {
@@ -291,7 +291,7 @@ impl <T: Ord> BinarySearchTree<T> {
         BinarySearchTree{ root: None, size: 0 }
     }
 
-    pub fn len(&self) -> u32 {
+    pub fn len(&self) -> usize {
         self.size
     }
 
