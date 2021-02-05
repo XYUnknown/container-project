@@ -120,6 +120,76 @@ fn find_min<T: Ord> (mut node: Box<Node<T>>) -> (Option<Box<Node<T>>>, Box<Node<
     }
 }
 
+fn remove_min_rec<T: Clone + Ord> (mut node : Box<Node<T>>, left: Box<Node<T>>) -> (Option<Box<Node<T>>>, Box<Node<T>>) {
+    let (new_left, min) = remove_min(left);
+    match new_left {
+        Some(n) => {
+            if (node.value == n.value) {
+                (Some(node), min)
+            } else {
+                node.left = Some(n);
+                update_height(&mut node);
+                (Some(balance(node)), min)
+            }
+        }, 
+        None => {
+            node.left = None;
+            update_height(&mut node);
+            (Some(balance(node)), min)
+        }
+    }
+}
+
+fn remove_min<T: Clone + Ord> (mut node: Box<Node<T>>) -> (Option<Box<Node<T>>>, Box<Node<T>>) {
+    match node.left.take() {
+        Some(left) => remove_min_rec(node, left),
+        None => {
+            if node.count > 1 {
+                node.count -= 1;
+                let min = node.value.clone();
+                (Some(node), Box::new(Node::new(min)))
+            } else {
+                (node.right.take(), node)
+            }
+        }
+    }
+}
+
+fn remove_max_rec<T: Clone + Ord> (mut node : Box<Node<T>>, right: Box<Node<T>>) -> (Option<Box<Node<T>>>, Box<Node<T>>) {
+    let (new_right, max) = remove_max(right);
+    match new_right {
+        Some(n) => {
+            if (node.value == n.value) {
+                (Some(node), max)
+            } else {
+                node.right = Some(n);
+                update_height(&mut node);
+                (Some(balance(node)), max)
+            }
+        }, 
+        None => {
+            node.right = None;
+            update_height(&mut node);
+            (Some(balance(node)), max)
+        }
+    }
+}
+
+fn remove_max<T: Clone + Ord> (mut node: Box<Node<T>>) -> (Option<Box<Node<T>>>, Box<Node<T>>) {
+    match node.right.take() {
+        Some(right) => remove_max_rec(node, right),
+        None => {
+            if node.count > 1 {
+                node.count -= 1;
+                let max = node.value.clone();
+                (Some(node), Box::new(Node::new(max)))
+            } else {
+                (node.left.take(), node)
+            }
+        }
+    }
+}
+
 pub fn remove<T: Ord> (v: &T, mut parent: Option<Box<Node<T>>>, size: &mut u32) -> Option<Box<Node<T>>> {
     match parent {
         Some(mut p) => {
@@ -241,6 +311,36 @@ impl <T: Ord> BinarySearchTree<T> {
     // remove all appearance of v
     pub fn remove(&mut self, v: &T) {
         self.root = remove(v, self.root.take(), &mut self.size);
+    }
+
+    pub fn pop_first(&mut self) -> Option<T>
+    where
+        T: Clone
+    {
+        match self.root.take() {
+            Some(v) => {
+                let (node, min) = remove_min(v);
+                self.root = node;
+                self.size -= 1;
+                Some(min.value)
+            },
+            None => None
+        }
+    }
+
+    pub fn pop_last(&mut self) -> Option<T>
+    where
+        T: Clone
+    {
+        match self.root.take() {
+            Some(v) => {
+                let (node, max) = remove_max(v);
+                self.root = node;
+                self.size -= 1;
+                Some(max.value)
+            },
+            None => None
+        }
     }
 
     pub fn clear(&mut self) {
