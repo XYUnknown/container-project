@@ -652,6 +652,38 @@ mod tests {
         assert_eq!(t.last(), Some(&99));
     }
 
+    #[test]
+    fn bst_pop_first_works() {
+        let mut t = BinarySearchTree::new();
+        for x in 0..10 {
+            t.insert(x);
+        }
+        t.insert(0);
+        assert_eq!(t.pop_first(), Some(0));
+        assert_eq!(*t.to_vec(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(t.len(), 10);
+        assert_eq!(t.pop_first(), Some(0));
+        assert_eq!(t.pop_first(), Some(1));
+        assert_eq!(*t.to_vec(), [2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(t.len(), 8);
+    }
+
+    #[test]
+    fn bst_pop_last_works() {
+        let mut t = BinarySearchTree::new();
+        for x in 0..10 {
+            t.insert(x);
+        }
+        t.insert(9);
+        assert_eq!(t.pop_last(), Some(9));
+        assert_eq!(*t.to_vec(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(t.len(), 10);
+        assert_eq!(t.pop_last(), Some(9));
+        assert_eq!(*t.to_vec(), [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+        assert_eq!(t.pop_last(), Some(8));
+        assert_eq!(t.len(), 8);
+    }
+
     /* SortedVecAlt */
     #[test]
     fn sorted_vec_alt_creation_from_vec_works() {
