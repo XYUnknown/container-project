@@ -74,18 +74,27 @@ macro_rules! unique_sorted_vec {
 }
 
 // get a vector according to specific property(-ies)
-macro_rules! match_vec_property {
-    (Property::Unique) => {
-        let vec = UniqueVec::new();
-        vec
+
+// this does not work, error: `match` arms have incompatible types
+// uncomment to see the error
+/*macro_rules! get_vec {
+    ($t:ty; $p:expr) => {
+        {
+            match $p {
+                Property::Unique => {
+                    let vec = UniqueVec::<$t>::new();
+                    vec
+                },
+                Property::Sorted => {
+                    let vec = SortedVec::<$t>::new();
+                    vec
+                }
+            }
+        }
     };
-    (Property::Sorted) => {
-        let vec = SortedVec::new();
-        vec
-    }
-}
+}*/
 
-
+// this works
 macro_rules! get_vec {
     ($t:ty) => { Vec::<$t>::new() }; // an ordinary vector
     ($t:ty; Property::Unique) => { UniqueVec::<$t>::new() };
@@ -93,7 +102,6 @@ macro_rules! get_vec {
     ($t:ty; Property::Unique + Property::Sorted) => { UniqueSortedVec::<$t>::new() };
     ($t:ty; Property::Sorted + Property::Unique) => { UniqueSortedVec::<$t>::new() };
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -879,6 +887,7 @@ mod tests {
         assert_eq!(type_of(&v), type_of(&v1));
     }
 
+    /*
     #[test]
     fn get_vec_sorted_works() {
         let v = get_vec!(u32; Property::Sorted);
@@ -902,5 +911,5 @@ mod tests {
         assert!(v.is_empty());
         assert_eq!(type_of(&v), type_of(&v1));
     }
-
+    */
 }
