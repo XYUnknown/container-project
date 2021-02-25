@@ -10,6 +10,7 @@ pub mod unique_linked_list;
 pub mod sorted_linked_list;
 pub mod unique_sorted_linked_list;
 pub mod binary_search_tree;
+pub mod container;
 
 #[macro_export]
 // UniqueVec creations
@@ -72,6 +73,28 @@ macro_rules! unique_sorted_vec {
     };
 }
 
+// get a vector according to specific property(-ies)
+macro_rules! match_vec_property {
+    (Property::Unique) => {
+        let vec = UniqueVec::new();
+        vec
+    };
+    (Property::Sorted) => {
+        let vec = SortedVec::new();
+        vec
+    }
+}
+
+
+macro_rules! get_vec {
+    ($t:ty) => { Vec::<$t>::new() }; // an ordinary vector
+    ($t:ty; Property::Unique) => { UniqueVec::<$t>::new() };
+    ($t:ty; Property::Sorted) => { SortedVec::<$t>::new() };
+    ($t:ty; Property::Unique + Property::Sorted) => { UniqueSortedVec::<$t>::new() };
+    ($t:ty; Property::Sorted + Property::Unique) => { UniqueSortedVec::<$t>::new() };
+}
+
+
 #[cfg(test)]
 mod tests {
     use crate::unique_vector::UniqueVec;
@@ -84,7 +107,7 @@ mod tests {
     use crate::unique_sorted_linked_list::UniqueSortedLinkedList;
     use crate::unique_sorted_linked_list::UniqueSortedLinkedListAlt;
     use crate::binary_search_tree::BinarySearchTree;
-    
+    use crate::container::{Property, type_of};
     //use test::Bencher;
     use std::collections::BTreeSet;
 
@@ -838,6 +861,46 @@ mod tests {
         }
         l.clear();
         assert!(l.is_empty());
+    }
+
+    // macro get_vec test
+    #[test]
+    fn get_vec_works() {
+        let v = get_vec!(u32);
+        assert!(v.is_empty());
+        assert_eq!(v, Vec::<u32>::new())
+    }
+
+    #[test]
+    fn get_vec_unique_works() {
+        let v = get_vec!(u32; Property::Unique);
+        let v1 = UniqueVec::<u32>::new();
+        assert!(v.is_empty());
+        assert_eq!(type_of(&v), type_of(&v1));
+    }
+
+    #[test]
+    fn get_vec_sorted_works() {
+        let v = get_vec!(u32; Property::Sorted);
+        let v1 = SortedVec::<u32>::new();
+        assert!(v.is_empty());
+        assert_eq!(type_of(&v), type_of(&v1));
+    }
+
+    #[test]
+    fn get_vec_unique_sorted_works() {
+        let v = get_vec!(u32; Property::Unique + Property::Sorted);
+        let v1 = UniqueSortedVec::<u32>::new();
+        assert!(v.is_empty());
+        assert_eq!(type_of(&v), type_of(&v1));
+    }
+
+    #[test]
+    fn get_vec_unique_sorted_alter_works() {
+        let v = get_vec!(u32; Property::Sorted + Property::Unique);
+        let v1 = UniqueSortedVec::<u32>::new();
+        assert!(v.is_empty());
+        assert_eq!(type_of(&v), type_of(&v1));
     }
 
 }
