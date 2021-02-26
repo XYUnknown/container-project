@@ -1,5 +1,5 @@
 use std::any::{Any, TypeId};
-
+use crate::unique_vector::UniqueVec;
 
 pub enum Property {
     Unique,
@@ -8,7 +8,7 @@ pub enum Property {
 
 pub trait Container<T> {
     fn push(&mut self, value: T);
-    fn pop(&mut self);
+    fn pop(&mut self) -> Option<T>;
     fn clear(&mut self);
     fn len(&self) -> usize;
     fn contains(&self, x: &T) -> bool;
@@ -22,7 +22,6 @@ pub trait Vector<T> : Container<T> {
 pub fn type_of<T: ?Sized + Any>(_s: &T) -> TypeId {
     TypeId::of::<String>()
 }
-
 
 // experiment on macro
 // get a vector according to specific property(-ies)
