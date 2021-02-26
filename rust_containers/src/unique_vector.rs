@@ -126,3 +126,191 @@ impl<T: Clone> Clone for UniqueVec<T> {
         self.v.clone_from(&source.v);
     }
 }
+
+#[macro_export]
+// UniqueVec creations
+macro_rules! unique_vec { // e.g., unique_vec![1, 2, 3]
+    ($($x:expr),*) => {
+        {
+            let mut vec = UniqueVec::new();
+            $(
+                vec.push($x);
+            )*
+            vec
+        }
+    };
+    ($elem:expr; $n:expr) => { // e.g., unique_vec![1; 3]
+        {
+            let mut vec = UniqueVec::new();
+            vec.push($elem);
+            vec
+        }
+    };
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::unique_vector::UniqueVec;
+    /** Unique Vector*/
+    #[test]
+    fn unique_vec_creation_works() {
+        let vec = UniqueVec::<u32>::new();
+        assert_eq!(vec.len(), 0);
+    }
+
+    #[test]
+    fn unique_vec_creation_with_capacity_works() {
+        let vec = UniqueVec::<u32>::with_capacity(10);
+        assert_eq!(vec.capacity(), 10);
+    }
+
+    #[test]
+    fn unique_vec_creation_from_vec() {
+        let mut src = vec![1, 2, 3];
+        let vec = UniqueVec::from_vec(&mut src);
+        assert_eq!(*vec, [1, 2, 3]);
+    }
+
+    #[test]
+    fn unique_vec_contains_works() {
+        let mut vec = UniqueVec::new();
+        vec.push(1);
+        assert_eq!(vec.contains(&1), true);
+        assert_eq!(vec.contains(&2), false);
+    }
+
+    #[test]
+    fn unique_vec_push_works() {
+        let mut vec = UniqueVec::new();
+        for x in 0..10000 {
+            vec.push(x);
+            vec.push(x);
+        }
+        assert_eq!(vec.len(), 10000); // no duplication
+    }
+
+    #[test]
+    fn unique_vec_pop_none_works() {
+        let mut vec = UniqueVec::<u32>::new();
+        assert_eq!(vec.pop(), None);
+    }
+
+    #[test]
+    fn unique_vec_pop_some_works() {
+        let mut vec = UniqueVec::new();
+        vec.push(1);
+        vec.push(2);
+        assert_eq!(vec.pop(), Some(2));
+    }
+
+    #[test]
+    fn unique_vec_insert_works() {
+        let mut vec = UniqueVec::new();
+        vec.insert(0, 10);
+        vec.insert(1, 10);
+        assert_eq!(vec.len(), 1);
+    }
+
+    #[test]
+    fn unique_vec_remove_works() {
+        let mut vec = UniqueVec::new();
+        vec.push(1);
+        vec.push(2);
+        assert_eq!(vec.remove(0), 1);
+        assert_eq!(vec.len(), 1);
+    }
+
+    #[test]
+    fn unique_vec_truncate_works() {
+        let mut vec = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        vec.truncate(3);
+        assert_eq!(*vec, [0, 1, 2]);
+    }
+
+    #[test]
+    fn unique_vec_clear_works() {
+        let mut vec = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        vec.clear();
+        assert_eq!(vec.len(), 0);
+    }
+
+    #[test]
+    fn unique_vec_first_none_works() {
+        let mut vec = UniqueVec::<u32>::new();
+        assert_eq!(vec.first(), None);
+    }
+
+    #[test]
+    fn unique_vec_first_works() {
+        let mut vec = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        assert_eq!(vec.first(), Some(&0));
+    }
+
+    #[test]
+    fn unique_vec_last_none_works() {
+        let mut vec = UniqueVec::<u32>::new();
+        assert_eq!(vec.last(), None);
+    }
+
+    #[test]
+    fn unique_vec_last_works() {
+        let mut vec = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        assert_eq!(vec.last(), Some(&4));
+    }
+
+    #[test]
+    fn unique_vec_get_element_works() {
+        let mut vec = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        assert_eq!(vec.get(3), Some(&3));
+    }
+
+    #[test]
+    fn unique_vec_get_slice_works() {
+        let mut vec = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        assert_eq!(vec.get(0..2), Some(&[0, 1][..]));
+    }
+
+    #[test]
+    fn unique_vec_macro_one_works() {
+        let mut vec = unique_vec![1, 1];
+        assert_eq!(vec.len(), 1);
+    }
+
+    #[test]
+    fn unique_vec_macro_two_works() {
+        let mut vec = unique_vec![1; 4];
+        assert_eq!(vec.len(), 1);
+    }
+
+    #[test]
+    fn unique_vec_append_works() {
+        let mut vec = UniqueVec::new();
+        let mut other = UniqueVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        for x in 2..7 {
+            other.push(x);
+        }
+        vec.append(&mut other);
+        assert_eq!(*vec, [0, 1, 2, 3, 4, 5, 6])
+    }
+}

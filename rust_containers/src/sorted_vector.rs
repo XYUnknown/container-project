@@ -305,3 +305,126 @@ impl<T: Clone> Clone for SortedVecAlt<T> {
         self.v.clone_from(&source.v);
     }
 }
+
+#[macro_export]
+// SortedVec creations
+macro_rules! sorted_vec {
+    ($($x:expr),*) => { // e.g., sorted_vec![1, 2, 3]
+        {
+            let mut vec = SortedVec::new();
+            $(
+                vec.push($x);
+            )*
+            vec
+        }
+    };
+    ($elem:expr; $n:expr) => { // e.g., sorted_vec![1; 3]
+        {
+            let mut src = std::vec::from_elem($elem, $n);
+            let mut vec = SortedVec::from_vec(&mut src);
+            vec
+        }
+    };
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::sorted_vector::SortedVec;
+    use crate::sorted_vector::SortedVecAlt;
+
+    /* Sorted Vector */
+    #[test]
+    fn sorted_vec_creation_from_vec_works() {
+        let mut src = vec![3, 1, 2, 3];
+        let vec = SortedVec::from_vec(&mut src);
+        assert_eq!(*vec, [1, 2, 3, 3]);
+    }
+
+    #[test]
+    fn sorted_vec_macro_one_works() {
+        let vec = sorted_vec![3, 7, 2, 1, 5, 4, 3];
+        assert_eq!(*vec, [1, 2, 3, 3, 4, 5, 7])
+    }
+
+    #[test]
+    fn sorted_vec_macro_two_works() {
+        let vec = sorted_vec![1; 3];
+        assert_eq!(*vec, [1, 1, 1])
+    }
+
+    #[test]
+    fn sorted_vec_contains_works() {
+        let mut vec = SortedVec::<u32>::new();
+        assert_eq!(vec.contains(&1), false);
+    }
+
+    #[test]
+    fn sorted_vec_push_works() {
+        let mut vec = SortedVec::new();
+        for x in 0..5 {
+            vec.push(4 - x);
+        }
+        assert_eq!(*vec, [0, 1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn sorted_vec_append_works() {
+        let mut vec = SortedVec::new();
+        let mut other = SortedVec::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        for x in 2..7 {
+            other.push(x);
+        }
+        vec.append(&mut other);
+        assert_eq!(*vec, [0, 1, 2, 2, 3, 3, 4, 4, 5, 6])
+    }
+
+    /* SortedVecAlt */
+    #[test]
+    fn sorted_vec_alt_creation_from_vec_works() {
+        let mut src = vec![3, 1, 2, 3];
+        let mut vec = SortedVecAlt::from_vec(&mut src);
+        assert_eq!(*vec.to_vec(), [1, 2, 3, 3]);
+    }
+
+    #[test]
+    fn sorted_vec_alt_contains_works() {
+        let mut vec = SortedVecAlt::<u32>::new();
+        assert_eq!(vec.contains(&1), false);
+    }
+
+    #[test]
+    fn sorted_vec_alt_push_works() {
+        let mut vec = SortedVecAlt::new();
+        for x in 0..5 {
+            vec.push(4 - x);
+        }
+        assert_eq!(*vec.to_vec(), [0, 1, 2, 3, 4]);
+    }
+
+    #[test]
+    fn sorted_vec_alt_pop_works() {
+        let mut vec = SortedVecAlt::new();
+        for x in 0..5 {
+            vec.push(4 - x);
+        }
+        assert_eq!(vec.pop(), Some(4));
+    }
+
+    #[test]
+    fn sorted_vec_alt_append_works() {
+        let mut vec = SortedVecAlt::new();
+        let mut other = SortedVecAlt::new();
+        for x in 0..5 {
+            vec.push(x);
+        }
+        for x in 2..7 {
+            other.push(x);
+        }
+        vec.append(&mut other);
+        assert_eq!(*vec.to_vec(), [0, 1, 2, 2, 3, 3, 4, 4, 5, 6])
+    }
+
+}

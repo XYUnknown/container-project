@@ -365,3 +365,134 @@ impl <T: Ord> BinarySearchTree<T> {
         vec
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::binary_search_tree::BinarySearchTree;
+    /* Test Binary Search Tree (Allow Duplication) */
+    #[test]
+    fn bst_creation_works() {
+        let t = BinarySearchTree::<u32>::new();
+        assert!(t.is_empty());
+    }
+
+    #[test]
+    fn bst_insertion_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        t.insert(0);
+        t.insert(6);
+        t.insert(4);
+        assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 4, 4, 6]);
+        assert_eq!(t.len(), 8);
+    }
+
+    #[test]
+    fn bst_insertion_many_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..10000 {
+            t.insert(x);
+        }
+        let vec: Vec<u32> = (0..10000).collect();
+        assert_eq!(t.to_vec(), vec);
+    }
+
+    #[test]
+    fn bst_deletion_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        t.insert(0);
+        t.insert(6);
+        t.insert(4);
+        t.remove(&4);
+        assert_eq!(t.to_vec(), [0, 0, 1, 2, 3, 6]);
+        assert_eq!(t.len(), 6);
+    }
+
+    #[test]
+    fn bst_deletion_all_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(6);
+        }
+        t.remove(&6);
+        assert_eq!(t.to_vec(), []);
+        assert_eq!(t.len(), 0);
+    }
+
+    #[test]
+    fn bst_contains_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        assert!(t.contains(&4));
+        assert!(!t.contains(&5));
+    }
+
+    #[test]
+    fn bst_clear_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        for x in 0..5 {
+            t.insert(x);
+        }
+        t.clear();
+        assert!(t.is_empty());
+    }
+
+    #[test]
+    fn bst_first_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        assert_eq!(t.first(), None);
+        for x in 0..100 {
+            t.insert(x);
+        }
+        assert_eq!(t.first(), Some(&0));
+    }
+
+    #[test]
+    fn bst_last_works() {
+        let mut t = BinarySearchTree::<u32>::new();
+        assert_eq!(t.last(), None);
+        for x in 0..100 {
+            t.insert(x);
+        }
+        assert_eq!(t.last(), Some(&99));
+    }
+
+    #[test]
+    fn bst_pop_first_works() {
+        let mut t = BinarySearchTree::new();
+        for x in 0..10 {
+            t.insert(x);
+        }
+        t.insert(0);
+        assert_eq!(t.pop_first(), Some(0));
+        assert_eq!(*t.to_vec(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(t.len(), 10);
+        assert_eq!(t.pop_first(), Some(0));
+        assert_eq!(t.pop_first(), Some(1));
+        assert_eq!(*t.to_vec(), [2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(t.len(), 8);
+    }
+
+    #[test]
+    fn bst_pop_last_works() {
+        let mut t = BinarySearchTree::new();
+        for x in 0..10 {
+            t.insert(x);
+        }
+        t.insert(9);
+        assert_eq!(t.pop_last(), Some(9));
+        assert_eq!(*t.to_vec(), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(t.len(), 10);
+        assert_eq!(t.pop_last(), Some(9));
+        assert_eq!(*t.to_vec(), [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+        assert_eq!(t.pop_last(), Some(8));
+        assert_eq!(t.len(), 8);
+    }
+}
