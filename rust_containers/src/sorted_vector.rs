@@ -1,6 +1,7 @@
 use std::vec::Vec;
 use std::slice::Iter;
 use std::ops::Deref;
+use std::ops::DerefMut;
 use std::cmp::Ordering;
 use core::slice::SliceIndex;
 
@@ -140,6 +141,12 @@ impl<T> Deref for SortedVec<T> {
 
     fn deref(&self) -> &Self::Target {
         &self.v
+    }
+}
+
+impl<T> DerefMut for SortedVec<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.v
     }
 }
 

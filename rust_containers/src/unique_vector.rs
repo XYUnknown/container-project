@@ -1,6 +1,7 @@
 use std::vec::Vec;
 use std::slice::Iter;
 use std::ops::Deref;
+use std::ops::DerefMut;
 use core::slice::SliceIndex;
 
 // A Unique Vector
@@ -114,6 +115,12 @@ impl<T> Deref for UniqueVec<T> {
 
     fn deref(&self) -> &Self::Target {
         &self.v
+    }
+}
+
+impl<T> DerefMut for UniqueVec<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.v
     }
 }
 
