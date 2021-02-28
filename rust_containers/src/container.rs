@@ -173,11 +173,16 @@ mod tests {
 
     #[test]
     fn get_vec_unique_works() {
-        let v = get_vec!(u32; Property::Unique);
+        let mut v = get_vec!(u32; Property::Unique);
         let v1 = UniqueVec::<u32>::new();
         assert!(v.is_empty());
         assert_eq!(type_of(&v), type_of(&v1));
-    }
+        for x in 0..10000 {
+            v.c_push(x);
+            v.c_push(x);
+        }
+        assert_eq!(v.c_len(), 10000); // no duplication
+    } 
 
     #[test]
     fn get_vec_sorted_works() {
