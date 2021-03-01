@@ -178,10 +178,10 @@ mod tests {
         assert!(v.is_empty());
         assert_eq!(type_of(&v), type_of(&v1));
         for x in 0..10000 {
-            v.c_push(x);
-            v.c_push(x);
+            v.push(x);
+            v.push(x);
         }
-        assert_eq!(v.c_len(), 10000); // no duplication
+        assert_eq!(v.len(), 10000); // no duplication
     } 
 
     #[test]
