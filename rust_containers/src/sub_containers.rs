@@ -3,7 +3,6 @@ use std::vec::Vec;
 use crate::unique_vector::UniqueVec;
 use crate::sorted_vector::SortedVec;
 
-
 pub trait Vector<T> : Container<T> {
     fn v_get(&mut self, index: usize) -> Option<&T>;
     fn v_remove(&mut self, index: usize) -> T;

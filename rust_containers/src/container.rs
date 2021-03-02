@@ -19,6 +19,8 @@ pub trait Container<T> {
     fn c_len(&self) -> usize;
     fn c_contains(&self, x: &T) -> bool;
     fn c_is_empty(&self) -> bool;
+    fn c_first(&mut self) -> Option<&T>;
+    fn c_last(&mut self) -> Option<&T>;
 }
 
 impl<T: PartialEq> Container<T> for Vec<T> {
@@ -44,6 +46,14 @@ impl<T: PartialEq> Container<T> for Vec<T> {
 
     fn c_is_empty(&self) -> bool {
         self.is_empty()
+    }
+
+    fn c_first(&mut self) -> Option<&T> {
+        self.first()
+    }
+
+    fn c_last(&mut self) -> Option<&T> {
+        self.last()
     }
 }
 
@@ -71,6 +81,14 @@ impl<T: PartialEq> Container<T> for UniqueVec<T> {
     fn c_is_empty(&self) -> bool {
         self.is_empty()
     }
+
+    fn c_first(&mut self) -> Option<&T> {
+        self.first()
+    }
+
+    fn c_last(&mut self) -> Option<&T> {
+        self.last()
+    }
 }
 
 impl<T: PartialEq> Container<T> for SortedVec<T> {
@@ -96,6 +114,14 @@ impl<T: PartialEq> Container<T> for SortedVec<T> {
 
     fn c_is_empty(&self) -> bool {
         self.is_empty()
+    }
+
+    fn c_first(&mut self) -> Option<&T> {
+        self.first()
+    }
+
+    fn c_last(&mut self) -> Option<&T> {
+        self.last()
     }
 }
 
