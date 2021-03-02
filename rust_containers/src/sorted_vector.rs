@@ -115,7 +115,7 @@ impl<T: Ord> SortedVec<T> {
     /**
      * Accessing elements
      */
-     pub fn first(&mut self) -> Option<&T> {
+    pub fn first(&mut self) -> Option<&T> {
         self.v.first()
     }
 

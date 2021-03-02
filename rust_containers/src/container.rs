@@ -3,6 +3,10 @@ use std::vec::Vec;
 use crate::unique_vector::UniqueVec;
 use crate::sorted_vector::SortedVec;
 
+pub fn type_of<T: ?Sized + Any>(_s: &T) -> TypeId {
+    TypeId::of::<T>()
+}
+
 pub enum Property {
     Unique,
     Sorted,
@@ -15,12 +19,6 @@ pub trait Container<T> {
     fn c_len(&self) -> usize;
     fn c_contains(&self, x: &T) -> bool;
     fn c_is_empty(&self) -> bool;
-}
-
-// pub trait Vector<T> : Container<T> {}
-
-pub fn type_of<T: ?Sized + Any>(_s: &T) -> TypeId {
-    TypeId::of::<T>()
 }
 
 impl<T: PartialEq> Container<T> for Vec<T> {
@@ -121,29 +119,10 @@ fn get_vec<T: 'static + Ord + PartialEq + Sized> (prop: Option<Property>) -> Box
         }
     }
 }
+
 // experiment on macro
 // get a vector according to specific property(-ies)
 #[macro_export]
-// this does not work, error: `match` arms have incompatible types
-// uncomment to see the error
-/*macro_rules! get_vec {
-    ($t:ty) => { Vec::<$t>::new() }; // an ordinary vector
-    ($t:ty; $p:expr) => {
-        {
-            match $p {
-                Property::Unique => {
-                    let vec = UniqueVec::<$t>::new();
-                    vec
-                },
-                Property::Sorted => {
-                    let vec = SortedVec::<$t>::new();
-                    vec
-                }
-            }
-        }
-    };
-}*/
-
 // this works
 macro_rules! get_vec {
     ($t:ty) => { Vec::<$t>::new() }; // an ordinary vector
@@ -166,10 +145,12 @@ mod tests {
         let v = Vec::<u32>::new();
         let v1 = UniqueVec::<u32>::new();
         let v2 = UniqueVec::<u32>::new();
+        let b = Box::new(Vec::<u32>::new());
         assert_eq!(type_of(&v1), type_of(&v2));
         assert_ne!(type_of(&v), type_of(&v1));
+        assert_ne!(type_of(&v), type_of(&b));
     }
-    
+
     // macro get_vec test
     #[test]
     fn get_vec_works() {
@@ -227,6 +208,8 @@ mod tests {
             c.c_push(x);
         }
         assert_eq!(c.c_len(), 10000); // no duplication
-        assert_ne!(type_of(&c), type_of(&v));
+        // the type of c is not an unique vector
+        // but it behaves the same as an unique vector
+        assert_ne!(type_of(&*c), type_of(&v));
     }
 }
