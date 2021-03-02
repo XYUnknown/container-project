@@ -17,12 +17,10 @@ pub trait Container<T> {
     fn c_is_empty(&self) -> bool;
 }
 
-pub trait Vector<T> : Container<T> {
-
-}
+// pub trait Vector<T> : Container<T> {}
 
 pub fn type_of<T: ?Sized + Any>(_s: &T) -> TypeId {
-    TypeId::of::<String>()
+    TypeId::of::<T>()
 }
 
 impl<T: PartialEq> Container<T> for Vec<T> {
@@ -162,6 +160,16 @@ mod tests {
     use crate::unique_sorted_vector::UniqueSortedVec;
     use crate::container::{Property, type_of, Container, get_vec};
 
+    // test the type of
+    #[test]
+    fn test_type_of_works() {
+        let v = Vec::<u32>::new();
+        let v1 = UniqueVec::<u32>::new();
+        let v2 = UniqueVec::<u32>::new();
+        assert_eq!(type_of(&v1), type_of(&v2));
+        assert_ne!(type_of(&v), type_of(&v1));
+    }
+    
     // macro get_vec test
     #[test]
     fn get_vec_works() {
@@ -175,8 +183,10 @@ mod tests {
     fn get_vec_unique_works() {
         let mut v = get_vec!(u32; Property::Unique);
         let v1 = UniqueVec::<u32>::new();
+        let v2 = SortedVec::<u32>::new();
         assert!(v.is_empty());
         assert_eq!(type_of(&v), type_of(&v1));
+        assert_ne!(type_of(&v), type_of(&v2));
         for x in 0..10000 {
             v.push(x);
             v.push(x);
@@ -211,10 +221,12 @@ mod tests {
     #[test]
     fn get_unique_container() {
         let mut c = get_vec(Some(Property::Unique));
+        let v = UniqueVec::<u32>::new();
         for x in 0..10000 {
             c.c_push(x);
             c.c_push(x);
         }
         assert_eq!(c.c_len(), 10000); // no duplication
+        assert_ne!(type_of(&c), type_of(&v));
     }
 }
