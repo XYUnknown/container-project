@@ -15,3 +15,4 @@ pub mod binary_search_tree;
 pub mod container;
 pub mod sub_containers;
 pub mod container_specialization;
+pub mod container_specialization_no_wrapper;
