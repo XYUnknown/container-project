@@ -23,17 +23,18 @@ pub struct VecWrapper<T, P: ?Sized> {
     property: PhantomData<P> // just a marker
 }
 
+impl<T: PartialEq, P: ?Sized> VecWrapper<T, P> {
+    pub const fn new() -> VecWrapper<T, P> {
+        VecWrapper { v: Vec::new(), property: PhantomData, }
+    }
+}
+
+// just for testing purposes
 impl<T, P: ?Sized> Deref for VecWrapper<T, P> {
     type Target = Vec<T>;
 
     fn deref(&self) -> &Self::Target {
         &self.v
-    }
-}
-
-impl<T: PartialEq, P: ?Sized> VecWrapper<T, P> {
-    pub const fn new() -> VecWrapper<T, P> {
-        VecWrapper { v: Vec::new(), property: PhantomData, }
     }
 }
 
@@ -95,30 +96,28 @@ impl<T: PartialEq + Ord> Container<T, dyn UniqueSorted> for VecWrapper<T, dyn Un
     }
 }
 
-/*fn get_vec<T: 'static + Ord + PartialEq + Sized, P: 'static + Property + ?Sized> () -> Box<dyn Container<T, P>> 
-    where VecWrapper<T, P>: Container<T, P> 
-{
+fn get_vec<T: 'static + PartialEq + Ord + Sized, P: 'static + ?Sized> () -> Box<dyn Container<T, P>> {
     let vec = Box::new(VecWrapper::<T, P>::new());
     vec
-}*/
+}
 
 #[cfg(test)]
 mod tests {
-    use crate::container_specialization::{Container, Unique, Sorted, UniqueSorted, VecWrapper };
+    use crate::container_specialization::{Container, Unique, Sorted, UniqueSorted, VecWrapper, get_vec };
 
     #[test]
-    fn get_vec_specialize_empty() {
+    fn vec_specialize_works() {
         let mut c = VecWrapper::<u32, ()>::new();
         assert!(c.is_empty());
         for x in 0..100 {
             c.push(x);
             c.push(x);
         }
-        assert_eq!(c.len(), 200); // duplication
+        assert_eq!(c.len(), 200); // duplication allowed
     }
 
     #[test]
-    fn get_vec_specialize_unique() {
+    fn vec_specialize_unique_works() {
         let mut c = VecWrapper::<u32, dyn Unique>::new();
         assert!(c.is_empty());
         for x in 0..100 {
@@ -129,7 +128,7 @@ mod tests {
     }
 
     #[test]
-    fn get_vec_specialize_sorted() {
+    fn vec_specialize_sorted_works() {
         let mut c = VecWrapper::<u32, dyn Sorted>::new();
         assert!(c.is_empty());
         for x in 0..5 {
@@ -139,7 +138,7 @@ mod tests {
     }
 
     #[test]
-    fn get_vec_specialize_unique_sorted() {
+    fn vec_specialize_unique_sorted_works() {
         let mut c = VecWrapper::<u32, dyn UniqueSorted>::new();
         assert!(c.is_empty());
         for x in 0..5 {
@@ -147,6 +146,66 @@ mod tests {
         }
         assert_eq!(*c, [0, 1, 2, 3, 4]); // increasing
         c.clear();
+        for x in 0..100 {
+            c.push(x);
+            c.push(x);
+        }
+        assert_eq!(c.len(), 100); // no duplication
+    }
+
+    #[test]
+    fn get_vec_specialize_works() {
+        let mut c = get_vec::<u32, ()>();
+        assert!(c.is_empty());
+        for x in 0..100 {
+            c.push(x);
+            c.push(x);
+        }
+        assert_eq!(c.len(), 200); // duplication allowed
+    }
+
+    #[test]
+    fn get_vec_specialize_unique_works() {
+        let mut c = get_vec::<u32, dyn Unique>();
+        assert!(c.is_empty());
+        for x in 0..100 {
+            c.push(x);
+            c.push(x);
+        }
+        assert_eq!(c.len(), 100); // no duplication
+    }
+
+    #[test]
+    fn get_vec_specialize_sorted_works() {
+        let mut c = get_vec::<u32, dyn Sorted>();
+        //let mut c = get_vec::<_, dyn Sorted>(); also valid
+        assert!(c.is_empty());
+        for x in 0..5 {
+            c.push(4 - x);
+        }
+        // increasing
+        assert_eq!(c.pop(), Some(4));
+        assert_eq!(c.pop(), Some(3));
+        assert_eq!(c.pop(), Some(2));
+        assert_eq!(c.pop(), Some(1));
+        assert_eq!(c.pop(), Some(0));
+        assert_eq!(c.pop(), None);
+    }
+
+    #[test]
+    fn get_vec_specialize_unique_sorted_works() {
+        let mut c = get_vec::<_, dyn UniqueSorted>();
+        assert!(c.is_empty());
+        for x in 0..5 {
+            c.push(4 - x);
+        }
+        // increasing
+        assert_eq!(c.pop(), Some(4));
+        assert_eq!(c.pop(), Some(3));
+        assert_eq!(c.pop(), Some(2));
+        assert_eq!(c.pop(), Some(1));
+        assert_eq!(c.pop(), Some(0));
+        assert_eq!(c.pop(), None);
         for x in 0..100 {
             c.push(x);
             c.push(x);
