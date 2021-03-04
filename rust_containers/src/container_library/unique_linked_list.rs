@@ -122,7 +122,7 @@ impl<T: Clone> Clone for UniqueLinkedList<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::unique_linked_list::UniqueLinkedList;
+    use crate::container_library::unique_linked_list::UniqueLinkedList;
     /* Unique List */
     #[test]
     fn unique_ll_creation_works() {

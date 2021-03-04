@@ -157,7 +157,7 @@ macro_rules! unique_vec { // e.g., unique_vec![1, 2, 3]
 
 #[cfg(test)]
 mod tests {
-    use crate::unique_vector::UniqueVec;
+    use crate::container_library::unique_vector::UniqueVec;
     /** Unique Vector*/
     #[test]
     fn unique_vec_creation_works() {

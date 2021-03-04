@@ -1,7 +1,7 @@
 use std::any::{Any, TypeId};
 use std::vec::Vec;
-use crate::unique_vector::UniqueVec;
-use crate::sorted_vector::SortedVec;
+use crate::container_library::unique_vector::UniqueVec;
+use crate::container_library::sorted_vector::SortedVec;
 
 pub fn type_of<T: ?Sized + Any>(_s: &T) -> TypeId {
     TypeId::of::<T>()
@@ -160,10 +160,10 @@ macro_rules! get_vec {
 
 #[cfg(test)]
 mod tests {
-    use crate::unique_vector::UniqueVec;
-    use crate::sorted_vector::SortedVec;
-    use crate::unique_sorted_vector::UniqueSortedVec;
-    use crate::container::{Property, type_of, Container, get_vec};
+    use crate::container_library::unique_vector::UniqueVec;
+    use crate::container_library::sorted_vector::SortedVec;
+    use crate::container_library::unique_sorted_vector::UniqueSortedVec;
+    use crate::container_naive::container::{Property, type_of, Container, get_vec};
 
     // test the type of
     #[test]

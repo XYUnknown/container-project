@@ -7,8 +7,8 @@ use std::collections::linked_list::Iter;
 use std::collections::linked_list::Cursor;
 use std::collections::linked_list::CursorMut;
 
-use crate::sorted_linked_list::SortedLinkedList;
-use crate::unique_linked_list::UniqueLinkedList;
+use crate::container_library::sorted_linked_list::SortedLinkedList;
+use crate::container_library::unique_linked_list::UniqueLinkedList;
 
 // A unique and sorted doubly linked-list
 pub struct UniqueSortedLinkedList<T> {
@@ -328,8 +328,8 @@ impl<T: Clone> Clone for UniqueSortedLinkedListAlt<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::unique_sorted_linked_list::UniqueSortedLinkedList;
-    use crate::unique_sorted_linked_list::UniqueSortedLinkedListAlt;
+    use crate::container_library::unique_sorted_linked_list::UniqueSortedLinkedList;
+    use crate::container_library::unique_sorted_linked_list::UniqueSortedLinkedListAlt;
 
      /* Unique Sorted List */
      #[test]

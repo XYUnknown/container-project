@@ -368,7 +368,7 @@ impl <T: Ord> BinarySearchTree<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::binary_search_tree::BinarySearchTree;
+    use crate::container_library::binary_search_tree::BinarySearchTree;
     /* Test Binary Search Tree (Allow Duplication) */
     #[test]
     fn bst_creation_works() {

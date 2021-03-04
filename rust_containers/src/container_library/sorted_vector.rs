@@ -336,8 +336,8 @@ macro_rules! sorted_vec {
 
 #[cfg(test)]
 mod tests {
-    use crate::sorted_vector::SortedVec;
-    use crate::sorted_vector::SortedVecAlt;
+    use crate::container_library::sorted_vector::SortedVec;
+    use crate::container_library::sorted_vector::SortedVecAlt;
 
     /* Sorted Vector */
     #[test]
