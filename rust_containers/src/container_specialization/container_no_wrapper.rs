@@ -83,7 +83,7 @@ fn get_vec<T: 'static + PartialEq + Ord + Sized, P: 'static + ?Sized> () -> Box<
 
 #[cfg(test)]
 mod tests {
-    use crate::container_specialization_no_wrapper::{Container, Unique, Sorted, UniqueSorted, get_vec };
+    use crate::container_specialization::container_no_wrapper::{Container, Unique, Sorted, UniqueSorted, get_vec };
 
     #[test]
     fn get_vec_no_wrapper_works() {

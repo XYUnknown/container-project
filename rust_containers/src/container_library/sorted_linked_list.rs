@@ -188,7 +188,7 @@ impl<T: Clone> Clone for SortedLinkedList<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::sorted_linked_list::SortedLinkedList;
+    use crate::container_library::sorted_linked_list::SortedLinkedList;
     /* Sorted List */
     #[test]
     fn sorted_ll_creation_works() {

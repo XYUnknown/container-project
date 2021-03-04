@@ -1,7 +1,7 @@
-use crate::container::{Property, type_of, Container};
+use crate::container_naive::container::{Property, type_of, Container};
 use std::vec::Vec;
-use crate::unique_vector::UniqueVec;
-use crate::sorted_vector::SortedVec;
+use crate::container_library::unique_vector::UniqueVec;
+use crate::container_library::sorted_vector::SortedVec;
 
 pub trait Vector<T> : Container<T> {
     fn v_get(&mut self, index: usize) -> Option<&T>;
@@ -63,7 +63,7 @@ fn get_vec<T: 'static + Ord + PartialEq + Sized> (prop: Option<Property>) -> Box
 
 #[cfg(test)]
 mod tests {
-    use crate::sub_containers::{get_vec};
+    use crate::container_naive::sub_containers::{get_vec};
     #[test]
     fn get_vec_container() {
         let mut c = get_vec(None);

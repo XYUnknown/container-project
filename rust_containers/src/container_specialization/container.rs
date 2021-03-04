@@ -114,7 +114,7 @@ fn get_vec<T: 'static + PartialEq + Ord + Sized, P: 'static + ?Sized> () -> Box<
 
 #[cfg(test)]
 mod tests {
-    use crate::container_specialization::{Container, Unique, Sorted, UniqueSorted, VecWrapper, get_vec };
+    use crate::container_specialization::container::{Container, Unique, Sorted, UniqueSorted, VecWrapper, get_vec };
 
     #[test]
     fn vec_specialize_works() {

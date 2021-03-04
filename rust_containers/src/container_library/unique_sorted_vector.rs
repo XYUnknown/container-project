@@ -3,8 +3,8 @@ use std::slice::Iter;
 use std::ops::Deref;
 use std::cmp::Ordering;
 use core::slice::SliceIndex;
-use crate::sorted_vector::SortedVec;
-use crate::unique_vector::UniqueVec;
+use crate::container_library::sorted_vector::SortedVec;
+use crate::container_library::unique_vector::UniqueVec;
 
 // A Unique and sorted vector
 pub struct UniqueSortedVec<T> {
@@ -271,8 +271,8 @@ macro_rules! unique_sorted_vec {
 
 #[cfg(test)]
 mod tests {
-    use crate::unique_sorted_vector::UniqueSortedVec;
-    use crate::unique_sorted_vector::UniqueSortedVecAlt;
+    use crate::container_library::unique_sorted_vector::UniqueSortedVec;
+    use crate::container_library::unique_sorted_vector::UniqueSortedVecAlt;
 
     /* Unique Sorted Vector */
     #[test]
