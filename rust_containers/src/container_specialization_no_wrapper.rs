@@ -144,5 +144,15 @@ mod tests {
         }
         assert_eq!(c.c_len(), 100); // no duplication
     }
+
+    // The compiler is confused
+    //#[test]
+    //fn c_push_behaviour() {
+    //    let mut c = Vec::<u32>::new();
+    //    c.c_push(4);
+    //    c.c_push(4);
+    //    c.c_push(2);
+    //    assert_eq!(c, [4, 4, 2]);
+    //}
 }
 

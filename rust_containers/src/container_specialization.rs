@@ -18,6 +18,13 @@ pub trait Container<T, P: ?Sized> {
     fn last(&mut self) -> Option<&T>;
 }
 
+pub trait Vector<T, P: ?Sized> : Container<T, P> {
+    fn get(&mut self, index: usize) -> Option<&T>;
+    fn remove(&mut self, index: usize) -> T;
+    // issue: insert is not meaningful for sored vector
+    // fn v_insert(&mut self, index: usize, element: T);
+}
+
 pub struct VecWrapper<T, P: ?Sized> {
     v: Vec<T>,
     property: PhantomData<P> // just a marker
@@ -95,6 +102,10 @@ impl<T: PartialEq + Ord> Container<T, dyn UniqueSorted> for VecWrapper<T, dyn Un
         }
     }
 }
+
+//impl<T: PartialEq, P: ?Sized> Vector<T, P> for VecWrapper<T, P> {
+//
+//}
 
 fn get_vec<T: 'static + PartialEq + Ord + Sized, P: 'static + ?Sized> () -> Box<dyn Container<T, P>> {
     let vec = Box::new(VecWrapper::<T, P>::new());
