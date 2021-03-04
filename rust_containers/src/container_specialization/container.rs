@@ -22,11 +22,16 @@ pub trait Container<T, P: ?Sized> {
     fn last(&mut self) -> Option<&T>;
 }
 
-pub trait Vector<T, P: ?Sized> : Container<T, P> {
+pub trait VectorT<T, P: ?Sized> : Container<T, P> {
     fn get(&mut self, index: usize) -> Option<&T>;
     fn remove(&mut self, index: usize) -> T;
     // issue: insert is not meaningful for sored vector
     // fn v_insert(&mut self, index: usize, element: T);
+}
+
+pub trait LinkedListT<T, P: ?Sized> : Container<T, P> {
+    fn push_front(&mut self, elt: T);
+    fn pop_front(&mut self) -> Option<T>;
 }
 
 pub struct VecWrapper<T, P: ?Sized> {
@@ -169,13 +174,84 @@ impl<T: PartialEq, P: ?Sized> Container<T, P> for LinkedListWrapper<T, P> {
 impl<T: PartialEq> Container<T, dyn Unique> for LinkedListWrapper<T, dyn Unique> {
     fn push(&mut self, value: T) {
         if !self.ll.contains(&value) {
-            self.ll.push_front(value);
+            self.ll.push_back(value);
         }
     }
 }
 
 impl<T: Ord + PartialEq> Container<T, dyn Sorted> for LinkedListWrapper<T, dyn Sorted> {
     fn push(&mut self, elt: T) {
+        let mut c = self.cursor_back_mut();
+        loop {
+            match c.current() {
+                Some(x) => {
+                    match &elt.cmp(x) {
+                        Ordering::Less => {
+                            c.move_prev();
+                        },
+                        Ordering::Greater | Ordering::Equal => {
+                            c.insert_after(elt);
+                            break;
+                        } 
+                    }
+                },
+                None => { // empty list
+                    c.insert_after(elt);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+impl<T: Ord + PartialEq> Container<T, dyn UniqueSorted> for LinkedListWrapper<T, dyn UniqueSorted> {
+    fn push(&mut self, elt: T) {
+        let mut c = self.cursor_back_mut();
+        loop {
+            match c.current() {
+                Some(x) => {
+                    match &elt.cmp(x) {
+                        Ordering::Less => {
+                            c.move_prev();
+                        },
+                        Ordering::Greater => {
+                            c.insert_after(elt);
+                            break;
+                        }
+                        Ordering::Equal => break
+                    }
+                },
+                None => { // empty list
+                    c.insert_after(elt);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+impl<T: PartialEq, P: ?Sized> VectorT<T, P> for VecWrapper<T, P> {
+    default fn get(&mut self, index: usize) -> Option<&T> {
+        self.v.get(index)
+    }
+    
+    default fn remove(&mut self, index: usize) -> T {
+        self.v.remove(index)
+    }
+}
+
+impl<T: PartialEq, P: ?Sized> LinkedListT<T, P> for LinkedListWrapper<T, P> {
+    default fn push_front(&mut self, elt: T) {
+        self.ll.push_front(elt);
+    }
+
+    default fn pop_front(&mut self) -> Option<T> {
+        self.ll.pop_front()
+    }
+}
+
+impl<T: Ord + PartialEq> LinkedListT<T, dyn Sorted> for LinkedListWrapper<T, dyn Sorted> {
+    fn push_front(&mut self, elt: T) {
         let mut c = self.cursor_front_mut();
         loop {
             match c.current() {
@@ -197,8 +273,8 @@ impl<T: Ord + PartialEq> Container<T, dyn Sorted> for LinkedListWrapper<T, dyn S
     }
 }
 
-impl<T: Ord + PartialEq> Container<T, dyn UniqueSorted> for LinkedListWrapper<T, dyn UniqueSorted> {
-    fn push(&mut self, elt: T) {
+impl<T: Ord + PartialEq> LinkedListT<T, dyn UniqueSorted> for LinkedListWrapper<T, dyn UniqueSorted> {
+    fn push_front(&mut self, elt: T) {
         let mut c = self.cursor_front_mut();
         loop {
             match c.current() {
@@ -220,9 +296,6 @@ impl<T: Ord + PartialEq> Container<T, dyn UniqueSorted> for LinkedListWrapper<T,
         }
     }
 }
-//impl<T: PartialEq, P: ?Sized> Vector<T, P> for VecWrapper<T, P> {
-//
-//}
 
 fn get_vec<T: 'static + PartialEq + Ord + Sized, P: 'static + ?Sized> () -> Box<dyn Container<T, P>> {
     let vec = Box::new(VecWrapper::<T, P>::new());
@@ -236,7 +309,7 @@ fn get_list<T: 'static + PartialEq + Ord + Sized, P: 'static + ?Sized> () -> Box
 
 #[cfg(test)]
 mod tests {
-    use crate::container_specialization::container::{Container, Unique, Sorted, UniqueSorted, VecWrapper, LinkedListWrapper, get_vec, get_list };
+    use crate::container_specialization::container::{Container, Unique, Sorted, UniqueSorted, VecWrapper, LinkedListWrapper, VectorT, get_vec, get_list };
 
     #[test]
     fn vec_specialize_works() {
