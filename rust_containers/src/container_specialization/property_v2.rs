@@ -53,11 +53,30 @@ impl<T: PartialEq + Ord> PushProperty<T> for Sorted {
     }
 }
 
-pub struct And<P1, P2> {}
+pub struct And<P1, P2> {
+    property1: PhantomData<P1>,
+    property2: PhantomData<P2> 
+}
 
-/*impl<T: PartialEq + Ord, P1: PushProperty<T>, PushProperty<T>> PushProperty<T> for And <P1, P2> {
+impl<T: PartialEq + Ord, P1: PushProperty<T>, P2: PushProperty<T>> PushProperty<T> for And <P1, P2> {
+    type R = (P1::R, P2::R);
 
-}*/
+    fn pre(vec: &Vec<T>, value: &T) -> (P1::R, P2::R) {
+        let r1 = P1::pre(vec, value);
+        let r2 = P2::pre(vec, value);
+        (r1, r2)
+    }
+
+    fn exec(vec: &mut Vec<T>, cond: (P1::R, P2::R), value: T) {
+        //how to specify the execution satisfying/according to both conditions?
+    }
+
+    fn assert(vec: &Vec<T>) -> bool {
+        let a1 = P1::assert(vec);
+        let a2 = P2::assert(vec);
+        a1 && a2
+    }
+}
 
 
 pub struct VecWrapper<T, P> {
@@ -97,5 +116,15 @@ mod tests {
             vec.push(4 - x);
         }
         assert_eq!(vec.v, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]);
+    }
+
+    #[test]
+    fn test_vec_unique_sorted_prop_works() {
+        let mut vec = VecWrapper::<u32, And<Unique, Sorted>>::new();
+        for x in 0..5 {
+            vec.push(4 - x);
+            vec.push(4 - x);
+        }
+        assert_eq!(vec.v, [0, 1, 2, 3, 4]);
     }
 }
