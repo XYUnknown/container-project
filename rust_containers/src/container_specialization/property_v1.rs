@@ -53,7 +53,7 @@ impl<T: PartialEq, P: ?Sized> PushProperty<T, ()> for VecWrapper<T, P> {
 
 impl<T: PartialEq> PushProperty<T, bool> for VecWrapper<T, dyn Unique> {
     fn pre(&self, value: &T) -> bool {
-        !self.v.contains(&value)
+        !self.v.contains(value)
     }
     
     fn exec(&mut self, cond: bool, value: T) {
@@ -69,7 +69,7 @@ impl<T: PartialEq> PushProperty<T, bool> for VecWrapper<T, dyn Unique> {
 
 impl<T: PartialEq+Ord> PushProperty<T, usize> for VecWrapper<T, dyn Sorted> {
     fn pre(&self, value: &T) -> usize {
-        self.v.binary_search(&value).unwrap_or_else(|i| i)
+        self.v.binary_search(value).unwrap_or_else(|i| i)
     }
     
     fn exec(&mut self, cond: usize, value: T) {
@@ -156,8 +156,8 @@ mod tests {
         assert_eq!(c.len(), 200);
     }
 
-    /*
-    #[test]
+    
+    /*#[test]
     fn test_prop_unique_con_works() {
         let mut c = get_vec::<u32, dyn Unique>();
         for x in 0..100 {
