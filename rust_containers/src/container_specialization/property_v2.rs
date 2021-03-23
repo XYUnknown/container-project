@@ -32,7 +32,7 @@ impl<T: PartialEq> PushProperty<T> for Unique {
     }
 
     fn assert(vec: &Vec<T>) -> bool {
-        true // for now
+        !(1..vec.len()).any(|i| vec[i..].contains(&vec[i - 1]))
     }
 }
 
