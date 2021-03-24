@@ -1,22 +1,13 @@
-// The push property for Vec
-// We would like to inspect how the composition of properties works
 use std::vec::Vec;
 use std::marker::PhantomData;
-use std::any::{Any, TypeId};
 
-pub fn type_of<T: ?Sized + Any>(_s: &T) -> TypeId {
-    TypeId::of::<T>()
-}
-
-pub trait PushProperty<T> {
-    type R : 'static;
-    fn pre(vec: &Vec<T>, value: &T) -> Self::R;
-    fn exec(vec: &mut Vec<T>, cond: Self::R, value: T); 
+pub trait PushProperty<T>  {
+    fn post(vec: &mut Vec<T>);
     fn assert(vec: &Vec<T>) -> bool;
   
     fn p_push(vec: &mut Vec<T>, value: T) {
-        let cond = Self::pre(vec, &value);
-        Self::exec(vec, cond, value);
+        vec.push(value);
+        Self::post(vec);
         assert!(Self::assert(vec));
     }
 }
@@ -24,14 +15,12 @@ pub trait PushProperty<T> {
 pub struct Unique {}
 
 impl<T: PartialEq> PushProperty<T> for Unique {
-    type R = bool;
-    fn pre(vec: &Vec<T>, value: &T) -> bool {
-        !vec.contains(value)
-    }
-
-    fn exec(vec: &mut Vec<T>, cond: bool, value: T) {
-        if cond {
-            vec.push(value);
+    fn post(vec: &mut Vec<T>) { // a very inefficient implementation
+        for i in 0..(vec.len() - 1) {
+            let index = vec.len() - 1 - i;
+            if vec[0..index].contains(&vec[index]) {
+                vec.remove(index);
+            }
         }
     }
 
@@ -43,13 +32,8 @@ impl<T: PartialEq> PushProperty<T> for Unique {
 pub struct Sorted {}
 
 impl<T: PartialEq + Ord> PushProperty<T> for Sorted {
-    type R = usize;
-    fn pre(vec: &Vec<T>, value: &T) -> usize {
-        vec.binary_search(&value).unwrap_or_else(|i| i)
-    }
-
-    fn exec(vec: &mut Vec<T>, cond: usize, value: T) {
-        vec.insert(cond, value);
+    fn post(vec: &mut Vec<T>) {
+        vec.sort();
     }
 
     fn assert(vec: &Vec<T>) -> bool {
@@ -63,17 +47,10 @@ pub struct And<P1, P2> {
 }
 
 impl<T: PartialEq + Ord, P1: PushProperty<T>, P2: PushProperty<T>> PushProperty<T> for And <P1, P2> {
-    type R = (P1::R, P2::R);
 
-    fn pre(vec: &Vec<T>, value: &T) -> (P1::R, P2::R) {
-        let r1 = P1::pre(vec, value);
-        let r2 = P2::pre(vec, value);
-        (r1, r2)
-    }
-
-    fn exec(vec: &mut Vec<T>, cond: (P1::R, P2::R), value: T) {
-        //how to specify the execution satisfying/according to both conditions?
-        
+    fn post(vec: &mut Vec<T>) {
+        P1::post(vec);
+        P2::post(vec); 
     }
 
     fn assert(vec: &Vec<T>) -> bool {
@@ -100,20 +77,20 @@ impl<T: PartialEq, P: PushProperty<T>> VecWrapper<T, P> {
 
 #[cfg(test)]
 mod tests {
-    use crate::container_specialization::property_v2::*;
+    use crate::container_specialization::property_v3::*;
 
     #[test]
-    fn test_vec_unique_prop_works() {
+    fn test_v3_vec_unique_prop_works() {
         let mut vec = VecWrapper::<u32, Unique>::new();
-        for x in 0..100 {
+        for x in 0..5 {
             vec.push(x);
             vec.push(x);
         }
-        assert_eq!(vec.v.len(), 100);
+        assert_eq!(vec.v.len(), 5);
     }
 
     #[test]
-    fn test_vec_sorted_prop_works() {
+    fn test_v3_vec_sorted_prop_works() {
         let mut vec = VecWrapper::<u32, Sorted>::new();
         for x in 0..5 {
             vec.push(4 - x);
@@ -122,13 +99,23 @@ mod tests {
         assert_eq!(vec.v, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4]);
     }
 
-    /*#[test]
-    fn test_vec_unique_sorted_prop_works() {
+    #[test]
+    fn test_v3_vec_unique_sorted_prop_works() {
         let mut vec = VecWrapper::<u32, And<Unique, Sorted>>::new();
         for x in 0..5 {
             vec.push(4 - x);
             vec.push(4 - x);
         }
         assert_eq!(vec.v, [0, 1, 2, 3, 4]);
-    }*/
+    }
+
+    #[test]
+    fn test_v3_vec_sorted_unique_prop_works() {
+        let mut vec = VecWrapper::<u32, And<Sorted, Unique>>::new();
+        for x in 0..5 {
+            vec.push(4 - x);
+            vec.push(4 - x);
+        }
+        assert_eq!(vec.v, [0, 1, 2, 3, 4]);
+    }
 }
