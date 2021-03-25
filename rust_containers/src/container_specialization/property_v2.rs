@@ -40,6 +40,23 @@ impl<T: PartialEq> PushProperty<T> for Unique {
     }
 }
 
+pub struct Default {}
+
+impl<T> PushProperty<T> for Default {
+    type R = ();
+    fn pre(vec: &Vec<T>, value: &T) -> () {
+        ()
+    }
+
+    fn exec(vec: &mut Vec<T>, cond: (), value: T) {
+        vec.push(value);
+    }
+
+    fn assert(vec: &Vec<T>) -> bool {
+        true
+    }
+}
+
 pub struct Sorted {}
 
 impl<T: PartialEq + Ord> PushProperty<T> for Sorted {

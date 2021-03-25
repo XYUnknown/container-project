@@ -1,7 +1,15 @@
 use std::vec::Vec;
 use std::marker::PhantomData;
 
+/**
+ * This can be inefficient
+ * but easy to compose
+ */
 pub trait PushProperty<T>  {
+    /**
+     * Post operation after push
+     * e.g., sort, remove dupilcate
+     */
     fn post(vec: &mut Vec<T>);
     fn assert(vec: &Vec<T>) -> bool;
   
@@ -38,6 +46,18 @@ impl<T: PartialEq + Ord> PushProperty<T> for Sorted {
 
     fn assert(vec: &Vec<T>) -> bool {
         vec.iter().is_sorted()
+    }
+}
+
+pub struct Default {}
+
+impl<T> PushProperty<T> for Default {
+    fn post(vec: &mut Vec<T>) {
+        ()
+    }
+
+    fn assert(vec: &Vec<T>) -> bool {
+        true
     }
 }
 
