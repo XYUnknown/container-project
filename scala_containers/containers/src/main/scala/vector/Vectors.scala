@@ -9,7 +9,7 @@ import scala.collection.Searching._
  * Since the Vector is a sealed class that I cannot extend directly,
  * Wrapping it up allowing `extends` need to be done
  */
-class Vec[+A](v: Vector[A])  (implicit ord: Ordering[A]) {
+class Vec[+A](v: Vector[A]) (implicit ord: Ordering[A]) {
 
     def contains [A1 >: A](elem: A1) : Boolean = {
         this.v.contains(elem)
