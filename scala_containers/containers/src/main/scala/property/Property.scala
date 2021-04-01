@@ -105,3 +105,17 @@ class SortedVec[A] extends DefaultVec[A] with SortedVecT[A] {
         }
     }
 }
+
+class UniqueSortedVec[A] 
+    extends DefaultVec[A] 
+    with SortedVecT[A] 
+    with UniqueVecT[A] {
+    // Question: What would be the way to specify composition
+}
+
+class SortedUniqueVec[A] 
+    extends DefaultVec[A] 
+    with UniqueVecT[A]
+    with SortedVecT[A] {
+
+}

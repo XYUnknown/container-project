@@ -26,7 +26,7 @@ isIncList = [1, 2, 2, 3]
 --notIncList::[Int]
 --notIncList = [1, 2, 2, 3, 1]
 
-{-
+{- not working
 {-@ push :: (Ord a) => IncrList a -> a -> IncrList a @-}
 push [] y = y:[]
 push (x:xs) y = case y <= x of 
