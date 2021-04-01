@@ -5,6 +5,7 @@ import qualified Data.Set as S
 {-@ isIncList :: IncrList Int @-}
 isIncList::[Int]
 isIncList = [1, 2, 2, 3]
+
 {-
 {-@ notIncList :: IncrList Int @-}
 notIncList::[Int]

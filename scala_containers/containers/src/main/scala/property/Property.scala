@@ -2,20 +2,19 @@ package property
 import scala.collection.immutable.Vector
 import scala.collection.Searching._
 
-
-abstract class VecOps[A] {
+trait DefaultVecT[A] {
     def contains [A1 >: A](vec: Vector[A], elem: A1) : Boolean = {
         vec.contains(elem)
     }
+
     def size(vec: Vector[A]): Int = {
         vec.size
     }
+
     def isEmpty(vec: Vector[A]): Boolean = {
         vec.isEmpty
     }
-}
 
-trait DefaultVecT[A] {
     def appended [B >: A](vec: Vector[A], elem: B)(implicit ord: Ordering[B]): Vector[B] = {
         vec.appended(elem)
     }
@@ -25,27 +24,7 @@ trait DefaultVecT[A] {
     }
 }
 
-trait UniqueVecT[A] {
-    def appended [B >: A](vec: Vector[A], elem: B)(implicit ord: Ordering[B]): Vector[B]
-    def insert[B >: A](vec: Vector[A], i: Int, elem: B)(implicit ord: Ordering[B]): Vector[B]
-    def assertionU[A] (vec: Vector[A]): Boolean = {
-        vec.distinct.size == vec.size
-    }
-}
-
-trait SortedVecT[A] {
-    def appended [B >: A](vec: Vector[A], elem: B)(implicit ord: Ordering[B]): Vector[B]
-    def insert[B >: A](vec: Vector[A], i: Int, elem: B)(implicit ord: Ordering[B]): Vector[B]
-    def assertionS[A] (vec : Vector[A]) (implicit ord: Ordering[A]) : Boolean = vec.isEmpty match {
-        case true => true
-        case _ => vec.sliding(2).forall { case Vector(x, y) => ord.lteq(x, y) }
-    }
-}
-
-class DefaultVec[A] extends VecOps[A] with DefaultVecT [A] {
-}
-
-class UniqueVec[A] extends DefaultVec[A] with UniqueVecT[A] {
+trait UniqueVecT[A] extends DefaultVecT[A] {
     override def appended [B >: A](vec: Vector[A], elem: B)(implicit ord: Ordering[B]): Vector[B] = {
         if (!contains(vec, elem)) {
             super.appended(vec, elem)
@@ -61,9 +40,12 @@ class UniqueVec[A] extends DefaultVec[A] with UniqueVecT[A] {
             vec
         }
     }
+    def assertionU[A] (vec: Vector[A]): Boolean = {
+        vec.distinct.size == vec.size
+    }
 }
 
-class SortedVec[A] extends DefaultVec[A] with SortedVecT[A] {
+trait SortedVecT[A] extends DefaultVecT[A] {
     override def appended [B >: A](vec: Vector[A], elem: B)(implicit ord: Ordering[B]): Vector[B] = {
         vec.search(elem) match {
             case Found(x) => {
@@ -104,18 +86,37 @@ class SortedVec[A] extends DefaultVec[A] with SortedVecT[A] {
             }
         }
     }
+
+    def assertionS[A] (vec : Vector[A]) (implicit ord: Ordering[A]) : Boolean = vec.isEmpty match {
+        case true => true
+        case _ => vec.sliding(2).forall { case Vector(x, y) => ord.lteq(x, y) }
+    }
 }
 
+class DefaultVec[A] extends DefaultVecT[A] {}
+class UniqueVec[A] extends UniqueVecT[A] {}
+class SortedVec[A] extends SortedVecT[A] {}
+
 class UniqueSortedVec[A] 
-    extends DefaultVec[A] 
-    with SortedVecT[A] 
+    extends SortedVecT[A] 
     with UniqueVecT[A] {
-    // Question: What would be the way to specify composition
+    override def appended [B >: A](vec: Vector[A], elem: B) (implicit ord: Ordering[B]): Vector[B] = {
+        super.appended(vec, elem)
+    }
+
+    override def insert[B >: A](vec: Vector[A], i: Int, elem: B)(implicit ord: Ordering[B]): Vector[B] = {
+        super.appended(vec, elem)
+    }
 }
 
 class SortedUniqueVec[A] 
-    extends DefaultVec[A] 
-    with UniqueVecT[A]
+    extends UniqueVecT[A]
     with SortedVecT[A] {
+    override def appended [B >: A](vec: Vector[A], elem: B) (implicit ord: Ordering[B]): Vector[B] = {
+        super.appended(vec, elem)
+    }
 
+    override def insert[B >: A](vec: Vector[A], i: Int, elem: B)(implicit ord: Ordering[B]): Vector[B] = {
+        super.appended(vec, elem)
+    }
 }

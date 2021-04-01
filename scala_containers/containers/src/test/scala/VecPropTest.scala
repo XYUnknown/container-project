@@ -1,6 +1,9 @@
 import property.DefaultVec
 import property.UniqueVec
 import property.SortedVec
+import property.UniqueSortedVec
+import property.SortedUniqueVec
+
 import scala.collection.immutable.Vector
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -40,5 +43,29 @@ class VecPropTets extends AnyFunSuite {
         }
         assert(v.size(vec) == 20)
         assert(v.assertionS(vec))
+    }
+
+    test("UniqueSortedVec.appeneded") {
+        val v = new UniqueSortedVec[Int]
+        var vec = Vector[Int]()
+        for ( a <- 0 until 10){
+            vec = v.appended(vec, 9 - a)
+            vec = v.appended(vec, 9 - a)   
+        }
+        assert(v.size(vec) == 10)
+        assert(v.assertionS(vec))
+        assert(v.assertionU(vec))
+    }
+
+    test("SortedUniqueVec.appeneded") {
+        val v = new SortedUniqueVec[Int]
+        var vec = Vector[Int]()
+        for ( a <- 0 until 10){
+            vec = v.appended(vec, 9 - a)
+            vec = v.appended(vec, 9 - a)   
+        }
+        assert(v.size(vec) == 10)
+        assert(v.assertionS(vec))
+        assert(v.assertionU(vec))
     }
 }
