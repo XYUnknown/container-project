@@ -16,6 +16,7 @@ library
   exposed-modules:
       Lists.UniqueList
       Lists.IncrList
+      Lists.AbstractRefLists
   hs-source-dirs:
       src
   build-depends:
