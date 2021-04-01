@@ -2,7 +2,7 @@
 {-@ LIQUID "--notermination" @-}
 {-@ LIQUID "--exact-data-cons" @-}
 
-module Demo.IncrList () where
+module Lists.IncrList () where
 import qualified Data.Set as S
 
 {-@ measure ascending @-}
@@ -26,16 +26,10 @@ isIncList = [1, 2, 2, 3]
 --notIncList::[Int]
 --notIncList = [1, 2, 2, 3, 1]
 
-{-@ insert :: (Ord a) => a -> IncrList a -> IncrList a @-}
-insert y [] = y:[]
-insert y (x:xs)
-    | y <= x = y : (x : xs)
-    | otherwise = x : insert y xs
-
 {-
-{-@ pushI :: (Ord a) => a -> IncrList a -> IncrList a @-}
-pushI y []     = [y]
-pushI y (x:xs)
-    | y <= x      = y : x : xs
-    | otherwise   = x : pushI y xs
+{-@ push :: (Ord a) => IncrList a -> a -> IncrList a @-}
+push [] y = y:[]
+push (x:xs) y = case y <= x of 
+    True -> y : (x : xs)
+    _ -> x : push xs y
 -}

@@ -14,8 +14,8 @@ build-type:     Simple
 
 library
   exposed-modules:
-      Demo.UniqueList
-      Demo.IncrList
+      Lists.UniqueList
+      Lists.IncrList
   hs-source-dirs:
       src
   build-depends:

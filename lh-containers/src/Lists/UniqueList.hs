@@ -1,11 +1,6 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
-{-@ LIQUID "--notermination" @-}
 {-@ LIQUID "--exact-data-cons" @-}
-
-module Demo.UniqueList () where
+module Lists.UniqueList () where
 import qualified Data.Set as S
-import Prelude hiding (length, map, filter, head, tail, foldl1)
-import Language.Haskell.Liquid.Prelude (liquidError)
 
 {-@ measure elts @-}
 elts :: (Ord a) => [a] -> S.Set a
@@ -32,9 +27,9 @@ isUniqueListEmpty = []
 isUnique::[Int]
 isUnique = [1, 2, 3] 
 
---{-@ isNotUnique :: UniqueList Int @-}
---isNotUnique::[Int]
---isNotUnique = [1, 2, 3, 1]
+-- {-@ isNotUnique :: UniqueList Int @-}
+-- isNotUnique::[Int]
+-- isNotUnique = [1, 2, 3, 1]
 
 {-@ append :: xs: (UniqueList a) 
               -> ys: {v: (UniqueList a) | Disjoint v xs} 
@@ -47,3 +42,13 @@ append (x:xs) ys = x: append xs ys
             -> {v: UniqueList a | (UnionElem v xs y)} @-}
 push [] y = [y]
 push (x:xs) y = x: push xs y
+
+-- a working push
+list = push [1, 2] 3
+
+-- a not working push
+-- badList = push [1, 2] 2
+
+-- This implementation basically report error on duplicated push
+-- Which is quite different from our old approaches:
+    -- if duplicated, do nothing
