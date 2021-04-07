@@ -99,24 +99,8 @@ class SortedVec[A] extends SortedVecT[A] {}
 
 class UniqueSortedVec[A] 
     extends SortedVecT[A] 
-    with UniqueVecT[A] {
-    override def appended [B >: A](vec: Vector[A], elem: B) (implicit ord: Ordering[B]): Vector[B] = {
-        super.appended(vec, elem)
-    }
-
-    override def insert[B >: A](vec: Vector[A], i: Int, elem: B)(implicit ord: Ordering[B]): Vector[B] = {
-        super.appended(vec, elem)
-    }
-}
+    with UniqueVecT[A] {}
 
 class SortedUniqueVec[A] 
     extends UniqueVecT[A]
-    with SortedVecT[A] {
-    override def appended [B >: A](vec: Vector[A], elem: B) (implicit ord: Ordering[B]): Vector[B] = {
-        super.appended(vec, elem)
-    }
-
-    override def insert[B >: A](vec: Vector[A], i: Int, elem: B)(implicit ord: Ordering[B]): Vector[B] = {
-        super.appended(vec, elem)
-    }
-}
+    with SortedVecT[A] {}
