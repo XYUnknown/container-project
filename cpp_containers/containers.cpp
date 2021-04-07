@@ -20,7 +20,7 @@ class Container {
     virtual ~Container() {}
 };*/
 
-template <typename T, typename P>
+template<typename T>
 class Vec /*: public Container<T, P>*/ {
     private:
     vector<T> v;
@@ -28,7 +28,7 @@ class Vec /*: public Container<T, P>*/ {
     public:
     Vec() /*: Container<T, P> ()*/ {}
     ~Vec() {}
-    void push(T value);
+    template<typename P> void push(T value);
     T pop();
     void clear();
     size_t size();
@@ -36,60 +36,65 @@ class Vec /*: public Container<T, P>*/ {
     bool contains(T value);
 };
 
-template <typename T, typename P>
-inline void Vec<T, P>::push(T value) {
+template<typename T>
+template<typename P> void Vec<T>::push(T value) {
     v.push_back(value);
 }
 
-template <typename T, typename P>
-inline T Vec<T, P>::pop() {
+template<typename T>
+T Vec<T>::pop() {
     T value = v.back();
     v.pop_back();
     return value;
 }
 
-template <typename T, typename P>
-inline void Vec<T, P>::clear() {
+template<typename T>
+void Vec<T>::clear() {
     v.clear();
 }
 
-template <typename T, typename P>
-inline size_t Vec<T, P>::size() {
+template<typename T>
+size_t Vec<T>::size() {
     return v.size();
 }
 
-template <typename T, typename P>
-inline bool Vec<T, P>::is_empty() {
+template<typename T>
+bool Vec<T>::is_empty() {
     return v.empty();
 }
 
-template <typename T, typename P>
-inline bool Vec<T, P>::contains(T value) {
+template<typename T>
+bool Vec<T>::contains(T value) {
     return find(v.begin(), v.end(), value) != v.end();
 }
 
-template <typename T>
-class Vec<T, Unique> {
-    public:
-    void push(T value);
-};
-
-template <typename T>
-inline void Vec<T, Unique>::push(T value) {
+// This is valid
+template<>
+template<> void Vec<int>::push<Unique>(int value) {
     if (!this->contains(value)) {
-        this->push(value);
+        v.push_back(value);
     }
 }
 
-int main() {
-    Vec<int, monostate> v1;
-    v1.push(1);
-    v1.push(1);
+// This is invalid
+/*
+template<typename T>
+template<> void Vec<T>::push<Unique>(T value) {
+    if (!this->contains(value)) {
+        v.push_back(value);
+    }
+}*/
 
-    Vec<int, Unique> v2;
-    v2.push(1);
-    v2.push(1);
-    cout << v1.size() << endl;
+int main() {
+    Vec<int> v1;
+    v1.push<monostate>(1);
+    v1.push<monostate>(1);
+
+    Vec<int> v2;
+    v2.push<Unique>(1);
+    v2.push<Unique>(1);
+
+    cout << v1.size() << endl; //2
     cout << v2.size() << endl; //1
     return 0;
 }
