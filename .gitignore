@@ -57,3 +57,6 @@ cabal.project.local~
 .HTF/
 .ghc.environment.*
 .liquid
+
+# CPP
+build/
