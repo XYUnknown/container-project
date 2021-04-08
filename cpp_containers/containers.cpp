@@ -70,6 +70,21 @@ struct Container<T, std::vector<T>, And<Sorted, Unique>> : Container<T, std::vec
     }
 };
 
+template <class T>
+struct Container<T, std::vector<T>, And<Unique, Sorted>> : Container<T, std::vector<T>, Unique>, Container<T, std::vector<T>, Sorted> {
+    void push_back(T t) {
+        if (!this->contains(t)) {
+            Container<T, std::vector<T>, Sorted>::push_back(t);
+        } 
+    }
+
+    auto insert(typename std::vector<T>::iterator pos, T t) {
+        if (!this->contains(t)) {
+            Container<T, std::vector<T>, Sorted>::insert(pos, t);
+        } 
+    }
+};
+
 void print_vector(std::vector<int> v) {
     std::cout << "Size: " << v.size() << std::endl;
     for (auto it=v.begin(); it<v.end(); it++)
@@ -104,8 +119,19 @@ int main() {
     c4.push_back(3);
     c4.push_back(1);
     c4.push_back(3);
-    std::cout << "Container for unique sorted vector" << std::endl;
+    c4.insert(c4.begin(), 4);
+    c4.insert(c4.begin(), 4);
+    std::cout << "Container for sorted unique vector" << std::endl;
     print_vector(c4);
+
+    Container<int, std::vector<int>, And<Unique, Sorted>> c5;
+    c5.push_back(3);
+    c5.push_back(1);
+    c5.push_back(3);
+    c5.insert(c5.begin(), 4);
+    c5.insert(c5.begin(), 4);
+    std::cout << "Container for unique sorted vector" << std::endl;
+    print_vector(c5);
 
     return 0;
 }
