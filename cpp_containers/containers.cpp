@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <list>
 
 class Unique {};
 class Sorted {};
@@ -8,14 +9,16 @@ template <class P1, class P2>
 struct And;
 
 // We can try making a container where we can sepecify what concrete container type and 
-// semantic properties 
+// semantic properties are
+// C - concrete container type; P - semantic property(-ies)
 template<class T, class C, class P>
 struct Container;
 
+// Vectors
 template<class T>
 struct Container<T, std::vector<T>, void> : public std::vector<T> {
     bool contains(T t) {
-        return find(std::vector<T>::begin(), std::vector<T>::end(), t) != std::vector<T>::end();
+        return std::find(std::vector<T>::begin(), std::vector<T>::end(), t) != std::vector<T>::end();
     }
 };
 
@@ -85,6 +88,59 @@ struct Container<T, std::vector<T>, And<Unique, Sorted>> : Container<T, std::vec
     }
 };
 
+// Lists
+template <class T>
+struct Container<T, std::list<T>, void> : public std::list<T> {
+    bool contains(T t) {
+        return std::find(std::list<T>::begin(), std::list<T>::end(), t) != std::list<T>::end();
+    }
+};
+
+template <class T>
+struct Container<T, std::list<T>, Unique> : public virtual Container<T, std::list<T>, void> {
+    void push_back(T t) {
+        if (!this->contains(t)) {
+            Container<T, std::list<T>, void>::push_back(t);
+        }
+    }
+
+    void push_front(T t) {
+        if (!this->contains(t)) {
+            Container<T, std::list<T>, void>::push_front(t);
+        }
+    }
+
+    auto insert(typename std::list<T>::iterator pos, T t) {
+        if (!this->contains(t)) {
+            Container<T, std::list<T>, void>::insert(pos, t);
+        }
+    }
+};
+
+template <class T>
+struct Container<T, std::list<T>, Sorted> : public virtual Container<T, std::list<T>, void> {
+    void push_back(T t) {
+        this->insert(this->end(), t);
+    }
+
+    void push_front(T t) {
+        this->insert(this->begin(), t);
+    }
+
+    auto insert(typename std::list<T>::iterator pos, T t) {
+        // we cannot access element by position in a list
+        // therefore we need to search the whole list
+        auto pos_i = std::lower_bound(this->begin(), pos, t);
+        if (pos_i == pos) {
+            pos_i = std::lower_bound(pos, this->end(), t);
+            Container<T, std::list<T>, void>::insert(pos_i, t);
+        } else {
+            Container<T, std::list<T>, void>::insert(pos_i, t);
+        }
+    }
+};
+
+// Helpers
 void print_vector(std::vector<int> v) {
     std::cout << "Size: " << v.size() << std::endl;
     for (auto it=v.begin(); it<v.end(); it++)
@@ -93,7 +149,16 @@ void print_vector(std::vector<int> v) {
     std::cout << '\n';
 }
 
+void print_list(std::list<int> l) {
+    std::cout << "Size: " << l.size() << std::endl;
+    for (auto const &i : l)
+        std::cout << ' ' << i;
+    std::cout << '\n';
+    std::cout << '\n';
+}
+
 int main() {
+    // Vectors
     Container<int, std::vector<int>, void> c1;
     c1.push_back(1);
     c1.push_back(1);
@@ -132,6 +197,31 @@ int main() {
     c5.insert(c5.begin(), 4);
     std::cout << "Container for unique sorted vector" << std::endl;
     print_vector(c5);
+
+    // Lists
+    Container<int, std::list<int>, void> c6;
+    c6.push_back(1);
+    c6.push_back(1);
+    std::cout << "Container for default list" << std::endl;
+    print_list(c6);
+
+    Container<int, std::list<int>, Unique> c7;
+    c7.push_back(3);
+    c7.push_back(1);
+    c7.push_front(1);
+    c7.insert(c7.begin(), 1);
+    c7.push_back(1);
+    std::cout << "Container for default list" << std::endl;
+    print_list(c7);
+
+    Container<int, std::list<int>, Sorted> c8;
+    c8.push_back(3);
+    c8.push_back(1);
+    c8.push_front(5);
+    c8.insert(c8.begin(), 6);
+    c8.push_back(1);
+    std::cout << "Container for default list" << std::endl;
+    print_list(c8);
 
     return 0;
 }
