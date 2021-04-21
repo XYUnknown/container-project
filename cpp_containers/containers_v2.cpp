@@ -15,7 +15,7 @@ struct Container;
 template<class T> struct dependent_false : std::false_type {};
 
 template<class T, class C>
-struct Container<T, C, void> : std::vector<T>, std::list<T> {
+struct Container<T, C, void> : C {
     auto at(size_t pos) {
         if constexpr (std::is_same<C, std::vector<T>>::value) {
             return std::vector<T>::at(pos);

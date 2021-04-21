@@ -16,7 +16,7 @@ struct Container;
 
 // Vectors
 template<class T>
-struct Container<T, std::vector<T>, void> : public std::vector<T> {
+struct Container<T, std::vector<T>, void> : std::vector<T> {
     bool contains(T t) {
         return std::find(std::vector<T>::begin(), std::vector<T>::end(), t) != std::vector<T>::end();
     }
