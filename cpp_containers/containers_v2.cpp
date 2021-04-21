@@ -216,22 +216,6 @@ struct Container<T, C, And<Unique, Sorted>> : Container<T, C, Unique>, Container
     }
 };
 
-void print_vector(std::vector<int> v) {
-    std::cout << "Size: " << v.size() << std::endl;
-    for (auto it=v.begin(); it<v.end(); it++)
-        std::cout << ' ' << *it;
-    std::cout << '\n';
-    std::cout << '\n';
-}
-
-void print_list(std::list<int> l) {
-    std::cout << "Size: " << l.size() << std::endl;
-    for (auto const &i : l)
-        std::cout << ' ' << i;
-    std::cout << '\n';
-    std::cout << '\n';
-}
-
 int main() {
     // std::cout << std::is_same<std::vector<int>, std::vector<int>>::value << ' ';
     Container<int, std::vector<int>, void> v1;
