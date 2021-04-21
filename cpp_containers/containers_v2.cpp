@@ -24,7 +24,7 @@ struct Container<T, C, void> : std::vector<T>, std::list<T> {
         } else {
             // at compilation level
             // ref : https://en.cppreference.com/w/cpp/language/if
-            static_assert(dependent_false<T>::value, "at is only defined for vectors");
+            static_assert(dependent_false<T>::value, "Not a valid container");
         }
     }
 
@@ -66,7 +66,7 @@ struct Container<T, C, void> : std::vector<T>, std::list<T> {
         } else if constexpr (std::is_same<C, std::list<T>>::value) {
             std::list<T>::push_front(t);
         } else {
-            static_assert(dependent_false<T>::value, "push_front is only defined for list");
+            static_assert(dependent_false<T>::value, "Not a valid container");
         }
     }
 
@@ -132,6 +132,31 @@ struct Container<T, C, Unique> : public virtual Container<T, C, void> {
     }
 };
 
+template<class T, class C>
+struct Container<T, C, Sorted> : public virtual Container<T, C, void> {
+    auto push_back(T t) {
+        this->insert(this->end(), t);
+    }
+
+    auto push_front(T t) {
+        if constexpr (std::is_same<C, std::list<T>>::value) {
+            this->insert(this->begin(), t);
+        } else {
+            static_assert(dependent_false<T>::value, "push_front is only defined for list");
+        }
+    }
+
+    auto insert(typename C::iterator pos, T t) {
+        auto pos_i = std::lower_bound(this->begin(), pos, t);
+        if (pos_i == pos) {
+            pos_i = std::lower_bound(pos, this->end(), t);
+            Container<T, C, void>::insert(pos_i, t);
+        } else {
+            Container<T, C, void>::insert(pos_i, t);
+        }
+    }
+};
+
 void print_vector(std::vector<int> v) {
     std::cout << "Size: " << v.size() << std::endl;
     for (auto it=v.begin(); it<v.end(); it++)
@@ -172,5 +197,30 @@ int main() {
     v2.insert(v2.begin(), 1);
     std::cout << "Container for unique vector" << std::endl;
     print_vector(v2);
+
+    Container<int, std::list<int>, Unique> l2;
+    l2.push_back(1);
+    l2.push_back(1);
+    l2.push_front(1);
+    l2.insert(l2.begin(), 1);
+    std::cout << "Container for unique list" << std::endl;
+    print_list(l2);
+
+    Container<int, std::vector<int>, Sorted> v3;
+    v3.push_back(6);
+    v3.push_back(1);
+    //v3.push_front(4);
+    v3.insert(v3.begin(), 1);
+    std::cout << "Container for sorted vector" << std::endl;
+    print_vector(v3);
+
+    Container<int, std::list<int>, Sorted> l3;
+    l3.push_back(6);
+    l3.push_back(1);
+    l3.push_front(4);
+    l3.insert(l3.begin(), 1);
+    std::cout << "Container for sorted list" << std::endl;
+    print_list(l3);
+
     return 0;
 }
