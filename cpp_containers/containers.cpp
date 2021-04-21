@@ -183,18 +183,11 @@ struct Container<T, std::list<T>, And<Unique, Sorted>> : Container<T, std::list<
 };
 
 // Helpers
-void print_vector(std::vector<int> v) {
-    std::cout << "Size: " << v.size() << std::endl;
-    for (auto it=v.begin(); it<v.end(); it++)
+template<class C>
+void print_container(C c) {
+    std::cout << "Size: " << c.size() << std::endl;
+    for (auto it=c.begin(); it!=c.end(); it++)
         std::cout << ' ' << *it;
-    std::cout << '\n';
-    std::cout << '\n';
-}
-
-void print_list(std::list<int> l) {
-    std::cout << "Size: " << l.size() << std::endl;
-    for (auto const &i : l)
-        std::cout << ' ' << i;
     std::cout << '\n';
     std::cout << '\n';
 }
@@ -205,14 +198,14 @@ int main() {
     c1.push_back(1);
     c1.push_back(1);
     std::cout << "Container for default vector" << std::endl;
-    print_vector(c1);
+    print_container(c1);
 
     Container<int, std::vector<int>, Unique> c2;
     c2.push_back(1);
     c2.push_back(1);
     c2.insert(c2.begin(), 1);
     std::cout << "Container for unique vector" << std::endl;
-    print_vector(c2);
+    print_container(c2);
 
     Container<int, std::vector<int>, Sorted> c3;
     c3.push_back(3);
@@ -220,7 +213,7 @@ int main() {
     c3.push_back(3);
     c3.insert(c3.begin(), 4);
     std::cout << "Container for sorted vector" << std::endl;
-    print_vector(c3);
+    print_container(c3);
 
     Container<int, std::vector<int>, And<Sorted, Unique>> c4;
     c4.push_back(3);
@@ -229,7 +222,7 @@ int main() {
     c4.insert(c4.begin(), 4);
     c4.insert(c4.begin(), 4);
     std::cout << "Container for sorted unique vector" << std::endl;
-    print_vector(c4);
+    print_container(c4);
 
     Container<int, std::vector<int>, And<Unique, Sorted>> c5;
     c5.push_back(3);
@@ -238,14 +231,14 @@ int main() {
     c5.insert(c5.begin(), 4);
     c5.insert(c5.begin(), 4);
     std::cout << "Container for unique sorted vector" << std::endl;
-    print_vector(c5);
+    print_container(c5);
 
     // Lists
     Container<int, std::list<int>, void> c6;
     c6.push_back(1);
     c6.push_back(1);
     std::cout << "Container for default list" << std::endl;
-    print_list(c6);
+    print_container(c6);
 
     Container<int, std::list<int>, Unique> c7;
     c7.push_back(3);
@@ -254,7 +247,7 @@ int main() {
     c7.insert(c7.begin(), 1);
     c7.push_back(1);
     std::cout << "Container for unique list" << std::endl;
-    print_list(c7);
+    print_container(c7);
 
     Container<int, std::list<int>, Sorted> c8;
     c8.push_back(3);
@@ -263,7 +256,7 @@ int main() {
     c8.insert(c8.begin(), 6);
     c8.push_back(1);
     std::cout << "Container for sorted list" << std::endl;
-    print_list(c8);
+    print_container(c8);
 
     Container<int, std::list<int>, And<Sorted, Unique>> c9;
     c9.push_back(3);
@@ -272,7 +265,7 @@ int main() {
     c9.insert(c9.begin(), 6);
     c9.push_back(1);
     std::cout << "Container for sorted unique list" << std::endl;
-    print_list(c9);
+    print_container(c9);
 
     Container<int, std::list<int>, And<Unique, Sorted>> c10;
     c10.push_back(3);
@@ -281,7 +274,7 @@ int main() {
     c10.insert(c10.begin(), 6);
     c10.push_back(1);
     std::cout << "Container for unique sorted list" << std::endl;
-    print_list(c9);
+    print_container(c10);
 
     return 0;
 }

@@ -109,6 +109,18 @@ struct Container<T, C, void> : std::vector<T>, std::list<T> {
             static_assert(dependent_false<T>::value, "Not a valid container");
         }
     }
+
+    void print() {
+        if constexpr (std::is_same<C, std::vector<T>>::value || std::is_same<C, std::list<T>>::value)  {
+            std::cout << "Size: " << this->size() << std::endl;
+            for (auto it=this->begin(); it!=this->end(); it++)
+                std::cout << ' ' << *it;
+            std::cout << '\n';
+            std::cout << '\n';
+        } else {
+            static_assert(dependent_false<T>::value, "Not a valid container");
+        }
+    }
 };
 
 template<class T, class C>
@@ -227,7 +239,7 @@ int main() {
     v1.insert(v1.begin(), 5);
     std::cout << typeid(v1).name() << std::endl;
     std::cout << "Container for default vector" << std::endl;
-    print_vector(v1);
+    v1.print();
 
     Container<int, std::list<int>, void> l1;
     l1.push_back(3);
@@ -235,7 +247,7 @@ int main() {
     l1.insert(l1.begin(), 5);
     std::cout << typeid(l1).name() << std::endl;
     std::cout << "Container for default list" << std::endl;
-    print_list(l1);
+    l1.print();
 
     Container<int, std::vector<int>, Unique> v2;
     v2.push_back(1);
@@ -243,7 +255,7 @@ int main() {
     // v2.push_front(1); // invalid
     v2.insert(v2.begin(), 1);
     std::cout << "Container for unique vector" << std::endl;
-    print_vector(v2);
+    v2.print();
 
     Container<int, std::list<int>, Unique> l2;
     l2.push_back(1);
@@ -251,7 +263,7 @@ int main() {
     l2.push_front(1);
     l2.insert(l2.begin(), 1);
     std::cout << "Container for unique list" << std::endl;
-    print_list(l2);
+    l2.print();
 
     Container<int, std::vector<int>, Sorted> v3;
     v3.push_back(6);
@@ -259,7 +271,7 @@ int main() {
     //v3.push_front(4);
     v3.insert(v3.begin(), 1);
     std::cout << "Container for sorted vector" << std::endl;
-    print_vector(v3);
+    v3.print();
 
     Container<int, std::list<int>, Sorted> l3;
     l3.push_back(6);
@@ -267,14 +279,14 @@ int main() {
     l3.push_front(4);
     l3.insert(l3.begin(), 1);
     std::cout << "Container for sorted list" << std::endl;
-    print_list(l3);
+    l3.print();
 
     Container<int, std::vector<int>, And<Sorted, Unique>> v4;
     v4.push_back(6);
     v4.push_back(1);
     v4.insert(v4.begin(), 1);
     std::cout << "Container for sorted unique vector" << std::endl;
-    print_vector(v4);
+    v4.print();
 
     Container<int, std::list<int>, And<Sorted, Unique>> l4;
     l4.push_back(6);
@@ -283,14 +295,14 @@ int main() {
     l4.push_front(4);
     l4.insert(l4.begin(), 1);
     std::cout << "Container for sorted unique list" << std::endl;
-    print_list(l4);
+    l4.print();
 
     Container<int, std::vector<int>, And<Unique, Sorted>> v5;
     v5.push_back(6);
     v5.push_back(1);
     v5.insert(v5.begin(), 1);
     std::cout << "Container for unique sorted vector" << std::endl;
-    print_vector(v5);
+    v5.print();
 
     Container<int, std::list<int>, And<Unique, Sorted>> l5;
     l5.push_back(6);
@@ -299,7 +311,7 @@ int main() {
     l5.push_front(4);
     l5.insert(l5.begin(), 1);
     std::cout << "Container for unique sorted list" << std::endl;
-    print_list(l5);
+    l5.print();
 
     return 0;
 }
