@@ -200,7 +200,6 @@ int main() {
     Container<int, std::vector, Sorted> v3;
     v3.push_back(6);
     v3.push_back(1);
-    //v3.push_front(4);
     v3.insert(v3.begin(), 1);
     std::cout << "Container for sorted vector" << std::endl;
     v3.print();
