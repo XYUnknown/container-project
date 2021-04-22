@@ -6,10 +6,7 @@
 class Unique {};
 class Sorted {};
 
-template <class P1, class P2>
-struct And;
-
-template<class T, template<class...> class C, class P=void>
+template<class T, template<class...> class C, class... P>
 struct Container;
 
 template<class T> struct dependent_false : std::false_type {};
@@ -121,29 +118,29 @@ struct Container<T, C> : C<T> {
     }
 };
 
-template<class T, template<typename...> class C>
-struct Container<T, C, Unique> : public virtual Container<T, C> {
+template<class T, template<typename...> class C, class ...Ps>
+struct Container<T, C, Unique, Ps...> : public virtual Container<T, C, Ps...> {
     auto push_back(T t) {
         if (!this->contains(t)) {
-            Container<T, C>::push_back(t);
+            Container<T, C, Ps...>::push_back(t);
         }
     }
 
     auto push_front(T t) {
         if (!this->contains(t)) {
-            Container<T, C>::push_front(t);
+            Container<T, C, Ps...>::push_front(t);
         }
     }
 
     auto insert(typename C<T>::iterator pos, T t) {
         if (!this->contains(t)) {
-            Container<T, C>::insert(pos, t);
+            Container<T, C, Ps...>::insert(pos, t);
         }
     }
 };
 
-template<class T, template<typename...> class C>
-struct Container<T, C, Sorted> : public virtual Container<T, C> {
+template<class T, template<typename...> class C, class ...Ps>
+struct Container<T, C, Sorted, Ps...> : public virtual Container<T, C, Ps...> {
     auto push_back(T t) {
         this->insert(this->end(), t);
     }
@@ -160,55 +157,9 @@ struct Container<T, C, Sorted> : public virtual Container<T, C> {
         auto pos_i = std::lower_bound(this->begin(), pos, t);
         if (pos_i == pos) {
             pos_i = std::lower_bound(pos, this->end(), t);
-            Container<T, C>::insert(pos_i, t);
+            Container<T, C, Ps...>::insert(pos_i, t);
         } else {
-            Container<T, C>::insert(pos_i, t);
-        }
-    }
-};
-
-template<class T, template<typename...>class C>
-struct Container<T, C, And<Sorted, Unique>> : Container<T, C, Sorted>, Container<T, C, Unique> {
-    auto push_back(T t) {
-        if (!this->contains(t)) {
-            Container<T, C, Sorted>::push_back(t);
-        }
-    }
-
-    auto push_front(T t) {
-        if (!this->contains(t)) {
-            Container<T, C, Sorted>::push_front(t);
-        }
-    }
-
-    auto insert(typename C<T>::iterator pos, T t) {
-        if (!this->contains(t)) {
-            Container<T, C, Sorted>::insert(pos, t);
-        }
-    }
-};
-
-template<class T, template<class...> class C>
-struct Container<T, C, And<Unique, Sorted>> : Container<T, C, Unique>, Container<T, C, Sorted> {
-    auto push_back(T t) {
-        this->insert(this->end(), t);
-    }
-
-    auto push_front(T t) {
-        if constexpr (std::is_same<C<T>, std::list<T>>::value) {
-            this->insert(this->begin(), t);
-        } else {
-            static_assert(dependent_false<T>::value, "push_front is only defined for list");
-        }
-    }
-
-    auto insert(typename C<T>::iterator pos, T t) {
-        auto pos_i = std::lower_bound(this->begin(), pos, t);
-        if (pos_i == pos) {
-            pos_i = std::lower_bound(pos, this->end(), t);
-            Container<T, C, Unique>::insert(pos_i, t);
-        } else {
-            Container<T, C, Unique>::insert(pos_i, t);
+            Container<T, C, Ps...>::insert(pos_i, t);
         }
     }
 };
@@ -262,14 +213,14 @@ int main() {
     std::cout << "Container for sorted list" << std::endl;
     l3.print();
 
-    Container<int, std::vector, And<Sorted, Unique>> v4;
+    Container<int, std::vector, Sorted, Unique> v4;
     v4.push_back(6);
     v4.push_back(1);
     v4.insert(v4.begin(), 1);
     std::cout << "Container for sorted unique vector" << std::endl;
     v4.print();
 
-    Container<int, std::list, And<Sorted, Unique>> l4;
+    Container<int, std::list, Sorted, Unique> l4;
     l4.push_back(6);
     l4.push_back(1);
     l4.push_back(1);
@@ -278,14 +229,14 @@ int main() {
     std::cout << "Container for sorted unique list" << std::endl;
     l4.print();
 
-    Container<int, std::vector, And<Unique, Sorted>> v5;
+    Container<int, std::vector, Unique, Sorted> v5;
     v5.push_back(6);
     v5.push_back(1);
     v5.insert(v5.begin(), 1);
     std::cout << "Container for unique sorted vector" << std::endl;
     v5.print();
 
-    Container<int, std::list, And<Unique, Sorted>> l5;
+    Container<int, std::list, Unique, Sorted> l5;
     l5.push_back(6);
     l5.push_back(1);
     l5.push_back(1);
