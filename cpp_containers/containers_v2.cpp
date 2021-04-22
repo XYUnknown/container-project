@@ -11,7 +11,7 @@ struct Container;
 
 template<class T> struct dependent_false : std::false_type {};
 
-template<class T, template<typename...> class C>
+template<class T, template<class...> class C>
 struct Container<T, C> : C<T> {
     auto at(size_t pos) {
         if constexpr (std::is_same<C<T>, std::vector<T>>::value) {
