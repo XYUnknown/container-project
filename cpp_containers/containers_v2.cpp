@@ -9,13 +9,13 @@ class Sorted {};
 template <class P1, class P2>
 struct And;
 
-template<class T, class C, class P>
+template<class T, class C, class P=void>
 struct Container;
 
 template<class T> struct dependent_false : std::false_type {};
 
 template<class T, class C>
-struct Container<T, C, void> : C {
+struct Container<T, C> : C {
     auto at(size_t pos) {
         if constexpr (std::is_same<C, std::vector<T>>::value) {
             return std::vector<T>::at(pos);
@@ -124,28 +124,28 @@ struct Container<T, C, void> : C {
 };
 
 template<class T, class C>
-struct Container<T, C, Unique> : public virtual Container<T, C, void> {
+struct Container<T, C, Unique> : public virtual Container<T, C> {
     auto push_back(T t) {
         if (!this->contains(t)) {
-            Container<T, C, void>::push_back(t);
+            Container<T, C>::push_back(t);
         }
     }
 
     auto push_front(T t) {
         if (!this->contains(t)) {
-            Container<T, C, void>::push_front(t);
+            Container<T, C>::push_front(t);
         }
     }
 
     auto insert(typename C::iterator pos, T t) {
         if (!this->contains(t)) {
-            Container<T, C, void>::insert(pos, t);
+            Container<T, C>::insert(pos, t);
         }
     }
 };
 
 template<class T, class C>
-struct Container<T, C, Sorted> : public virtual Container<T, C, void> {
+struct Container<T, C, Sorted> : public virtual Container<T, C> {
     auto push_back(T t) {
         this->insert(this->end(), t);
     }
@@ -162,9 +162,9 @@ struct Container<T, C, Sorted> : public virtual Container<T, C, void> {
         auto pos_i = std::lower_bound(this->begin(), pos, t);
         if (pos_i == pos) {
             pos_i = std::lower_bound(pos, this->end(), t);
-            Container<T, C, void>::insert(pos_i, t);
+            Container<T, C>::insert(pos_i, t);
         } else {
-            Container<T, C, void>::insert(pos_i, t);
+            Container<T, C>::insert(pos_i, t);
         }
     }
 };
@@ -218,14 +218,14 @@ struct Container<T, C, And<Unique, Sorted>> : Container<T, C, Unique>, Container
 
 int main() {
     // std::cout << std::is_same<std::vector<int>, std::vector<int>>::value << ' ';
-    Container<int, std::vector<int>, void> v1;
+    Container<int, std::vector<int>> v1;
     v1.push_back(3);
     v1.insert(v1.begin(), 5);
     std::cout << typeid(v1).name() << std::endl;
     std::cout << "Container for default vector" << std::endl;
     v1.print();
 
-    Container<int, std::list<int>, void> l1;
+    Container<int, std::list<int>> l1;
     l1.push_back(3);
     l1.push_front(6);
     l1.insert(l1.begin(), 5);
