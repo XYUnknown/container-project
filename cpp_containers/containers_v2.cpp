@@ -12,7 +12,7 @@ struct Container;
 template<class T> struct dependent_false : std::false_type {};
 
 template<class T, template<class...> class C>
-struct Container<T, C> : C<T> {
+struct Container<T, C> : private C<T> {
     auto at(size_t pos) {
         if constexpr (std::is_same<C<T>, std::vector<T>>::value) {
             return std::vector<T>::at(pos);
@@ -119,7 +119,7 @@ struct Container<T, C> : C<T> {
 };
 
 template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, Unique, Ps...> : public virtual Container<T, C, Ps...> {
+struct Container<T, C, Unique, Ps...> : public Container<T, C, Ps...> {
     auto push_back(T t) {
         if (!this->contains(t)) {
             Container<T, C, Ps...>::push_back(t);
@@ -140,7 +140,7 @@ struct Container<T, C, Unique, Ps...> : public virtual Container<T, C, Ps...> {
 };
 
 template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, Sorted, Ps...> : public virtual Container<T, C, Ps...> {
+struct Container<T, C, Sorted, Ps...> : public Container<T, C, Ps...> {
     auto push_back(T t) {
         this->insert(this->end(), t);
     }
