@@ -34,8 +34,6 @@ struct Container<T, C> : C<T> {
         } else if constexpr (std::is_same<C<T>, std::list<T>>::value) {
             return std::list<T>::size();
         } else {
-            // at compilation level
-            // ref : https://en.cppreference.com/w/cpp/language/if
             static_assert(dependent_false<T>::value, "Not a valid container");
         }
     }
