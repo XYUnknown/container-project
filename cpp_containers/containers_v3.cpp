@@ -6,12 +6,14 @@
 
 // ref: https://stackoverflow.com/a/59161334
 //      https://en.cppreference.com/w/cpp/types/is_invocable
+// __VA_ARGS__ : variadic macro, can be called with any number arguments
+//               replaced by ...
 #define RETURNS( ... ) \
-  noexcept(noexcept(__VA_ARGS__)) \
-  -> decltype(__VA_ARGS__) \
-  { return __VA_ARGS__; }
+    noexcept(noexcept(__VA_ARGS__)) \
+    -> decltype(__VA_ARGS__) \
+    { return __VA_ARGS__; }
 
-#define METHOD( ... )  \
+#define METHOD( ... ) \
     []( auto&& self, auto&&...args ) \
     RETURNS( decltype(self)(self).__VA_ARGS__( decltype(args)(args)... ) )
 
@@ -26,8 +28,8 @@ template<class T> struct dependent_false : std::false_type {};
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
     T at(size_t pos) {
-        auto call_size = METHOD(at);
-        if constexpr (std::is_invocable_r_v<T, decltype(call_size), C<T>&, size_t>) {
+        auto call = METHOD(at);
+        if constexpr (std::is_invocable_r_v<T, decltype(call), C<T>&, size_t>) {
             return C<T>::at(pos);
         } else {
             // at compilation level
@@ -37,8 +39,8 @@ struct Container<T, C> : private C<T> {
     }
 
     size_t size() {
-        auto call_size = METHOD(size);
-        if constexpr (std::is_invocable_r_v<size_t, decltype(call_size), C<T>&>) {
+        auto call = METHOD(size);
+        if constexpr (std::is_invocable_r_v<size_t, decltype(call), C<T>&>) {
             return C<T>::size();
         } else {
             static_assert(dependent_false<T>::value, "Method \"size\" is not defined");
@@ -46,8 +48,8 @@ struct Container<T, C> : private C<T> {
     }
 
     bool empty() {
-        auto call_size = METHOD(empty);
-        if constexpr (std::is_invocable_r_v<bool, decltype(call_size), C<T>&>) {
+        auto call = METHOD(empty);
+        if constexpr (std::is_invocable_r_v<bool, decltype(call), C<T>&>) {
             return C<T>::empty();
         } else {
             static_assert(dependent_false<T>::value, "Method \"empty\" is not defined");
@@ -55,8 +57,8 @@ struct Container<T, C> : private C<T> {
     }
 
     void clear() {
-        auto call_size = METHOD(clear);
-        if constexpr (std::is_invocable_r_v<void, decltype(call_size), C<T>&>) {
+        auto call = METHOD(clear);
+        if constexpr (std::is_invocable_r_v<void, decltype(call), C<T>&>) {
             C<T>::clear();
         } else {
             static_assert(dependent_false<T>::value, "Method \"clear\" is not defined");
@@ -64,8 +66,8 @@ struct Container<T, C> : private C<T> {
     }
 
     void push_back(T t) {
-        auto call_size = METHOD(push_back);
-        if constexpr (std::is_invocable_r_v<void, decltype(call_size), C<T>&, T>) {
+        auto call = METHOD(push_back);
+        if constexpr (std::is_invocable_r_v<void, decltype(call), C<T>&, T>) {
             C<T>::push_back(t);
         } else {
             static_assert(dependent_false<T>::value, "Method \"push_back\" is not defined");
@@ -73,8 +75,8 @@ struct Container<T, C> : private C<T> {
     }
 
     void push_front(T t) {
-        auto call_size = METHOD(push_front);
-        if constexpr (std::is_invocable_r_v<void, decltype(call_size), C<T>&, T>) {
+        auto call = METHOD(push_front);
+        if constexpr (std::is_invocable_r_v<void, decltype(call), C<T>&, T>) {
             C<T>::push_front(t);
         } else {
             static_assert(dependent_false<T>::value, "Method \"push_front\" is not defined");
@@ -82,8 +84,8 @@ struct Container<T, C> : private C<T> {
     }
 
     void insert(typename C<T>::iterator pos, T t) {
-        auto call_size = METHOD(insert);
-        if constexpr (std::is_invocable_r_v<void, decltype(call_size), C<T>&, typename C<T>::iterator, T>) {
+        auto call = METHOD(insert);
+        if constexpr (std::is_invocable_r_v<void, decltype(call), C<T>&, typename C<T>::iterator, T>) {
             C<T>::insert(pos, t);
         } else {
             static_assert(dependent_false<T>::value, "Not a valid container");
@@ -91,8 +93,8 @@ struct Container<T, C> : private C<T> {
     }
 
     auto begin() {
-        auto call_size = METHOD(begin);
-        if constexpr (std::is_invocable_r_v<typename C<T>::iterator, decltype(call_size), C<T>&>) {
+        auto call = METHOD(begin);
+        if constexpr (std::is_invocable_r_v<typename C<T>::iterator, decltype(call), C<T>&>) {
             return C<T>::begin();
         } else {
             static_assert(dependent_false<T>::value, "Not a valid container");
@@ -100,8 +102,8 @@ struct Container<T, C> : private C<T> {
     }
 
     auto end() {
-        auto call_size = METHOD(end);
-        if constexpr (std::is_invocable_r_v<typename C<T>::iterator, decltype(call_size), C<T>&>) {
+        auto call = METHOD(end);
+        if constexpr (std::is_invocable_r_v<typename C<T>::iterator, decltype(call), C<T>&>) {
             return C<T>::end();
         } else {
             static_assert(dependent_false<T>::value, "Not a valid container");
