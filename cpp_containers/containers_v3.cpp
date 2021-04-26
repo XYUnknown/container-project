@@ -178,7 +178,6 @@ struct Container<T, C, Sorted, Ps...> : public Container<T, C, Ps...> {
 };
 
 int main() {
-    // std::cout << std::is_same<std::vector<int>, std::vector<int>>::value << ' ';
     Container<int, std::vector> v1;
     v1.push_back(3);
     v1.insert(v1.begin(), 5);
