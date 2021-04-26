@@ -111,25 +111,15 @@ struct Container<T, C> : private C<T> {
     }
 
     bool contains(T t) {
-        if constexpr (std::is_same<C<T>, std::vector<T>>::value) {
-            return std::find(std::vector<T>::begin(), std::vector<T>::end(), t) != std::vector<T>::end();
-        } else if constexpr (std::is_same<C<T>, std::list<T>>::value) {
-            return std::find(std::list<T>::begin(), std::list<T>::end(), t) != std::list<T>::end();
-        } else {
-            static_assert(dependent_false<T>::value, "Not a valid container");
-        }
+        return std::find(this->begin(), this->end(), t) != this->end();
     }
 
     void print() {
-        if constexpr (std::is_same<C<T>, std::vector<T>>::value || std::is_same<C<T>, std::list<T>>::value)  {
-            std::cout << "Size: " << this->size() << std::endl;
-            for (auto it=this->begin(); it!=this->end(); it++)
-                std::cout << ' ' << *it;
-            std::cout << '\n';
-            std::cout << '\n';
-        } else {
-            static_assert(dependent_false<T>::value, "Not a valid container");
-        }
+        std::cout << "Size: " << this->size() << std::endl;
+        for (auto it=this->begin(); it!=this->end(); it++)
+            std::cout << ' ' << *it;
+        std::cout << '\n';
+        std::cout << '\n';
     }
 };
 
