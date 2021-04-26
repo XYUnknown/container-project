@@ -3,8 +3,9 @@
 #include <list>
 #include <typeinfo>
 #include <type_traits>
-#include <utility>
 
+// ref: https://stackoverflow.com/a/59161334
+//      https://en.cppreference.com/w/cpp/types/is_invocable
 #define RETURNS( ... ) \
   noexcept(noexcept(__VA_ARGS__)) \
   -> decltype(__VA_ARGS__) \
