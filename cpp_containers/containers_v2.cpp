@@ -45,6 +45,16 @@ struct Container<T, C> : private C<T> {
         }
     }
 
+    auto clear() {
+        if constexpr (std::is_same<C<T>, std::vector<T>>::value) {
+            return std::vector<T>::clear();
+        } else if constexpr (std::is_same<C<T>, std::list<T>>::value) {
+            return std::list<T>::clear();
+        } else {
+            static_assert(dependent_false<T>::value, "Method \"clear\" is not defined");
+        }
+    }
+
     auto push_back(T t) {
         if constexpr (std::is_same<C<T>, std::vector<T>>::value) {
             std::vector<T>::push_back(t);
@@ -169,16 +179,28 @@ int main() {
     Container<int, std::vector> v1;
     v1.push_back(3);
     v1.insert(v1.begin(), 5);
+    v1.insert(v1.end(), 7);
     std::cout << typeid(v1).name() << std::endl;
+    std::cout << "at position 0: " << v1.at(0) << std::endl;
+    std::cout << "is empty? " << v1.empty() << std::endl;
     std::cout << "Container for default vector" << std::endl;
+    v1.print();
+    v1.clear();
+    std::cout << "After clear" << std::endl;
     v1.print();
 
     Container<int, std::list> l1;
     l1.push_back(3);
     l1.push_front(6);
     l1.insert(l1.begin(), 5);
+    l1.insert(l1.end(), 7);
+    // std::cout << l1.at(0) << std::endl; // error
+    std::cout << "is empty? " << l1.empty() << std::endl;
     std::cout << typeid(l1).name() << std::endl;
     std::cout << "Container for default list" << std::endl;
+    l1.print();
+    l1.clear();
+    std::cout << "After clear" << std::endl;
     l1.print();
 
     Container<int, std::vector, Unique> v2;
