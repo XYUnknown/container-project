@@ -17,6 +17,10 @@ containers3: containers_v3.cpp
 	mkdir -p build
 	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v3 containers_v3.cpp
 
+containers4: containers_v4.cpp
+	mkdir -p build
+	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v4 containers_v4.cpp
+
 vectors: vectors.cpp
 	mkdir -p build
 	clang++ -Wall -Werror -std=c++20 -o ./build/vectors vectors.cpp
