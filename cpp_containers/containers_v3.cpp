@@ -85,6 +85,8 @@ struct Container<T, C> : private C<T> {
 
     void insert(typename C<T>::iterator pos, T t) {
         auto call = METHOD(insert);
+        // the return type is typename C<T>::iterator, but i don't know why this works
+        // suppose to throw error in my understanding
         if constexpr (std::is_invocable_r_v<void, decltype(call), C<T>&, typename C<T>::iterator, T>) {
             C<T>::insert(pos, t);
         } else {
