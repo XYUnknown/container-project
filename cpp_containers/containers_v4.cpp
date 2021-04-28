@@ -19,7 +19,6 @@ struct Container<T, C> : private C<T> {
         // ref: https://akrzemi1.wordpress.com/2020/01/29/requires-expression/
         // c++20 required
         constexpr bool has_at = requires(const C<T>& c) {
-            //c.at(pos);
             //{ c.at(pos) } -> std::same_as<T>; //this doesn't work, no idea why
             std::same_as<decltype(c.at(pos)), T>;
         };
@@ -99,7 +98,7 @@ struct Container<T, C> : private C<T> {
         }
     }
 
-    typename C<T>::iterator  begin() {
+    typename C<T>::iterator begin() {
         constexpr bool has_begin = requires(C<T>& c) {
             { c.begin() } -> std::same_as<typename C<T>::iterator>;
         };
@@ -110,7 +109,7 @@ struct Container<T, C> : private C<T> {
         }
     }
 
-    typename C<T>::iterator  end() {
+    typename C<T>::iterator end() {
         constexpr bool has_end = requires(C<T>& c) {
             { c.end() } -> std::same_as<typename C<T>::iterator>;
         };
