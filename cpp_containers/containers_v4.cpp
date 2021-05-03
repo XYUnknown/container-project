@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <set>
 #include <typeinfo>
 #include <type_traits>
 #include <concepts>
@@ -15,65 +16,44 @@ template<class T> struct dependent_false : std::false_type {};
 
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
-    T at(size_t pos) {
-        // ref: https://akrzemi1.wordpress.com/2020/01/29/requires-expression/
-        // c++20 required
-        constexpr bool has_at = requires(const C<T>& c) {
-            //{ c.at(pos) } -> std::same_as<T>; //this doesn't work, no idea why
-            std::same_as<decltype(c.at(pos)), T>;
-        };
-        if constexpr (has_at) {
-            return C<T>::at(pos);
-        } else {
-            // at compilation level
-            // ref : https://en.cppreference.com/w/cpp/language/if
-            static_assert(dependent_false<T>::value, "Method \"at\" is not defined");
-        }
+
+    static constexpr bool has_at = requires(C<T>& c, size_t p) {
+        { c.at(p) } -> std::same_as<T&>;
+        // same as:
+        // std::same_as<decltype(c.at(p)), const T&>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_at, Q&> at(size_t pos) {
+        return C<Q>::at(pos);
     }
 
-    size_t size() {
-        constexpr bool has_size = requires(const C<T>& c) {
-            { c.size() } -> std::same_as<size_t>; // return type has to be size_t
-            // std::same_as<decltype(c.size()), size_t>; // same as this
-        };
-        if constexpr (has_size) {
-            return C<T>::size();
-        } else {
-            static_assert(dependent_false<T>::value, "Method \"size\" is not defined");
-        }
+    static constexpr bool has_size = requires(const C<T>& c) {
+        { c.size() } -> std::same_as<size_t>; // return type has to be size_t
+    };
+    typename std::enable_if_t<has_size, size_t> size() {
+        return C<T>::size();
     }
 
-    bool empty() {
-        constexpr bool has_empty = requires(const C<T>& c) {
-            { c.empty() } -> std::same_as<bool>; // return type has to be bool
-        };
-        if constexpr (has_empty) {
-            return C<T>::empty();
-        } else {
-            static_assert(dependent_false<T>::value, "Method \"empty\" is not defined");
-        }
+    static constexpr bool has_empty = requires(const C<T>& c) {
+        { c.empty() } -> std::same_as<bool>; // return type has to be bool
+    };
+    typename std::enable_if_t<has_empty, bool> empty() {
+        return C<T>::empty();
     }
 
-    void clear() {
-        constexpr bool has_clear = requires(C<T>& c) {
-            { c.clear() } -> std::same_as<void>;
-        };
-        if constexpr (has_clear) {
-            C<T>::clear();
-        } else {
-            static_assert(dependent_false<T>::value, "Method \"clear\" is not defined");
-        }
+    static constexpr bool has_clear = requires(C<T>& c) {
+        { c.clear() } -> std::same_as<void>;
+    };
+    typename std::enable_if_t<has_clear, void> clear() {
+        C<T>::clear();
     }
 
-    void push_back(T t) {
-        constexpr bool has_push_back = requires(C<T>& c) {
-            { c.push_back(t) } -> std::same_as<void>;
-        };
-        if constexpr (has_push_back) {
-            C<T>::push_back(t);
-        } else {
-            static_assert(dependent_false<T>::value, "Method \"push_back\" is not defined");
-        }
+    static constexpr bool has_push_back = requires(C<T>& c, const T& val) {
+        { c.push_back(val) } -> std::same_as<void>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_push_back, void> push_back(Q t) {
+        C<Q>::push_back(t);
     }
 
     void push_front(T t) {
@@ -134,7 +114,7 @@ struct Container<T, C> : private C<T> {
 };
 
 template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, Unique, Ps...> : public Container<T, C, Ps...> {
+struct Container<T, C, Unique, Ps...> : Container<T, C, Ps...> {
     auto push_back(T t) {
         if (!this->contains(t)) {
             Container<T, C, Ps...>::push_back(t);
@@ -155,7 +135,7 @@ struct Container<T, C, Unique, Ps...> : public Container<T, C, Ps...> {
 };
 
 template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, Sorted, Ps...> : public Container<T, C, Ps...> {
+struct Container<T, C, Sorted, Ps...> : Container<T, C, Ps...> {
     auto push_back(T t) {
         this->insert(this->end(), t);
     }
@@ -269,6 +249,9 @@ int main() {
     l5.insert(l5.begin(), 1);
     std::cout << "Container for unique sorted list" << std::endl;
     l5.print();
+
+    //Container<int, std::set> s;
+    //s.size();
 
     return 0;
 }
