@@ -243,8 +243,10 @@ int main() {
     Container<int, std::set> s;
     s.size();
     //s.push_front(6);
-    s.insert(10);
+    s.insert(6);
     s.insert(s.begin(), 7);
+    s.insert(1);
+    s.insert(s.begin(), 10);
     std::cout << "Container for set" << std::endl;
     s.print();
 
