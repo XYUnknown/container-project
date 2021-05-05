@@ -20,7 +20,7 @@ struct Container<T, C> : private C<T> {
     static constexpr bool has_at = requires(C<T>& c, size_t p) {
         { c.at(p) } -> std::same_as<T&>;
         // same as:
-        // std::same_as<decltype(c.at(p)), const T&>;
+        // std::same_as<decltype(c.at(p)), T&>;
     };
     template<class Q = T>
     typename std::enable_if_t<has_at, Q&> at(size_t pos) {
@@ -48,56 +48,51 @@ struct Container<T, C> : private C<T> {
         C<T>::clear();
     }
 
-    static constexpr bool has_push_back = requires(C<T>& c, const T& val) {
+    // to avoid error: no type named 'type' in 'std::__1::enable_if<false>'; 'enable_if' cannot be used to disable this declaration
+    // ref: https://stackoverflow.com/questions/13401716/selecting-a-member-function-using-different-enable-if-conditions
+    template<class Q = T>
+    static constexpr bool has_push_back = requires(C<Q>& c, Q val) {
         { c.push_back(val) } -> std::same_as<void>;
     };
     template<class Q = T>
-    typename std::enable_if_t<has_push_back, void> push_back(Q t) {
+    typename std::enable_if_t<has_push_back<Q>, void> push_back(Q t) {
         C<Q>::push_back(t);
     }
 
-    void push_front(T t) {
-        constexpr bool has_push_front = requires(C<T>& c) {
-            { c.push_front(t) } -> std::same_as<void>;
-        };
-        if constexpr (has_push_front) {
-            C<T>::push_front(t);
-        } else {
-            static_assert(dependent_false<T>::value, "Method \"push_front\" is not defined");
-        }
+    template<class Q = T>
+    static constexpr bool has_push_front = requires(C<Q>& c, Q val) {
+        { c.push_front(val) } -> std::same_as<void>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_push_front<Q>, void> push_front(Q t) {
+        C<Q>::push_front(t);
     }
 
-    typename C<T>::iterator insert(typename C<T>::iterator pos, T t) {
-        constexpr bool has_insert = requires(C<T>& c) {
-            { c.insert(pos, t) } -> std::same_as<typename C<T>::iterator>;
-        };
-        if constexpr (has_insert) {
-            return C<T>::insert(pos, t);
-        } else {
-            static_assert(dependent_false<T>::value, "Not a valid container");
-        }
+    template<class Q = T>
+    static constexpr bool has_insert = requires(C<Q>& c, typename C<Q>::iterator pos, Q val) {
+        { c.insert(pos, val) } -> std::same_as<typename C<Q>::iterator>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_insert<Q>, typename C<Q>::iterator> insert(typename C<Q>::iterator pos, Q t) {
+        return C<Q>::insert(pos, t);
     }
 
-    typename C<T>::iterator begin() {
-        constexpr bool has_begin = requires(C<T>& c) {
-            { c.begin() } -> std::same_as<typename C<T>::iterator>;
-        };
-        if constexpr (has_begin) {
-            return C<T>::begin();
-        } else {
-            static_assert(dependent_false<T>::value, "Not a valid container");
-        }
+    template<class Q = T>
+    static constexpr bool has_begin = requires(C<Q>& c) {
+        { c.begin() } -> std::same_as<typename C<Q>::iterator>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_begin<Q>, typename C<Q>::iterator> begin() {
+        return C<Q>::begin();
     }
 
-    typename C<T>::iterator end() {
-        constexpr bool has_end = requires(C<T>& c) {
-            { c.end() } -> std::same_as<typename C<T>::iterator>;
-        };
-        if constexpr (has_end) {
-            return C<T>::end();
-        } else {
-            static_assert(dependent_false<T>::value, "Not a valid container");
-        }
+    template<class Q = T>
+    static constexpr bool has_end = requires(C<Q>& c) {
+        { c.end() } -> std::same_as<typename C<Q>::iterator>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_end<Q>, typename C<Q>::iterator> end() {
+        return C<Q>::end();
     }
 
     bool contains(T t) {
@@ -250,8 +245,10 @@ int main() {
     std::cout << "Container for unique sorted list" << std::endl;
     l5.print();
 
-    //Container<int, std::set> s;
-    //s.size();
+    Container<int, std::set> s;
+    s.size();
+    //s.push_front(1);
+    s.begin();
 
     return 0;
 }
