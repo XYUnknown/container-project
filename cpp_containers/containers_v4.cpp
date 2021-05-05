@@ -78,6 +78,26 @@ struct Container<T, C> : private C<T> {
     }
 
     template<class Q = T>
+    static constexpr bool has_insert_v = requires(C<Q>& c, Q val) {
+        { c.insert(val) } -> std::same_as<std::pair<typename C<Q>::iterator, bool>>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_insert_v<Q>, std::pair<typename C<Q>::iterator, bool>> insert(Q t) {
+        return C<Q>::insert(t);
+    }
+
+    template<class Q = T>
+    static constexpr bool has_no_insert_v = !requires(C<Q>& c, Q val) {
+        { c.insert(val) } -> std::same_as<std::pair<typename C<Q>::iterator, bool>>;
+    };
+    template<class Q = T>
+    typename std::enable_if_t<has_no_insert_v<Q>, std::pair<typename C<Q>::iterator, bool>> insert(Q t) {
+        size_t old_size = this->size();
+        C<Q>::push_back(t);
+        return std::pair(this->end(), (old_size < this->size()));
+    }
+
+    template<class Q = T>
     static constexpr bool has_begin = requires(C<Q>& c) {
         { c.begin() } -> std::same_as<typename C<Q>::iterator>;
     };
@@ -157,6 +177,7 @@ struct Container<T, C, Sorted, Ps...> : Container<T, C, Ps...> {
 int main() {
     Container<int, std::vector> v1;
     v1.push_back(3);
+    v1.insert(4);
     v1.insert(v1.begin(), 5);
     v1.insert(v1.end(), 7);
     std::cout << typeid(v1).name() << std::endl;
@@ -249,6 +270,7 @@ int main() {
     s.size();
     //s.push_front(1);
     s.begin();
+    s.insert(2);
 
     return 0;
 }
