@@ -88,6 +88,12 @@ struct Container<T, C> : private C<T> {
         return C<Q>::end();
     }
 
+    template <class Q = T>
+        requires requires (C<Q>& c, typename C<Q>::iterator pos) { { c.erase(pos) } -> std::same_as<typename C<Q>::iterator>; }
+    typename C<Q>::iterator erase(typename C<Q>::iterator pos) {
+        return C<Q>::erase(pos);
+    }
+
     bool contains(T t) {
         return std::find(this->begin(), this->end(), t) != this->end();
     }
@@ -167,6 +173,7 @@ int main() {
     v1.push_back(3);
     v1.insert(v1.begin(), 5);
     v1.insert(v1.end(), 7);
+    v1.erase(v1.begin());
     std::cout << typeid(v1).name() << std::endl;
     std::cout << "at position 0: " << v1.at(0) << std::endl;
     std::cout << "is empty? " << v1.empty() << std::endl;
@@ -181,6 +188,7 @@ int main() {
     l1.push_front(6);
     l1.insert(l1.begin(), 5);
     l1.insert(l1.end(), 7);
+    l1.erase(l1.begin());
     // std::cout << l1.at(0) << std::endl; // error
     std::cout << typeid(l1).name() << std::endl;
     std::cout << "Container for default list" << std::endl;
@@ -258,6 +266,7 @@ int main() {
     s.insert(s.begin(), 7);
     s.insert(1);
     s.insert(s.begin(), 10);
+    s.erase(s.begin());
     std::cout << "Container for set" << std::endl;
     s.print();
 
