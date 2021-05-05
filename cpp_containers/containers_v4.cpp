@@ -129,7 +129,13 @@ struct Container<T, C> : private C<T> {
 };
 
 template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, Unique, Ps...> : Container<T, C, Ps...> {
+struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
+    using Container<T, C, Ps...>::begin;
+    using Container<T, C, Ps...>::end;
+    using Container<T, C, Ps...>::size;
+    using Container<T, C, Ps...>::empty;
+    using Container<T, C, Ps...>::contains;
+    using Container<T, C, Ps...>::print;
     auto push_back(T t) {
         if (!this->contains(t)) {
             Container<T, C, Ps...>::push_back(t);
@@ -147,20 +153,26 @@ struct Container<T, C, Unique, Ps...> : Container<T, C, Ps...> {
             Container<T, C, Ps...>::insert(pos, t);
         }
     }
+
+    auto insert(T t) {
+        if (!this->contains(t)) {
+            Container<T, C, Ps...>::insert(t);
+        }
+    }
 };
 
 template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, Sorted, Ps...> : Container<T, C, Ps...> {
-    auto push_back(T t) {
-        this->insert(this->end(), t);
-    }
+struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
+    using Container<T, C, Ps...>::begin;
+    using Container<T, C, Ps...>::end;
+    using Container<T, C, Ps...>::size;
+    using Container<T, C, Ps...>::empty;
+    using Container<T, C, Ps...>::contains;
+    using Container<T, C, Ps...>::print;
 
-    auto push_front(T t) {
-        if constexpr (std::is_same<C<T>, std::list<T>>::value) {
-            this->insert(this->begin(), t);
-        } else {
-            static_assert(dependent_false<T>::value, "push_front is only defined for list");
-        }
+    auto insert(T t) {
+        auto pos = std::lower_bound(this->begin(), this->end(), t);
+        Container<T, C, Ps...>::insert(pos, t);
     }
 
     auto insert(typename C<T>::iterator pos, T t) {
@@ -176,8 +188,8 @@ struct Container<T, C, Sorted, Ps...> : Container<T, C, Ps...> {
 
 int main() {
     Container<int, std::vector> v1;
+    v1.insert(6);
     v1.push_back(3);
-    v1.insert(4);
     v1.insert(v1.begin(), 5);
     v1.insert(v1.end(), 7);
     std::cout << typeid(v1).name() << std::endl;
@@ -220,57 +232,59 @@ int main() {
     l2.print();
 
     Container<int, std::vector, Sorted> v3;
-    v3.push_back(6);
-    v3.push_back(1);
-    v3.insert(v3.begin(), 1);
+    v3.insert(6);
+    v3.insert(1);
+    v3.insert(6);
+    v3.insert(5);
+    v3.insert(v3.begin()++, 7);
     std::cout << "Container for sorted vector" << std::endl;
     v3.print();
 
     Container<int, std::list, Sorted> l3;
-    l3.push_back(6);
-    l3.push_back(1);
-    l3.push_front(4);
-    l3.insert(l3.begin(), 1);
+    l3.insert(6);
+    l3.insert(4);
+    l3.insert(1);
+    l3.insert(4);
     std::cout << "Container for sorted list" << std::endl;
     l3.print();
 
     Container<int, std::vector, Sorted, Unique> v4;
-    v4.push_back(6);
-    v4.push_back(1);
-    v4.insert(v4.begin(), 1);
+    v4.insert(6);
+    v4.insert(1);
+    v4.insert(1);
     std::cout << "Container for sorted unique vector" << std::endl;
     v4.print();
 
     Container<int, std::list, Sorted, Unique> l4;
-    l4.push_back(6);
-    l4.push_back(1);
-    l4.push_back(1);
-    l4.push_front(4);
-    l4.insert(l4.begin(), 1);
+    l4.insert(6);
+    l4.insert(1);
+    l4.insert(1);
     std::cout << "Container for sorted unique list" << std::endl;
     l4.print();
 
     Container<int, std::vector, Unique, Sorted> v5;
-    v5.push_back(6);
-    v5.push_back(1);
-    v5.insert(v5.begin(), 1);
+    v5.insert(6);
+    v5.insert(1);
+    v5.insert(1);
     std::cout << "Container for unique sorted vector" << std::endl;
     v5.print();
 
     Container<int, std::list, Unique, Sorted> l5;
-    l5.push_back(6);
-    l5.push_back(1);
-    l5.push_back(1);
-    l5.push_front(4);
-    l5.insert(l5.begin(), 1);
+    l5.insert(6);
+    l5.insert(1);
+    l5.insert(1);
     std::cout << "Container for unique sorted list" << std::endl;
     l5.print();
 
     Container<int, std::set> s;
     s.size();
-    //s.push_front(1);
-    s.begin();
-    s.insert(2);
+    //s.push_front(6);
+    s.insert(6);
+    s.insert(s.begin(), 7);
+    s.insert(1);
+    s.insert(s.begin(), 10);
+    std::cout << "Container for set" << std::endl;
+    s.print();
 
     return 0;
 }
