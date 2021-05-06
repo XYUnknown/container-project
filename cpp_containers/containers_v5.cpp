@@ -155,16 +155,6 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
         auto pos = std::lower_bound(this->begin(), this->end(), t);
         Container<T, C, Ps...>::insert(pos, t);
     }
-
-    auto insert(typename C<T>::iterator pos, T t) {
-        auto pos_i = std::lower_bound(this->begin(), pos, t);
-        if (pos_i == pos) {
-            pos_i = std::lower_bound(pos, this->end(), t);
-            Container<T, C, Ps...>::insert(pos_i, t);
-        } else {
-            Container<T, C, Ps...>::insert(pos_i, t);
-        }
-    }
 };
 
 int main() {
@@ -219,7 +209,6 @@ int main() {
     v3.insert(1);
     v3.insert(6);
     v3.insert(5);
-    v3.insert(v3.begin()++, 7);
     std::cout << "Container for sorted vector" << std::endl;
     v3.print();
 
