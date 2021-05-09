@@ -10,10 +10,22 @@
 class Unique {};
 class Sorted {};
 
-template<class T, template<class...> class C, class... P>
+template<class T, template<class...> class C, class... Ps>
 struct Container;
 
 template<class T> struct dependent_false : std::false_type {};
+
+template<class T, template<class...> class C, class... Ps>
+struct WithProperty : public C<T> {
+};
+
+template<class T>
+using SetWrapper = WithProperty<T, std::set, Unique, Sorted>;
+
+template<class T>
+struct Container<T, SetWrapper> : SetWrapper<T> {
+
+};
 
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
@@ -258,6 +270,16 @@ int main() {
     s.erase(s.begin());
     std::cout << "Container for set" << std::endl;
     s.print();
+
+    Container<int, SetWrapper> s1;
+    /*//s1.push_front(6);
+    s1.insert(6);
+    s1.insert(s.begin(), 7);
+    s1.insert(1);
+    s1.insert(s.begin(), 10);
+    s1.erase(s.begin());
+    std::cout << "Container for set" << std::endl;
+    s1.print();*/
 
     return 0;
 }
