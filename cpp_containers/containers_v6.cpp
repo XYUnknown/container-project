@@ -20,9 +20,12 @@ struct WithProperty : public C<T> {
     { return std::disjunction_v<std::is_same<P, Ps>...>; }
 };
 
+// A set implemented using a binary search tree
 template<class T>
 using SetWrapper = WithProperty<T, std::set, Unique, Sorted>;
 
+
+// a binary search tree
 template<class T>
 using TreeWrapper = WithProperty<T, std::multiset, Sorted>;
 
