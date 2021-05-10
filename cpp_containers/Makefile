@@ -27,6 +27,10 @@ containers5: containers_v5.cpp
 	mkdir -p build
 	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v5 containers_v5.cpp
 
+containers6: containers_v6.cpp
+	mkdir -p build
+	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v6 containers_v6.cpp
+
 vectors: vectors.cpp
 	mkdir -p build
 	clang++ -Wall -Werror -std=c++20 -o ./build/vectors vectors.cpp
