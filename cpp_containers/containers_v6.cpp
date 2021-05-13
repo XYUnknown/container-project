@@ -138,56 +138,48 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::contains;
     using Container<T, C, Ps...>::print;
 
-    template<class Q=T, template<typename...> class D=C> requires (!CUnique<Q, D>)
-    void push_back(Q t) {
-        if (!this->contains(t)) {
-            Container<Q, D, Ps...>::push_back(t);
+    void push_back(T t) {
+        if constexpr (CUnique<T, C>) {
+            std::cout << "CUnique specialization is called" << std::endl;
+            Container<T, C, Ps...>::push_back(t);
+        } else {
+            if (!this->contains(t)) {
+                Container<T, C, Ps...>::push_back(t);
+            }
         }
     }
 
-    template<class Q=T, template<typename...> class D=C> requires (CUnique<Q, D>)
-    void push_back(Q t) {
-        std::cout << "CUnique specialization is called" << std::endl;
-        Container<Q, D, Ps...>::push_back(t);
-    }
-
-    template<class Q=T, template<typename...> class D=C> requires (!CUnique<Q, D>)
-    void push_front(Q t) {
-        if (!this->contains(t)) {
-            Container<Q, D, Ps...>::push_front(t);
+    void push_front(T t) {
+        if constexpr (CUnique<T, C>) {
+            std::cout << "CUnique specialization is called" << std::endl;
+            Container<T, C, Ps...>::push_front(t);
+        } else {
+            if (!this->contains(t)) {
+                Container<T, C, Ps...>::push_front(t);
+            }
         }
     }
 
-    template<class Q=T, template<typename...> class D=C> requires (CUnique<Q, D>)
-    void push_front(Q t) {
-        Container<Q, D, Ps...>::push_front(t);
-    }
-
-    template<class Q=T, template<typename...> class D=C> requires (!CUnique<Q, D>)
-    auto insert(typename D<Q>::iterator pos, Q t) {
-        if (!this->contains(t)) {
-            Container<Q, D, Ps...>::insert(pos, t);
+    auto insert(typename C<T>::iterator pos, T t) {
+        if constexpr (CUnique<T, C>) {
+            std::cout << "CUnique specialization is called" << std::endl;
+            Container<T, C, Ps...>::insert(pos, t);
+        } else {
+            if (!this->contains(t)) {
+                Container<T, C, Ps...>::insert(pos, t);
+            }
         }
     }
 
-    template<class Q=T, template<typename...> class D=C> requires (CUnique<Q, D>)
-    auto insert(typename D<Q>::iterator pos, Q t) {
-        Container<Q, D, Ps...>::insert(pos, t);
-    }
-
-    // if C is not a unique container type by default
-    template<class Q=T, template<typename...> class D=C> requires (!CUnique<Q, D>)
-    auto insert(Q t) {
-        if (!this->contains(t)) {
-            Container<Q, D, Ps...>::insert(t);
-        }
-    }
-
-    // if C is a unique container type by default
-    template<class Q=T, template<typename...> class D=C> requires CUnique<Q, D>
     auto insert(T t) {
-        std::cout << "CUnique specialization is called" << std::endl;
-        Container<Q, D, Ps...>::insert(t);
+        if constexpr (CUnique<T, C>) {
+            std::cout << "CUnique specialization is called" << std::endl;
+            Container<T, C, Ps...>::insert(t);
+        } else {
+            if (!this->contains(t)) {
+                Container<T, C, Ps...>::insert(t);
+            }
+        }
     }
 };
 
@@ -202,16 +194,14 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
 
     // for a sorted container, it is not meaningful to choose the position for an element
     // to be inserted in.
-    template<class Q=T, template<typename...> class D=C> requires (!CSorted<Q, D>)
-    auto insert(Q t) {
-        auto pos = std::lower_bound(this->begin(), this->end(), t);
-        Container<Q, D, Ps...>::insert(pos, t);
-    }
-
-    template<class Q=T, template<typename...> class D=C> requires (CSorted<Q, D>)
-    auto insert(Q t) {
-        std::cout << "CSorted specialization is called" << std::endl;
-        Container<Q, D, Ps...>::insert(t);
+    auto insert(T t) {
+        if constexpr (CSorted<T, C>) {
+            std::cout << "CSorted specialization is called" << std::endl;
+            Container<T, C, Ps...>::insert(t);
+        } else {
+            auto pos = std::lower_bound(this->begin(), this->end(), t);
+            Container<T, C, Ps...>::insert(pos, t);
+        }
     }
 };
 
