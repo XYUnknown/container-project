@@ -205,6 +205,27 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     }
 };
 
+template<class P, class ...Ps>
+constexpr bool is_present() {
+    return (std::is_same_v<P, Ps> || ...);
+}
+
+template<class T, class ...Ps>
+auto make_container() {
+    if constexpr (is_present<Sorted, Ps...>()) {
+        if constexpr (is_present<Unique, Ps...>()) {
+            Container<T, std::set, Ps...> c;
+            return c;
+        } else {
+            Container<T, std::multiset, Ps...> c;
+            return c;
+        }
+    } else {
+        Container<T, std::vector, Ps...> c;
+        return c;
+    }
+}
+
 int main() {
     Container<int, std::vector> v1;
     v1.insert(6);
@@ -364,5 +385,32 @@ int main() {
     std::cout << "Container for sorted tree (multiset) is sorted" << std::endl;
     t4.print();
     
+    // test is present
+    static_assert(!is_present<Unique, Sorted>());
+    static_assert(is_present<Unique, Unique, Sorted>());
+
+    // test the make_container
+    auto c1 = make_container<int, Unique>();
+    c1.insert(6);
+    c1.insert(1);
+    c1.insert(1);
+    std::cout << "Unique Container from function make_container" << std::endl;
+    c1.print();
+
+
+    auto c2 = make_container<int, Sorted>();
+    c2.insert(6);
+    c2.insert(1);
+    c2.insert(1);
+    std::cout << "Sorted Container from function make_container" << std::endl;
+    c2.print();
+
+    auto c3 = make_container<int, Unique, Sorted>();
+    c3.insert(6);
+    c3.insert(1);
+    c3.insert(1);
+    std::cout << "Unique Sorted Container from function make_container" << std::endl;
+    c3.print();
+
     return 0;
 }
