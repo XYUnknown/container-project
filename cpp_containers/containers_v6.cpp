@@ -37,6 +37,13 @@ concept CSorted = C<T>::template has_property<Sorted>();
 
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
+    friend constexpr auto operator<= (const Container<T, C>& lhs, const Container<T, C>& rhs) {
+        return (static_cast<const C<T> &>(lhs) <= static_cast<const C<T> &>(rhs));
+    }
+
+    friend constexpr auto operator< (const Container<T, C>& lhs, const Container<T, C>& rhs) {
+        return (static_cast<const C<T> &>(lhs) < static_cast<const C<T> &>(rhs));
+    }
     // The first requires is the require claus, the second requires is the require expression
     template <class Q = T>
         requires requires (const C<Q>& c, size_t p) { { c.at(p) } -> std::same_as<const Q&>; }
@@ -138,6 +145,14 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::contains;
     using Container<T, C, Ps...>::print;
 
+    friend constexpr auto operator<= (const Container<T, C, Unique, Ps...>& lhs, const Container<T, C, Unique, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    friend constexpr auto operator< (const Container<T, C, Unique, Ps...>& lhs, const Container<T, C, Unique, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) < static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
     void push_back(T t) {
         if constexpr (CUnique<T, C>) {
             std::cout << "CUnique specialization is called" << std::endl;
@@ -192,6 +207,13 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::contains;
     using Container<T, C, Ps...>::print;
 
+    friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    friend constexpr auto operator< (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) < static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
     // for a sorted container, it is not meaningful to choose the position for an element
     // to be inserted in.
     auto insert(T t) {
@@ -384,6 +406,25 @@ int main() {
     t4.insert(1);
     std::cout << "Container for sorted tree (multiset) is sorted" << std::endl;
     t4.print();
+
+    // Nested containers
+    Container<Container<int, std::vector, Unique>, std::vector, Sorted> n1;
+    Container<int, std::vector, Unique> e1, e2, e3;
+    e1.insert(4);
+    e1.insert(3);
+    e2.insert(5);
+    e2.insert(1);
+    e2.insert(10);
+    e3.insert(11);
+    n1.insert(e1);
+    n1.insert(e2);
+    n1.insert(e3);
+    std::cout << "Size: " << "Nested container" << std::endl;
+    std::cout << "Size: " << n1.size() << std::endl;
+    for (auto it=n1.begin(); it!=n1.end(); it++)
+        it->print();
+    std::cout << '\n';
+    std::cout << '\n';
     
     // test is present
     static_assert(!is_present<Unique, Sorted>());
@@ -396,7 +437,6 @@ int main() {
     c1.insert(1);
     std::cout << "Unique Container from function make_container" << std::endl;
     c1.print();
-
 
     auto c2 = make_container<int, Sorted>();
     c2.insert(6);
