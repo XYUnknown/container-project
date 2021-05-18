@@ -44,6 +44,15 @@ struct Container<T, C> : private C<T> {
     friend constexpr auto operator< (Container<T, C>const & lhs, Container<T, C>const & rhs) {
         return (static_cast<C<T>const &>(lhs) < static_cast<C<T>const &>(rhs));
     }
+
+    friend constexpr auto operator== (Container<T, C>const & lhs, Container<T, C>const & rhs) {
+        return (static_cast<C<T>const &>(lhs) == static_cast<C<T>const &>(rhs));
+    }
+
+    friend constexpr auto operator!= (Container<T, C>const & lhs, Container<T, C>const & rhs) {
+        return (static_cast<C<T>const &>(lhs) != static_cast<C<T>const &>(rhs));
+    }
+
     // The first requires is the require claus, the second requires is the require expression
     template <class Q = T>
         requires requires (const C<Q>& c, size_t p) { { c.at(p) } -> std::same_as<const Q&>; }
@@ -150,7 +159,15 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     }
 
     friend constexpr auto operator< (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
-        return (static_cast<Container<T, C, Ps...>const &>(lhs) <static_cast<Container<T, C, Ps...>const &>(rhs));
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) < static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator== (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) == static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator!= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) != static_cast<Container<T, C, Ps...>const &>(rhs));
     }
 
     void push_back(T t) {
@@ -213,6 +230,14 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
 
     friend constexpr auto operator< (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...>&>(lhs) < static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    friend constexpr auto operator== (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) == static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    friend constexpr auto operator!= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) != static_cast<const Container<T, C, Ps...>&>(rhs));
     }
     // for a sorted container, it is not meaningful to choose the position for an element
     // to be inserted in.
@@ -424,6 +449,22 @@ int main() {
     for (auto it=n1.begin(); it!=n1.end(); it++)
         it->print();
 
+    Container<Container<int, std::vector, Sorted>, std::vector, Unique> n2;
+    Container<int, std::vector, Sorted> e4, e5, e6;
+    e4.insert(4);
+    e4.insert(3);
+    e5.insert(5);
+    e5.insert(1);
+    e5.insert(10);
+    e6.insert(11);
+    n2.insert(e4);
+    n2.insert(e4);
+    n2.insert(e5);
+    n2.insert(e6);
+    std::cout << "Size: " << "Nested container, a unique vector of sorted vectors" << std::endl;
+    std::cout << "Size: " << n2.size() << std::endl;
+    for (auto it=n2.begin(); it!=n2.end(); it++)
+        it->print();
     
     // test is present
     static_assert(!is_present<Unique, Sorted>());
