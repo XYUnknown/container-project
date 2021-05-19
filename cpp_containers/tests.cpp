@@ -246,6 +246,8 @@ int main() {
     c1.insert(6);
     c1.insert(1);
     c1.insert(1);
+    c1.insert(7);
+    c1.insert(7);
     std::cout << "Unique Container from function make_container" << std::endl;
     c1.print();
 
@@ -253,6 +255,8 @@ int main() {
     c2.insert(6);
     c2.insert(1);
     c2.insert(1);
+    c2.insert(7);
+    c2.insert(7);
     std::cout << "Sorted Container from function make_container" << std::endl;
     c2.print();
 
@@ -260,6 +264,8 @@ int main() {
     c3.insert(6);
     c3.insert(1);
     c3.insert(1);
+    c3.insert(7);
+    c3.insert(7);
     std::cout << "Unique Sorted Container from function make_container" << std::endl;
     c3.print();
 

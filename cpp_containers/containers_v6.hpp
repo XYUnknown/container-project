@@ -308,10 +308,18 @@ template<class T, class ...Ps>
 auto make_container() {
     if constexpr (is_present<Sorted, Ps...>()) {
         if constexpr (is_present<Unique, Ps...>()) {
-            Container<T, std::set, Ps...> c;
+            Container<T, TreeSetWrapper, Ps...> c;
             return c;
         } else {
-            Container<T, std::multiset, Ps...> c;
+            Container<T, TreeWrapper, Ps...> c;
+            return c;
+        }
+    } else if constexpr (is_present<Unique, Ps...>()) {
+        if constexpr (is_present<Sorted, Ps...>()) {
+            Container<T, TreeSetWrapper, Ps...> c;
+            return c;
+        } else {
+            Container<T, HashSetWrapper, Ps...> c;
             return c;
         }
     } else {
