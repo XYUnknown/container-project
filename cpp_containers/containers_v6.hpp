@@ -3,9 +3,11 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <unordered_set>
 #include <typeinfo>
 #include <type_traits>
 #include <concepts>
+#include <algorithm>
 
 class Unique {};
 class Sorted {};
@@ -22,12 +24,15 @@ struct WithProperty : public C<T> {
 
 // A set implemented using a binary search tree
 template<class T>
-using SetWrapper = WithProperty<T, std::set, Unique, Sorted>;
-
+using TreeSetWrapper = WithProperty<T, std::set, Unique, Sorted>;
 
 // a binary search tree
 template<class T>
 using TreeWrapper = WithProperty<T, std::multiset, Sorted>;
+
+// a hashset wrapper
+template<class T>
+using HashSetWrapper = WithProperty<T, std::unordered_set, Unique>;
 
 template<typename T, template<class...> class C>
 concept CUnique = C<T>::template has_property<Unique>();
@@ -132,8 +137,28 @@ struct Container<T, C> : private C<T> {
         return C<Q>::erase(pos);
     }
 
-    bool contains(T t) {
-        return std::find(this->begin(), this->end(), t) != this->end();
+    template <class Q = T>
+        requires requires (C<Q>& c, const Q& t) { { c.find(t) } -> std::same_as<typename C<Q>::iterator>; }
+    typename C<Q>::iterator find(const Q& value) {
+        return C<Q>::find(value);
+    }
+
+    template <class Q = T>
+        requires (!requires (C<Q>& c, const Q& t) { { c.find(t) } -> std::same_as<typename C<Q>::iterator>; })
+    typename C<Q>::iterator find(const Q& value) {
+        return std::find(this->begin(), this->end(), value);
+    }
+
+    template <class Q = T>
+        requires requires (C<Q>& c, const Q& t) { { c.contains(t) } -> std::same_as<bool>; }
+    bool contains(const Q& value) /*const*/ {
+        return C<Q>::contains(value);
+    }
+
+    template <class Q = T>
+        requires (!requires (C<Q>& c, const Q& t) { { c.contains(t) } -> std::same_as<bool>; })
+    bool contains(const Q& value) {
+        return this->find(value) != this->end();
     }
 
     void print() {
@@ -153,6 +178,7 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::empty;
     using Container<T, C, Ps...>::contains;
     using Container<T, C, Ps...>::print;
+    using Container<T, C, Ps...>::find;
 
     friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
@@ -221,7 +247,6 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::end;
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
-    using Container<T, C, Ps...>::contains;
     using Container<T, C, Ps...>::print;
 
     friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
@@ -248,6 +273,28 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t);
             Container<T, C, Ps...>::insert(pos, t);
+        }
+    }
+
+    bool contains(const T& t) {
+        if constexpr (CSorted<T, C>) {
+            std::cout << "CSorted specialization is called" << std::endl;
+            return Container<T, C, Ps...>::contains(t);
+        } else {
+            return std::binary_search(this->begin(), this->end(), t);
+        }
+    }
+
+    typename C<T>::iterator find(const T& t) {
+        if constexpr (CSorted<T, C>) {
+            std::cout << "CSorted specialization is called" << std::endl;
+            return Container<T, C, Ps...>::contains(t);
+        } else {
+            auto pos = std::lower_bound(this->begin(), this->end(), t);
+            if (*pos != t) { // element not found
+                return this->end();
+            }
+            return pos;
         }
     }
 };

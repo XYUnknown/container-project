@@ -9,8 +9,7 @@ int main() {
     v1.insert(v1.begin(), 5);
     v1.insert(v1.end(), 7);
     v1.erase(v1.begin());
-    //auto r = std::find(v1.begin(), v1.end(), 3);
-    //std::cout << *r << std::endl;
+    assert(v1.find(5) == v1.end());
     std::cout << typeid(v1).name() << std::endl;
     std::cout << "at position 0: " << v1.at(0) << std::endl;
     std::cout << "is empty? " << v1.empty() << std::endl;
@@ -56,6 +55,8 @@ int main() {
     v3.insert(1);
     v3.insert(6);
     v3.insert(5);
+    assert(v3.find(7) == v3.end());
+    assert(!v3.contains(7));
     std::cout << "Container for sorted vector" << std::endl;
     v3.print();
 
@@ -64,6 +65,8 @@ int main() {
     l3.insert(4);
     l3.insert(1);
     l3.insert(4);
+    assert(l3.find(7) == l3.end());
+    assert(!l3.contains(7));
     std::cout << "Container for sorted list" << std::endl;
     l3.print();
 
@@ -95,35 +98,39 @@ int main() {
     std::cout << "Container for unique sorted list" << std::endl;
     l5.print();
 
-    SetWrapper<int> sw;
+    TreeSetWrapper<int> sw;
     sw.size();
     static_assert(sw.has_property<Unique>()); // not recommended to call in this way
 
-    Container<int, SetWrapper> s1;
+    Container<int, TreeSetWrapper> s1;
     s1.insert(6);
     s1.insert(1);
     s1.insert(1);
+    assert(s1.find(1) != s1.end());
     std::cout << "Container for set(tree set) is sorted and unique" << std::endl;
     s1.print();
 
-    Container<int, SetWrapper, Unique> s2;
+    Container<int, TreeSetWrapper, Unique> s2;
     s2.insert(6);
     s2.insert(1);
     s2.insert(1);
+    assert(s2.find(1) != s2.end());
     std::cout << "Container for unique set(tree set) is sorted and unique" << std::endl;
     s2.print();
 
-    Container<int, SetWrapper, Sorted> s3;
+    Container<int, TreeSetWrapper, Sorted> s3;
     s3.insert(6);
     s3.insert(1);
     s3.insert(1);
+    assert(s1.find(1) != s1.end());
     std::cout << "Container for sorted set(tree set) is sorted and unique" << std::endl;
     s3.print();
 
-    Container<int, SetWrapper, Unique, Sorted> s4;
+    Container<int, TreeSetWrapper, Unique, Sorted> s4;
     s4.insert(6);
     s4.insert(1);
     s4.insert(1);
+    assert(s2.find(1) != s2.end());
     std::cout << "Container for unique and sorted set(tree set) is sorted and unique" << std::endl;
     s4.print();
 
@@ -160,8 +167,41 @@ int main() {
     t4.insert(6);
     t4.insert(1);
     t4.insert(1);
-    std::cout << "Container for sorted tree (multiset) is sorted" << std::endl;
+    std::cout << "Container for unique sorted tree (multiset) is unique and sorted" << std::endl;
     t4.print();
+    
+    Container<int, HashSetWrapper> hs1;
+    hs1.insert(6);
+    hs1.insert(1);
+    hs1.insert(1);
+    hs1.insert(7);
+    hs1.insert(9);
+    hs1.insert(7);
+    assert(hs1.contains(1));
+    std::cout << "Container for hash set (unordered_set) is unique" << std::endl;
+    hs1.print();
+
+    Container<int, HashSetWrapper, Unique> hs2;
+    hs2.insert(6);
+    hs2.insert(1);
+    hs2.insert(1);
+    hs2.insert(7);
+    hs2.insert(9);
+    hs2.insert(7);
+    assert(hs2.contains(1));
+    std::cout << "Container for unique hash set (unordered_set) is unique" << std::endl;
+    hs2.print();
+
+    /* This doesn't make sense
+    Container<int, HashSetWrapper, Sorted> hs3;
+    hs3.insert(6);
+    hs3.insert(1);
+    hs3.insert(1);
+    hs3.insert(7);
+    hs3.insert(9);
+    hs3.insert(7);
+    std::cout << "Container for sorted hash set (unordered_set) is unique and sorted" << std::endl;
+    hs3.print();*/
 
     // Nested containers
     Container<Container<int, std::vector, Unique>, std::vector, Sorted> n1;
