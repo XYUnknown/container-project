@@ -1,4 +1,4 @@
-all: containers.cpp containers_v2.cpp containers_v3.cpp containers_v4.cpp containers_v5.cpp vectors.cpp
+all: containers.cpp containers_v2.cpp containers_v3.cpp containers_v4.cpp containers_v5.cpp containers_v6.hpp tests.cpp benchmarks.cpp vectors.cpp
 	mkdir -p build
 	clang++ -Wall -Werror -std=c++20 -o ./build/containers containers.cpp
 	clang++ -Wall -Werror -std=c++20 -o ./build/vectors vectors.cpp
@@ -6,6 +6,8 @@ all: containers.cpp containers_v2.cpp containers_v3.cpp containers_v4.cpp contai
 	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v3 containers_v3.cpp
 	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v4 containers_v4.cpp
 	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v5 containers_v5.cpp
+	clang++ -Wall -Werror -std=c++20 -o ./build/tests tests.cpp
+	clang++ -Wall -Werror -std=c++20 -o ./build/benchmarks benchmarks.cpp
 
 containers: containers.cpp
 	mkdir -p build
@@ -27,9 +29,13 @@ containers5: containers_v5.cpp
 	mkdir -p build
 	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v5 containers_v5.cpp
 
-containers6: containers_v6.cpp
+tests: tests.cpp containers_v6.hpp
 	mkdir -p build
-	clang++ -Wall -Werror -std=c++20 -o ./build/containers_v6 containers_v6.cpp
+	clang++ -Wall -Werror -std=c++20 -o ./build/tests tests.cpp
+
+benchmarks: benchmarks.cpp containers_v6.hpp
+	mkdir -p build
+	clang++ -Wall -Werror -std=c++20 -o ./build/benchmarks benchmarks.cpp
 
 vectors: vectors.cpp
 	mkdir -p build
