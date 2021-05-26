@@ -69,16 +69,18 @@ int main() {
     //std::size_t size2 = 1024 * 1024;
     //std::size_t size3 = 10 * 1024 * 1024;
 
-    std::size_t lookup_size1 = 10000;
-    std::vector lookups = Generate(lookup_size1, up_to);
+    std::size_t lookup_size1 = 1000;
+    std::size_t lookup_size2 = 10000;
+    std::vector lookups1 = Generate(lookup_size1, up_to);
+    std::vector lookups2 = Generate(lookup_size2, up_to);
     volatile std::size_t result; // prevent from optimizing out test code
     
     Container<std::size_t, std::vector, Sorted> v1;
     Container<std::size_t, std::multiset, Sorted> s1;
     Generate(size1, up_to, v1, s1);
     {
-        Timer t1;
-        for (std::size_t item : lookups) {
+        Timer t;
+        for (std::size_t item : lookups1) {
             auto it = v1.find(item);
             if (it != v1.end()) {
                 result = *it;
@@ -86,8 +88,26 @@ int main() {
         }
     }
     {
-        Timer t2;
-        for (std::size_t item : lookups) {
+        Timer t;
+        for (std::size_t item : lookups1) {
+            auto it = s1.find(item);
+            if (it != s1.end()) {
+                result = *it;
+            }
+        }
+    }
+    {
+        Timer t;
+        for (std::size_t item : lookups2) {
+            auto it = v1.find(item);
+            if (it != v1.end()) {
+                result = *it;
+            }
+        }
+    }
+    {
+        Timer t;
+        for (std::size_t item : lookups2) {
             auto it = s1.find(item);
             if (it != s1.end()) {
                 result = *it;
