@@ -41,5 +41,9 @@ vectors: vectors.cpp
 	mkdir -p build
 	clang++ -Wall -Werror -std=c++20 -o ./build/vectors vectors.cpp
 
+bench: benchmark.cc
+	mkdir -p build
+	clang++ benchmark.cc -std=c++20 -isystem benchmark/include -lbenchmark -lpthread -o ./build/benchmark
+
 clean:
 	rm -f *.o ./build/containers *~
