@@ -295,7 +295,7 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     typename C<T>::iterator find(const T& t) {
         if constexpr (CSorted<T, C>) {
             std::cout << "CSorted specialization is called" << std::endl;
-            return Container<T, C, Ps...>::contains(t);
+            return Container<T, C, Ps...>::find(t);
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t);
             if (*pos != t) { // element not found
