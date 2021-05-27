@@ -40,62 +40,164 @@ void Generate(std::size_t amount, std::size_t max_val,
     }
 }
 
-class SortedConFixture : public ::benchmark::Fixture {
+class SortedLookUpSmallFixture : public ::benchmark::Fixture {
 public:
-    //constexpr static std::size_t up_to = 150000000;
-    std::size_t size0 = 10000;
-    //std::size_t size1 = 100000;
-    //std::size_t size2 = 1024 * 1024;
-    //std::size_t size3 = 10 * 1024 * 1024;
+    // size_t --> 8 bytes
+    std::size_t size = 1024; // 80KB data
 
     std::size_t lookup_size1 = 1000;
     std::size_t lookup_size2 = 10000;
     std::vector<std::size_t> lookups1;
     std::vector<std::size_t> lookups2;
 
-    Container<std::size_t, std::vector, Sorted> v1;
-    Container<std::size_t, std::multiset, Sorted> s1;
+    Container<std::size_t, std::vector, Sorted> v;
+    Container<std::size_t, std::multiset, Sorted> s;
 
     void SetUp(const ::benchmark::State& st) {
-        lookups1 = Generate(lookup_size1, size0*2);
-        lookups2 = Generate(lookup_size2, size0*2);
-        Generate(size0, size0*2, v1, s1);
+        lookups1 = Generate(lookup_size1, size*2);
+        lookups2 = Generate(lookup_size2, size*2);
+        Generate(size, size*2, v, s);
     }
 
     void TearDown(const ::benchmark::State&) {
         lookups1.clear();
         lookups2.clear();
-        v1.clear();
-        s1.clear();
+        v.clear();
+        s.clear();
     }
-
 };
 
-BENCHMARK_DEFINE_F(SortedConFixture, SortedVecLookup)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups1) {
-            auto it = v1.find(item);
-            if (it != v1.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedConFixture, SortedVecLookup);
+class SortedLookUpMediumFixture : public ::benchmark::Fixture {
+public:
+    // size_t --> 8 bytes
+    std::size_t size = 10*1024; // 80KB data
 
-BENCHMARK_DEFINE_F(SortedConFixture, SortedMultiSetLookup)(benchmark::State& state) {
+    std::size_t lookup_size1 = 1000;
+    std::size_t lookup_size2 = 10000;
+    std::vector<std::size_t> lookups1;
+    std::vector<std::size_t> lookups2;
+
+    Container<std::size_t, std::vector, Sorted> v;
+    Container<std::size_t, std::multiset, Sorted> s;
+
+    void SetUp(const ::benchmark::State& st) {
+        lookups1 = Generate(lookup_size1, size*2);
+        lookups2 = Generate(lookup_size2, size*2);
+        Generate(size, size*2, v, s);
+    }
+
+    void TearDown(const ::benchmark::State&) {
+        lookups1.clear();
+        lookups2.clear();
+        v.clear();
+        s.clear();
+    }
+};
+
+class SortedLookUpLargeFixture : public ::benchmark::Fixture {
+public:
+    // size_t --> 8 bytes
+    std::size_t size = 100*1024; // 800KB data
+
+    std::size_t lookup_size1 = 1000;
+    std::size_t lookup_size2 = 10000;
+    std::vector<std::size_t> lookups1;
+    std::vector<std::size_t> lookups2;
+
+    Container<std::size_t, std::vector, Sorted> v;
+    Container<std::size_t, std::multiset, Sorted> s;
+
+    void SetUp(const ::benchmark::State& st) {
+        lookups1 = Generate(lookup_size1, size*2);
+        lookups2 = Generate(lookup_size2, size*2);
+        Generate(size, size*2, v, s);
+    }
+
+    void TearDown(const ::benchmark::State&) {
+        lookups1.clear();
+        lookups2.clear();
+        v.clear();
+        s.clear();
+    }
+};
+
+BENCHMARK_DEFINE_F(SortedLookUpSmallFixture, SortedVecLookupSmall)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups1) {
-            auto it = s1.find(item);
-            if (it != s1.end()) {
+            auto it = v.find(item);
+            if (it != v.end()) {
                 result = *it;
             }
         }
     }
 }
-BENCHMARK_REGISTER_F(SortedConFixture, SortedMultiSetLookup);
+BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedVecLookupSmall);
+
+BENCHMARK_DEFINE_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups1) {
+            auto it = s.find(item);
+            if (it != s.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall);
+
+BENCHMARK_DEFINE_F(SortedLookUpMediumFixture, SortedVecLookupMedium)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups1) {
+            auto it = v.find(item);
+            if (it != v.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedVecLookupMedium);
+
+BENCHMARK_DEFINE_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups1) {
+            auto it = s.find(item);
+            if (it != s.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium);
+
+BENCHMARK_DEFINE_F(SortedLookUpLargeFixture, SortedVecLookupLarge)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups1) {
+            auto it = v.find(item);
+            if (it != v.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedVecLookupLarge);
+
+BENCHMARK_DEFINE_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups1) {
+            auto it = s.find(item);
+            if (it != s.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge);
 
 BENCHMARK_MAIN();
 
