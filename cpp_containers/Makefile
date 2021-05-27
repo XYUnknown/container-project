@@ -39,13 +39,7 @@ vectors: vectors.cpp
 bench: benchmark.cc containers_v6.hpp
 	mkdir -p build
 	clang++ benchmark.cc -std=c++20 -isystem benchmark/include -lbenchmark -lpthread -o ./build/benchmark
-
-bench2: benchmark.cc containers_v6.hpp
-	mkdir -p build
 	clang++ benchmark.cc -std=c++20 -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./build/benchmark_o2
-
-bench3: benchmark.cc containers_v6.hpp
-	mkdir -p build
 	clang++ benchmark.cc -std=c++20 -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./build/benchmark_o3
 
 clean:
