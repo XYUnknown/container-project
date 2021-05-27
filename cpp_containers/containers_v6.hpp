@@ -40,6 +40,11 @@ concept CUnique = C<T>::template has_property<Unique>();
 template<typename T, template<class...> class C>
 concept CSorted = C<T>::template has_property<Sorted>();
 
+/*template<class K, class V, template<class...> class C>
+struct Container<std::pair<K, V>, C> : private C<K, V> {
+
+}*/
+
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
     friend constexpr auto operator<= (Container<T, C>const & lhs, Container<T, C>const & rhs) {
@@ -179,6 +184,7 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::contains;
     using Container<T, C, Ps...>::print;
     using Container<T, C, Ps...>::find;
+    using Container<T, C, Ps...>::clear;
 
     friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
@@ -248,6 +254,7 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
     using Container<T, C, Ps...>::print;
+    using Container<T, C, Ps...>::clear;
 
     friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
