@@ -133,7 +133,7 @@ BENCHMARK_DEFINE_F(SortedLookUpSmallFixture, SortedVecLookupSmall)(benchmark::St
         }
     }
 }
-BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedVecLookupSmall);
+BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedVecLookupSmall)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_DEFINE_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall)(benchmark::State& state) {
     volatile std::size_t result;
@@ -146,7 +146,7 @@ BENCHMARK_DEFINE_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall)(benchmar
         }
     }
 }
-BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall);
+BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_DEFINE_F(SortedLookUpMediumFixture, SortedVecLookupMedium)(benchmark::State& state) {
     volatile std::size_t result;
@@ -159,7 +159,7 @@ BENCHMARK_DEFINE_F(SortedLookUpMediumFixture, SortedVecLookupMedium)(benchmark::
         }
     }
 }
-BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedVecLookupMedium);
+BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedVecLookupMedium)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_DEFINE_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium)(benchmark::State& state) {
     volatile std::size_t result;
@@ -172,7 +172,7 @@ BENCHMARK_DEFINE_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium)(benchm
         }
     }
 }
-BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium);
+BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_DEFINE_F(SortedLookUpLargeFixture, SortedVecLookupLarge)(benchmark::State& state) {
     volatile std::size_t result;
@@ -185,7 +185,7 @@ BENCHMARK_DEFINE_F(SortedLookUpLargeFixture, SortedVecLookupLarge)(benchmark::St
         }
     }
 }
-BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedVecLookupLarge);
+BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedVecLookupLarge)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_DEFINE_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge)(benchmark::State& state) {
     volatile std::size_t result;
@@ -198,7 +198,7 @@ BENCHMARK_DEFINE_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge)(benchmar
         }
     }
 }
-BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge);
+BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge)->Unit(benchmark::kMillisecond);
 
 /** Insertion benchmarks */
 class InsertionSmallFixture : public ::benchmark::Fixture {
