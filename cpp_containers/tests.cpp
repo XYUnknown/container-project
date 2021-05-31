@@ -35,6 +35,7 @@ int main() {
     l1.print();
 
     Container<int, std::vector, Unique> v2;
+    v2.reserve(10);
     v2.push_back(1);
     v2.push_back(1);
     // v2.push_front(1); // invalid
