@@ -71,6 +71,12 @@ struct Container<T, C> : private C<T> {
     }
 
     template <class Q = T>
+        requires requires (C<Q>& c, size_t new_cap) { { c.reserve(new_cap) } -> std::same_as<void>; }
+    void reserve(size_t new_cap) {
+        return C<Q>::reserve(new_cap);
+    }
+
+    template <class Q = T>
         requires requires (const C<Q>& c) { { c.size() } -> std::same_as<size_t>; }
     size_t size() {
         return C<Q>::size();
@@ -185,6 +191,9 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::print;
     using Container<T, C, Ps...>::find;
     using Container<T, C, Ps...>::clear;
+    using Container<T, C, Ps...>::erase;
+    using Container<T, C, Ps...>::at;
+    using Container<T, C, Ps...>::reserve;
 
     friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
@@ -255,6 +264,10 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::empty;
     using Container<T, C, Ps...>::print;
     using Container<T, C, Ps...>::clear;
+    using Container<T, C, Ps...>::erase;
+    using Container<T, C, Ps...>::at;
+    using Container<T, C, Ps...>::reserve;
+
 
     friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
