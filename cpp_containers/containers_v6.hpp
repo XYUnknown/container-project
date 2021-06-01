@@ -17,14 +17,14 @@ template<class T, template<class...> class C, class... Ps>
 struct Container;
 
 template<class T, template<class...> class C, class... Ps>
-struct WithProperty : public C<T> {
+struct WithProperty: public C<T> {
     template<typename P>
     static constexpr bool has_property()
     { return std::disjunction_v<std::is_same<P, Ps>...>; }
 };
 
 template<class K, class V, template<class...> class C, class... Ps>
-struct WithPropertyM : public C<K, V> {
+struct WithProperty<std::pair<K, V>, C, Ps...> : public C<K, V> {
     template<typename P>
     static constexpr bool has_property()
     { return std::disjunction_v<std::is_same<P, Ps>...>; }
@@ -44,7 +44,7 @@ using HashSetWrapper = WithProperty<T, std::unordered_set, Unique>;
 
 // A set implemented using a binary search tree
 template<class K, class V>
-using TreeMapWrapper = WithPropertyM<K, V, std::map, Unique, Sorted>;
+using TreeMapWrapper = WithProperty<std::pair<K, V>, std::map, Unique, Sorted>;
 
 template<typename T, template<class...> class C>
 concept CUnique = C<T>::template has_property<Unique>();
