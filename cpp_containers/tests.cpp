@@ -1,5 +1,7 @@
 // Usage testing of the containers implementations version 6
 // should be replaced by some unit test
+#include <string>
+#include <string_view>
 
 #include "containers_v6.hpp"
 int main() {
@@ -270,5 +272,14 @@ int main() {
     std::cout << "Unique Sorted Container from function make_container" << std::endl;
     c3.print();
 
+    // maps
+    Container<std::pair<std::string, int>, TreeMapWrapper> m1;
+    m1.insert({"a", 1});
+    m1.insert({"b", 2});
+    m1.insert_or_assign("b", 9);
+    
+    std::cout << "Container for a tree map" << std::endl;
+    std::cout << "has key \"a\"? " << m1.contains("a") << std::endl;
+    m1.print();
     return 0;
 }
