@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <map>
 #include <unordered_set>
 #include <typeinfo>
 #include <type_traits>
@@ -39,11 +40,6 @@ concept CUnique = C<T>::template has_property<Unique>();
 
 template<typename T, template<class...> class C>
 concept CSorted = C<T>::template has_property<Sorted>();
-
-/*template<class K, class V, template<class...> class C>
-struct Container<std::pair<K, V>, C> : private C<K, V> {
-
-}*/
 
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
@@ -316,6 +312,70 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
             }
             return pos;
         }
+    }
+};
+
+/* Maps */
+template<class K, class V, template<class...> class C>
+struct Container<std::pair<K, V>, C> : private C<K, V> {
+    friend constexpr auto operator<= (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) <= static_cast<C<K, V>const &>(rhs));
+    }
+
+    friend constexpr auto operator< (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) < static_cast<C<K, V>const &>(rhs));
+    }
+
+    friend constexpr auto operator== (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) == static_cast<C<K, V>const &>(rhs));
+    }
+
+    friend constexpr auto operator!= (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) != static_cast<C<K, V>const &>(rhs));
+    }
+
+    template <class K1 = K, class V1 = V>
+        requires requires (const C<K1, V1>& c, K1 key) { { c.at(key) } -> std::same_as<V1&>; }
+    V1& at(const K1& key) {
+        return C<K1, V1>::at(key);
+    }
+
+    template <class K1 = K, class V1 = V>
+        requires requires (const C<K1, V1>& c) { { c.size() } -> std::same_as<size_t>; }
+    size_t size() {
+        return C<K1, V1>::size();
+    }
+
+    template <class K1 = K, class V1 = V>
+        requires requires (const C<K1, V1>& c) { { c.empty() } -> std::same_as<bool>; }
+    bool empty() {
+        return C<K1, V1>::empty();
+    }
+
+    template <class K1 = K, class V1 = V>
+        requires requires (C<K1, V1>& c) { { c.clear() } -> std::same_as<void>; }
+    void clear() {
+        C<K1, V1>::clear();
+    }
+
+    template <class K1 = K, class V1 = V>
+        requires requires (C<K1, V1>& c) { { c.begin() } -> std::same_as<typename C<K1, V1>::iterator>; }
+    typename C<K1, V1>::iterator begin() {
+        return C<K1, V1>::begin();
+    }
+
+    template <class K1 = K, class V1 = V>
+        requires requires (C<K1, V1>& c) { { c.end() } -> std::same_as<typename C<K1, V1>::iterator>; }
+    typename C<K1, V1>::iterator end() {
+        return C<K1, V1>::end();
+    }
+
+    void print() {
+        std::cout << "Size: " << this->size() << std::endl;
+        for (auto it=this->begin(); it!=this->end(); it++)
+            std::cout << it->first << ", " << it->second << '\n';
+        std::cout << '\n';
+        std::cout << '\n';
     }
 };
 
