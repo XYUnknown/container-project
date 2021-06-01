@@ -23,6 +23,13 @@ struct WithProperty : public C<T> {
     { return std::disjunction_v<std::is_same<P, Ps>...>; }
 };
 
+template<class K, class V, template<class...> class C, class... Ps>
+struct WithPropertyM : public C<K, V> {
+    template<typename P>
+    static constexpr bool has_property()
+    { return std::disjunction_v<std::is_same<P, Ps>...>; }
+};
+
 // A set implemented using a binary search tree
 template<class T>
 using TreeSetWrapper = WithProperty<T, std::set, Unique, Sorted>;
@@ -34,6 +41,10 @@ using TreeWrapper = WithProperty<T, std::multiset, Sorted>;
 // a hashset wrapper
 template<class T>
 using HashSetWrapper = WithProperty<T, std::unordered_set, Unique>;
+
+// A set implemented using a binary search tree
+template<class K, class V>
+using TreeMapWrapper = WithPropertyM<K, V, std::map, Unique, Sorted>;
 
 template<typename T, template<class...> class C>
 concept CUnique = C<T>::template has_property<Unique>();
@@ -368,6 +379,26 @@ struct Container<std::pair<K, V>, C> : private C<K, V> {
         requires requires (C<K1, V1>& c) { { c.end() } -> std::same_as<typename C<K1, V1>::iterator>; }
     typename C<K1, V1>::iterator end() {
         return C<K1, V1>::end();
+    }
+
+    //template <class K1 = K, class V1 = V>
+        //requires requires (C<K1, V>& c, const K1& key) { { c.contains(key) } -> std::same_as<bool>; }
+    bool contains(const K& key) const {
+        return C<K, V>::contains(key);
+    }
+
+    template <class K1 = K, class V1 = V>
+        requires (requires (C<K1, V1>& c, std::pair<K1, V1> val) { { c.insert(val) } -> std::same_as<std::pair<typename C<K1, V1>::iterator, bool>>; })
+                || (requires (C<K1, V1>& c, std::pair<K1, V1>  val) { { c.insert(val) } -> std::same_as<typename C<K1, V1>::iterator>; })
+    auto insert(std::pair<K1, V1>&& val) {
+        return C<K1, V1>::insert(val);
+    }
+
+    /*template <class K1 = K, class V1 = V>
+        requires (requires (C<K1, V1>& c, K1&& k, V1&& v) { { c.insert_or_assign(k, v) } -> std::same_as<std::pair<typename C<K1, V1>::iterator, bool>>; })*/
+    // TODO : fix this
+    auto insert_or_assign(K&& k, V&& v) {
+        return C<K, V>::insert_or_assign(k, v);
     }
 
     void print() {
