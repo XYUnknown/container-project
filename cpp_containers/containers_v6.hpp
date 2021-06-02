@@ -220,7 +220,6 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
 
     void push_back(T t) {
         if constexpr (CUnique<T, C>) {
-            std::cout << "CUnique specialization is called" << std::endl;
             Container<T, C, Ps...>::push_back(t);
         } else {
             if (!this->contains(t)) {
@@ -231,7 +230,6 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
 
     void push_front(T t) {
         if constexpr (CUnique<T, C>) {
-            std::cout << "CUnique specialization is called" << std::endl;
             Container<T, C, Ps...>::push_front(t);
         } else {
             if (!this->contains(t)) {
@@ -242,7 +240,6 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
 
     auto insert(typename C<T>::iterator pos, T t) {
         if constexpr (CUnique<T, C>) {
-            std::cout << "CUnique specialization is called" << std::endl;
             Container<T, C, Ps...>::insert(pos, t);
         } else {
             if (!this->contains(t)) {
@@ -253,7 +250,6 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
 
     auto insert(T t) {
         if constexpr (CUnique<T, C>) {
-            std::cout << "CUnique specialization is called" << std::endl;
             Container<T, C, Ps...>::insert(t);
         } else {
             if (!this->contains(t)) {
@@ -295,7 +291,6 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     // to be inserted in.
     auto insert(T t) {
         if constexpr (CSorted<T, C>) {
-            std::cout << "CSorted specialization is called" << std::endl;
             Container<T, C, Ps...>::insert(t);
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t);
@@ -305,7 +300,6 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
 
     bool contains(const T& t) {
         if constexpr (CSorted<T, C>) {
-            std::cout << "CSorted specialization is called" << std::endl;
             return Container<T, C, Ps...>::contains(t);
         } else {
             return std::binary_search(this->begin(), this->end(), t);
@@ -314,7 +308,6 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
 
     typename C<T>::iterator find(const T& t) {
         if constexpr (CSorted<T, C>) {
-            std::cout << "CSorted specialization is called" << std::endl;
             return Container<T, C, Ps...>::find(t);
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t);
