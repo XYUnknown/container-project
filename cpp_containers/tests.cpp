@@ -101,6 +101,26 @@ int main() {
     std::cout << "Container for unique sorted list" << std::endl;
     l5.print();
 
+    Container<int, std::vector, SortedOnAccess> v6;
+    v6.insert(6);
+    v6.insert(1);
+    v6.insert(6);
+    v6.insert(5);
+    assert(v6.find(7) == v6.end());
+    assert(!v6.contains(7));
+    std::cout << "Container for sorted (on access) vector" << std::endl;
+    v6.print();
+
+    Container<int, std::list, SortedOnAccess> l6;
+    l6.insert(6);
+    l6.insert(4);
+    l6.insert(1);
+    l6.insert(4);
+    assert(l6.find(7) == l6.end());
+    assert(!l6.contains(7));
+    std::cout << "Container for sorted (on access) list" << std::endl;
+    l6.print();
+
     TreeSetWrapper<int> sw;
     sw.size();
     static_assert(sw.has_property<Unique>()); // not recommended to call in this way
