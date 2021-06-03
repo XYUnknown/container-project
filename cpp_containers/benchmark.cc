@@ -151,7 +151,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpSmallFixture, SortedVecLookupSmall, std:
 }
 BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedVecLookupSmall)->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpSmallFixture, MultiSetLookupSmall, std::multiset)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpSmallFixture, MultiSetLookupSmall, TreeWrapper)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -163,19 +163,6 @@ BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpSmallFixture, MultiSetLookupSmall, std::
     }
 }
 BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, MultiSetLookupSmall)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall, std::multiset, Sorted)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedMultiSetLookupSmall)->Unit(benchmark::kMillisecond);
 
 
 BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, SortedVecLookupMedium, std::vector, Sorted)(benchmark::State& state) {
@@ -192,7 +179,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, SortedVecLookupMedium, st
 BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedVecLookupMedium)->Unit(benchmark::kMillisecond);
 
 
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, MultiSetLookupMedium, std::multiset)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, MultiSetLookupMedium, TreeWrapper)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -204,19 +191,6 @@ BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, MultiSetLookupMedium, std
     }
 }
 BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, MultiSetLookupMedium)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium, std::multiset, Sorted)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedMultiSetLookupMedium)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, SortedVecLookupLarge, std::vector, Sorted)(benchmark::State& state) {
     volatile std::size_t result;
@@ -231,7 +205,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, SortedVecLookupLarge, std:
 }
 BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedVecLookupLarge)->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, MultiSetLookupLarge, std::multiset)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, MultiSetLookupLarge, TreeWrapper)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -243,19 +217,6 @@ BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, MultiSetLookupLarge, std::
     }
 }
 BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, MultiSetLookupLarge)->Unit(benchmark::kMillisecond);
-
-/*BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge, std::multiset, Sorted)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedMultiSetLookupLarge)->Unit(benchmark::kMillisecond);*/
 
 BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpXLargeFixture, SortedVecLookupXLarge, std::vector, Sorted)(benchmark::State& state) {
     volatile std::size_t result;
@@ -270,7 +231,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpXLargeFixture, SortedVecLookupXLarge, st
 }
 BENCHMARK_REGISTER_F(SortedLookUpXLargeFixture, SortedVecLookupXLarge)->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpXLargeFixture, MultiSetLookupXLarge, std::multiset)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpXLargeFixture, MultiSetLookupXLarge, TreeWrapper)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
