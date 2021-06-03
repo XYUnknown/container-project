@@ -12,6 +12,7 @@
 
 class Unique {};
 class Sorted {};
+class SortedOnAccess{};
 
 template<class T, template<class...> class C, class... Ps>
 struct Container;
@@ -179,6 +180,22 @@ struct Container<T, C> : private C<T> {
         return this->find(value) != this->end();
     }
 
+    /**
+     * Two different versions of sort is necessary is because list cannot
+     * be sorted using std::sort
+     */
+    template <class Q = T>
+        requires requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; }
+    void sort() {
+        return C<Q>::sort();
+    }
+
+    template <class Q = T>
+        requires (!requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; })
+    void sort() {
+        std::sort(this->begin(), this->end());
+    }
+
     void print() {
         std::cout << "Size: " << this->size() << std::endl;
         for (auto it=this->begin(); it!=this->end(); it++)
@@ -201,6 +218,7 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::erase;
     using Container<T, C, Ps...>::at;
     using Container<T, C, Ps...>::reserve;
+    using Container<T, C, Ps...>::sort;
 
     friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
@@ -270,7 +288,7 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::erase;
     using Container<T, C, Ps...>::at;
     using Container<T, C, Ps...>::reserve;
-
+    using Container<T, C, Ps...>::sort; // to be consistent
 
     friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
@@ -319,8 +337,131 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     }
 };
 
+template<class T, template<typename...> class C, class ...Ps>
+struct Container<T, C, SortedOnAccess, Ps...> : private Container<T, C, Ps...> {
+    using Container<T, C, Ps...>::size;
+    using Container<T, C, Ps...>::empty;
+    using Container<T, C, Ps...>::clear;
+    using Container<T, C, Ps...>::reserve;
+    using Container<T, C, Ps...>::sort;
+
+    private:
+    bool isSorted = true;
+    void sortOnAccess() {
+        this->sort();
+        isSorted = true;
+    }
+    
+    public:
+    friend constexpr auto operator<= (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    friend constexpr auto operator< (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) < static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    friend constexpr auto operator== (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) == static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    friend constexpr auto operator!= (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+        return (static_cast<const Container<T, C, Ps...>&>(lhs) != static_cast<const Container<T, C, Ps...>&>(rhs));
+    }
+
+    auto at(size_t pos) {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::at(pos);
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::at(pos);
+        }
+    }
+
+    auto insert(T t) {
+        if constexpr (CSorted<T, C>) {
+            Container<T, C, Ps...>::insert(t);
+        } else {
+            this->isSorted = false;
+            Container<T, C, Ps...>::insert(t);
+        }
+    }
+
+    auto begin() {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::begin();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::begin();
+        }
+    }
+
+    auto end() {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::end();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::end();
+        }
+    }
+
+    auto erase(typename C<T>::iterator pos) {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::erase(pos);
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::erase(pos);
+        }
+    }
+
+    bool contains(const T& t) {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::contains(t);
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return std::binary_search(this->begin(), this->end(), t);
+        }
+    }
+
+    typename C<T>::iterator find(const T& t) {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::find(t);
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            auto pos = std::lower_bound(this->begin(), this->end(), t);
+            if (*pos != t) { // element not found
+                return this->end();
+            }
+            return pos;
+        }
+    }
+
+    void print() {
+        if constexpr (CSorted<T, C>) {
+            Container<T, C, Ps...>::print();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            Container<T, C, Ps...>::print();
+        }
+    }
+};
+
 /* Maps */
-template<class K, class V, template<class...> class C>
+template<class K, class V, template<class...> /*template<class, class> */ class C>
 struct Container<std::pair<K, V>, C> : private C<K, V> {
     friend constexpr auto operator<= (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
         return (static_cast<C<K, V>const &>(lhs) <= static_cast<C<K, V>const &>(rhs));
