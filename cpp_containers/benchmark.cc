@@ -346,6 +346,15 @@ BENCHMARK_DEFINE_F(InsertionFixture_1KB, SortedVectorInsertion_1KB)(benchmark::S
 }
 BENCHMARK_REGISTER_F(InsertionFixture_1KB, SortedVectorInsertion_1KB)->Unit(benchmark::kMillisecond);
 
+BENCHMARK_DEFINE_F(InsertionFixture_1KB, SortedOnAccessVectorInsertion_1KB)(benchmark::State& state) {
+    Container<std::size_t, std::vector, SortedOnAccess> c;
+    while (state.KeepRunning()) {
+        for (std::size_t i=0; i < size; i++)
+            c.insert((std::size_t)generator());
+    }
+}
+BENCHMARK_REGISTER_F(InsertionFixture_1KB, SortedOnAccessVectorInsertion_1KB)->Unit(benchmark::kMillisecond);
+
 BENCHMARK_DEFINE_F(InsertionFixture_100KB, SortedMultiSetInsertion_100KB)(benchmark::State& state) {
     Container<std::size_t, TreeWrapper> c;
     while (state.KeepRunning()) {
@@ -363,6 +372,15 @@ BENCHMARK_DEFINE_F(InsertionFixture_100KB, SortedVectorInsertion_100KB)(benchmar
     }
 }
 BENCHMARK_REGISTER_F(InsertionFixture_100KB, SortedVectorInsertion_100KB)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_DEFINE_F(InsertionFixture_100KB, SortedOnAccessVectorInsertion_100KB)(benchmark::State& state) {
+    Container<std::size_t, std::vector, SortedOnAccess> c;
+    while (state.KeepRunning()) {
+        for (std::size_t i=0; i < size; i++)
+            c.insert((std::size_t)generator());
+    }
+}
+BENCHMARK_REGISTER_F(InsertionFixture_100KB, SortedOnAccessVectorInsertion_100KB)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_DEFINE_F(InsertionFixture_1MB, SortedMultiSetInsertion_1MB)(benchmark::State& state) {
     Container<std::size_t, TreeWrapper> c;
@@ -382,6 +400,15 @@ BENCHMARK_DEFINE_F(InsertionFixture_1MB, SortedVectorInsertion_1MB)(benchmark::S
 }
 BENCHMARK_REGISTER_F(InsertionFixture_1MB, SortedVectorInsertion_1MB)->Unit(benchmark::kMillisecond);
 
+BENCHMARK_DEFINE_F(InsertionFixture_1MB, SortedOnAccessVectorInsertion_1MB)(benchmark::State& state) {
+    Container<std::size_t, std::vector, SortedOnAccess> c;
+    while (state.KeepRunning()) {
+        for (std::size_t i=0; i < size; i++)
+            c.insert((std::size_t)generator());
+    }
+}
+BENCHMARK_REGISTER_F(InsertionFixture_1MB, SortedOnAccessVectorInsertion_1MB)->Unit(benchmark::kMillisecond);
+
 BENCHMARK_DEFINE_F(InsertionFixture_100MB, SortedMultiSetInsertion_100MB)(benchmark::State& state) {
     Container<std::size_t, TreeWrapper> c;
     while (state.KeepRunning()) {
@@ -399,6 +426,15 @@ BENCHMARK_DEFINE_F(InsertionFixture_100MB, SortedVectorInsertion_100MB)(benchmar
     }
 }
 BENCHMARK_REGISTER_F(InsertionFixture_100MB, SortedVectorInsertion_100MB)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_DEFINE_F(InsertionFixture_100MB, SortedOnAccessVectorInsertion_100MB)(benchmark::State& state) {
+    Container<std::size_t, std::vector, SortedOnAccess> c;
+    while (state.KeepRunning()) {
+        for (std::size_t i=0; i < size; i++)
+            c.insert((std::size_t)generator());
+    }
+}
+BENCHMARK_REGISTER_F(InsertionFixture_100MB, SortedOnAccessVectorInsertion_100MB)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_DEFINE_F(InsertionFixture_1GB, SortedMultiSetInsertion_1GB)(benchmark::State& state) {
     Container<std::size_t, TreeWrapper> c;
@@ -418,6 +454,15 @@ BENCHMARK_DEFINE_F(InsertionFixture_1GB, SortedVectorInsertion_1GB)(benchmark::S
 }
 BENCHMARK_REGISTER_F(InsertionFixture_1GB, SortedVectorInsertion_1GB)->Unit(benchmark::kMillisecond);
 
+BENCHMARK_DEFINE_F(InsertionFixture_1GB, SortedOnAccessVectorInsertion_1GB)(benchmark::State& state) {
+    Container<std::size_t, std::vector, SortedOnAccess> c;
+    while (state.KeepRunning()) {
+        for (std::size_t i=0; i < size; i++)
+            c.insert((std::size_t)generator());
+    }
+}
+BENCHMARK_REGISTER_F(InsertionFixture_1GB, SortedOnAccessVectorInsertion_1GB)->Unit(benchmark::kMillisecond);
+
 BENCHMARK_DEFINE_F(InsertionFixture_4GB, SortedMultiSetInsertion_4GB)(benchmark::State& state) {
     Container<std::size_t, TreeWrapper> c;
     while (state.KeepRunning()) {
@@ -435,6 +480,15 @@ BENCHMARK_DEFINE_F(InsertionFixture_4GB, SortedVectorInsertion_4GB)(benchmark::S
     }
 }
 BENCHMARK_REGISTER_F(InsertionFixture_4GB, SortedVectorInsertion_4GB)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_DEFINE_F(InsertionFixture_4GB, SortedOnAccessVectorInsertion_4GB)(benchmark::State& state) {
+    Container<std::size_t, std::vector, SortedOnAccess> c;
+    while (state.KeepRunning()) {
+        for (std::size_t i=0; i < size; i++)
+            c.insert((std::size_t)generator());
+    }
+}
+BENCHMARK_REGISTER_F(InsertionFixture_4GB, SortedOnAccessVectorInsertion_4GB)->Unit(benchmark::kMillisecond);
 
 /** Consecutive insertion and lookup benchmarks
     1 insertion 1 lookup
