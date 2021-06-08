@@ -51,7 +51,28 @@ template<template<typename...> class C, class ...Ps>
 class LookUp_1000_100KB: public ::benchmark::Fixture {
 public:
     // size_t --> 8 bytes
-    std::size_t size = 25*512; // 1KB data
+    std::size_t size = 25*512; // 100KB data
+    Container<std::size_t, C, Ps...> c;
+
+    std::size_t lookup_size = 1000; // perform 1000 lookups
+    std::vector<std::size_t> lookups;
+
+    void SetUp(const ::benchmark::State& st) {
+        lookups = Generate(lookup_size);
+        Generate(c, size);
+    }
+
+    void TearDown(const ::benchmark::State&) {
+        lookups.clear();
+        c.clear();
+    }
+};
+
+template<template<typename...> class C, class ...Ps>
+class LookUp_1000_1MB: public ::benchmark::Fixture {
+public:
+    // size_t --> 8 bytes
+    std::size_t size = 128*1024; // 1MB data
     Container<std::size_t, C, Ps...> c;
 
     std::size_t lookup_size = 1000; // perform 1000 lookups
@@ -251,186 +272,6 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, SortedOnAccessList_100KB_1000Look
 }
 BENCHMARK_REGISTER_F(LookUp_1000_100KB, SortedOnAccessList_100KB_1000LookUp)->Unit(benchmark::kMillisecond);
 
-/*template<template<typename...> class C, class ...Ps>
-class SortedLookUpMediumFixture : public ::benchmark::Fixture {
-public:
-    // size_t --> 8 bytes
-    std::size_t size = 10*1024; // 80KB data
-    std::vector<std::size_t> data;
-
-    std::size_t lookup_size = 1000;
-    std::vector<std::size_t> lookups;
-
-    Container<std::size_t, C, Ps...> c;
-
-    void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size, size*2);
-        data = Generate(size, size*2);
-        Copy(data, c);
-    }
-
-    void TearDown(const ::benchmark::State&) {
-        data.clear();
-        lookups.clear();
-        c.clear();
-    }
-};
-
-template<template<typename...> class C, class ...Ps>
-class SortedLookUpLargeFixture : public ::benchmark::Fixture {
-public:
-    // size_t --> 8 bytes
-    std::size_t size = 1024*1024; // 8MB data
-    std::vector<std::size_t> data;
-
-    std::size_t lookup_size = 1000;
-    std::vector<std::size_t> lookups;
-
-    Container<std::size_t, C, Ps...> c;
-
-    void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size, size*2);
-        data = Generate(size, size*2);
-        Copy(data, c);
-    }
-
-    void TearDown(const ::benchmark::State&) {
-        data.clear();
-        lookups.clear();
-        c.clear();
-    }
-};
-
-template<template<typename...> class C, class ...Ps>
-class SortedLookUpXLargeFixture : public ::benchmark::Fixture {
-public:
-    // size_t --> 8 bytes
-    std::size_t size = 1024*1024*1024; // 8GB data
-    std::vector<std::size_t> data;
-
-    std::size_t lookup_size = 1000;
-    std::vector<std::size_t> lookups;
-
-    Container<std::size_t, C, Ps...> c;
-
-    void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size, size*2);
-        data = Generate(size, size*2);
-        Copy(data, c);
-    }
-
-    void TearDown(const ::benchmark::State&) {
-        data.clear();
-        lookups.clear();
-        c.clear();
-    }
-};
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpSmallFixture, SortedVecLookupSmall, std::vector, Sorted)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, SortedVecLookupSmall)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpSmallFixture, MultiSetLookupSmall, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpSmallFixture, MultiSetLookupSmall)->Unit(benchmark::kMillisecond);
-
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, SortedVecLookupMedium, std::vector, Sorted)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, SortedVecLookupMedium)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpMediumFixture, MultiSetLookupMedium, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpMediumFixture, MultiSetLookupMedium)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, SortedVecLookupLarge, std::vector, Sorted)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, SortedVecLookupLarge)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpLargeFixture, MultiSetLookupLarge, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpLargeFixture, MultiSetLookupLarge)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpXLargeFixture, SortedVecLookupXLarge, std::vector, Sorted)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpXLargeFixture, SortedVecLookupXLarge)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(SortedLookUpXLargeFixture, MultiSetLookupXLarge, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(SortedLookUpXLargeFixture, MultiSetLookupXLarge)->Unit(benchmark::kMillisecond);
-*/
 /** Insertion benchmarks */
 class InsertionFixture_1KB : public ::benchmark::Fixture {
 public:
