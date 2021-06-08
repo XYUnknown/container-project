@@ -89,6 +89,7 @@ public:
     }
 };
 
+/* 1KB 1000 lookups*/
 BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, SortedVec_1KB_1000LookUp, std::vector, Sorted)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
@@ -180,7 +181,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, SortedOnAccessList_1KB_1000LookUp, 
 }
 BENCHMARK_REGISTER_F(LookUp_1000_1KB, SortedOnAccessList_1KB_1000LookUp)->Unit(benchmark::kMillisecond);
 
-
+/* 100KB 1000 lookups*/
 BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, SortedVec_100KB_1000LookUp, std::vector, Sorted)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
@@ -271,6 +272,98 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, SortedOnAccessList_100KB_1000Look
     }
 }
 BENCHMARK_REGISTER_F(LookUp_1000_100KB, SortedOnAccessList_100KB_1000LookUp)->Unit(benchmark::kMillisecond);
+
+/* 1MB 1000 lookups*/
+BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, SortedVec_1MB_1000LookUp, std::vector, Sorted)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups) {
+            auto it = c.find(item);
+            if (it != c.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(LookUp_1000_1MB, SortedVec_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, SortedOnAccessVec_1MB_1000LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups) {
+            auto it = c.find(item);
+            if (it != c.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(LookUp_1000_1MB, SortedOnAccessVec_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, BST_1MB_1000LookUp, TreeWrapper)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups) {
+            auto it = c.find(item);
+            if (it != c.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(LookUp_1000_1MB, BST_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, HashSet_1MB_1000LookUp, HashSetWrapper)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups) {
+            auto it = c.find(item);
+            if (it != c.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(LookUp_1000_1MB, HashSet_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, TreeSet_1MB_1000LookUp, TreeSetWrapper)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups) {
+            auto it = c.find(item);
+            if (it != c.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(LookUp_1000_1MB, TreeSet_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, SortedList_1MB_1000LookUp, std::list, Sorted)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups) {
+            auto it = c.find(item);
+            if (it != c.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(LookUp_1000_1MB, SortedList_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, SortedOnAccessList_1MB_1000LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
+    volatile std::size_t result;
+    while (state.KeepRunning()) {
+        for (std::size_t item : lookups) {
+            auto it = c.find(item);
+            if (it != c.end()) {
+                result = *it;
+            }
+        }
+    }
+}
+BENCHMARK_REGISTER_F(LookUp_1000_1MB, SortedOnAccessList_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
 
 /** Insertion benchmarks */
 class InsertionFixture_1KB : public ::benchmark::Fixture {
