@@ -31,18 +31,18 @@ constexpr bool has_property()
 
 /** Lookup benchmarks */
 template<template<typename...> class C, class ...Ps>
-class LookUp_1000_1KB: public ::benchmark::Fixture {
+class LookUpFixture: public ::benchmark::Fixture {
 public:
     // size_t --> 8 bytes
-    std::size_t size = 128; // 1KB data
+    //std::size_t size = 128; // 1KB data
     Container<std::size_t, C, Ps...> c;
 
-    std::size_t lookup_size = 1000; // perform 1000 lookups
+    //std::size_t lookup_size = 1000; // perform 1000 lookups
     std::vector<std::size_t> lookups;
 
     void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size);
-        Generate(c, size);
+        lookups = Generate(st.range(1));
+        Generate(c, st.range(0));
         if constexpr (has_property<SortedOnAccess, Ps...>()) {
             c.sort(); // for sorted vectors and sorted lists
         }
@@ -54,104 +54,8 @@ public:
     }
 };
 
-template<template<typename...> class C, class ...Ps>
-class LookUp_1000_100KB: public ::benchmark::Fixture {
-public:
-    // size_t --> 8 bytes
-    std::size_t size = 25*512; // 100KB data
-    Container<std::size_t, C, Ps...> c;
-
-    std::size_t lookup_size = 1000; // perform 1000 lookups
-    std::vector<std::size_t> lookups;
-
-    void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size);
-        Generate(c, size);
-        if constexpr (has_property<SortedOnAccess, Ps...>()) {
-            c.sort(); // for sorted vectors and sorted lists
-        }
-    }
-
-    void TearDown(const ::benchmark::State&) {
-        lookups.clear();
-        c.clear();
-    }
-};
-
-template<template<typename...> class C, class ...Ps>
-class LookUp_1000_1MB: public ::benchmark::Fixture {
-public:
-    // size_t --> 8 bytes
-    std::size_t size = 128*1024; // 1MB data
-    Container<std::size_t, C, Ps...> c;
-
-    std::size_t lookup_size = 1000; // perform 1000 lookups
-    std::vector<std::size_t> lookups;
-
-    void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size);
-        Generate(c, size);
-        if constexpr (has_property<SortedOnAccess, Ps...>()) {
-            c.sort(); // for sorted vectors and sorted lists
-        }
-    }
-
-    void TearDown(const ::benchmark::State&) {
-        lookups.clear();
-        c.clear();
-    }
-};
-
-template<template<typename...> class C, class ...Ps>
-class LookUp_1000_100MB: public ::benchmark::Fixture {
-public:
-    // size_t --> 8 bytes
-    std::size_t size = 100*128*1024; // 100MB data
-    Container<std::size_t, C, Ps...> c;
-
-    std::size_t lookup_size = 1000; // perform 1000 lookups
-    std::vector<std::size_t> lookups;
-
-    void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size);
-        Generate(c, size);
-        if constexpr (has_property<SortedOnAccess, Ps...>()) {
-            c.sort(); // for sorted vectors and sorted lists
-        }
-    }
-
-    void TearDown(const ::benchmark::State&) {
-        lookups.clear();
-        c.clear();
-    }
-};
-
-template<template<typename...> class C, class ...Ps>
-class LookUp_1000_1GB: public ::benchmark::Fixture {
-public:
-    // size_t --> 8 bytes
-    std::size_t size = 128*1024*1024; // 1GB data
-    Container<std::size_t, C, Ps...> c;
-
-    std::size_t lookup_size = 1000; // perform 1000 lookups
-    std::vector<std::size_t> lookups;
-
-    void SetUp(const ::benchmark::State& st) {
-        lookups = Generate(lookup_size);
-        Generate(c, size);
-        if constexpr (has_property<SortedOnAccess, Ps...>()) {
-            c.sort(); // for sorted vectors and sorted lists
-        }
-    }
-
-    void TearDown(const ::benchmark::State&) {
-        lookups.clear();
-        c.clear();
-    }
-};
-
-/* 1KB 1000 lookups*/
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, SortedOnAccessVec_1KB_1000LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
+// Sorted Vector Lookup
+BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedOnAccessVec_LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -162,9 +66,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, SortedOnAccessVec_1KB_1000LookUp, s
         }
     }
 }
-BENCHMARK_REGISTER_F(LookUp_1000_1KB, SortedOnAccessVec_1KB_1000LookUp)->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(LookUpFixture, SortedOnAccessVec_LookUp)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({128, 10}) // 1KB, 10 lookup
+    ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 100000}) // 1KB, 100000 lookup
+    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 100000}) // 100KB, 100000 lookup
+    ->Args({128*1024, 10}) // 1MB, 10 lookup
+    ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
+    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
+    ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, BST_1KB_1000LookUp, TreeWrapper)(benchmark::State& state) {
+// Binary Search Tree (Multiset) Lookup
+BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, BST_LookUp, TreeWrapper)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -175,9 +96,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, BST_1KB_1000LookUp, TreeWrapper)(be
         }
     }
 }
-BENCHMARK_REGISTER_F(LookUp_1000_1KB, BST_1KB_1000LookUp)->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(LookUpFixture, BST_LookUp)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({128, 10}) // 1KB, 10 lookup
+    ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 100000}) // 1KB, 100000 lookup
+    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 100000}) // 100KB, 100000 lookup
+    ->Args({128*1024, 10}) // 1MB, 10 lookup
+    ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
+    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
+    ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, HashSet_1KB_1000LookUp, HashSetWrapper)(benchmark::State& state) {
+// TreeSet Lookup
+BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, TreeSet_LookUp, TreeSetWrapper)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -188,9 +126,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, HashSet_1KB_1000LookUp, HashSetWrap
         }
     }
 }
-BENCHMARK_REGISTER_F(LookUp_1000_1KB, HashSet_1KB_1000LookUp)->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(LookUpFixture, TreeSet_LookUp)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({128, 10}) // 1KB, 10 lookup
+    ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 100000}) // 1KB, 100000 lookup
+    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 100000}) // 100KB, 100000 lookup
+    ->Args({128*1024, 10}) // 1MB, 10 lookup
+    ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
+    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
+    ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, TreeSet_1KB_1000LookUp, TreeSetWrapper)(benchmark::State& state) {
+// HashSet Lookup
+BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, HashSet_LookUp, HashSetWrapper)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -201,9 +156,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, TreeSet_1KB_1000LookUp, TreeSetWrap
         }
     }
 }
-BENCHMARK_REGISTER_F(LookUp_1000_1KB, TreeSet_1KB_1000LookUp)->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(LookUpFixture, HashSet_LookUp)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({128, 10}) // 1KB, 10 lookup
+    ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 100000}) // 1KB, 100000 lookup
+    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 100000}) // 100KB, 100000 lookup
+    ->Args({128*1024, 10}) // 1MB, 10 lookup
+    ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
+    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
+    ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, SortedOnAccessList_1KB_1000LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
+// Sorted List Lookup
+BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedList_LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -214,271 +186,23 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1KB, SortedOnAccessList_1KB_1000LookUp, 
         }
     }
 }
-BENCHMARK_REGISTER_F(LookUp_1000_1KB, SortedOnAccessList_1KB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-/* 100KB 1000 lookups*/
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, SortedOnAccessVec_100KB_1000LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100KB, SortedOnAccessVec_100KB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, BST_100KB_1000LookUp, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100KB, BST_100KB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, HashSet_100KB_1000LookUp, HashSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100KB, HashSet_100KB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, TreeSet_100KB_1000LookUp, TreeSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100KB, TreeSet_100KB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100KB, SortedOnAccessList_100KB_1000LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100KB, SortedOnAccessList_100KB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-/* 1MB 1000 lookups*/
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, SortedOnAccessVec_1MB_1000LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1MB, SortedOnAccessVec_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, BST_1MB_1000LookUp, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1MB, BST_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, HashSet_1MB_1000LookUp, HashSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1MB, HashSet_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, TreeSet_1MB_1000LookUp, TreeSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1MB, TreeSet_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1MB, SortedOnAccessList_1MB_1000LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1MB, SortedOnAccessList_1MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-/* 100MB 1000 lookups*/
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100MB, SortedOnAccessVec_100MB_1000LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100MB, SortedOnAccessVec_100MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100MB, BST_100MB_1000LookUp, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100MB, BST_100MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100MB, HashSet_100MB_1000LookUp, HashSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100MB, HashSet_100MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100MB, TreeSet_100MB_1000LookUp, TreeSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100MB, TreeSet_100MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_100MB, SortedOnAccessList_100MB_1000LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_100MB, SortedOnAccessList_100MB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-/* 1GB 1000 lookups*/
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1GB, SortedOnAccessVec_1GB_1000LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1GB, SortedOnAccessVec_1GB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1GB, BST_1GB_1000LookUp, TreeWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1GB, BST_1GB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1GB, HashSet_1GB_1000LookUp, HashSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1GB, HashSet_1GB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1GB, TreeSet_1GB_1000LookUp, TreeSetWrapper)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1GB, TreeSet_1GB_1000LookUp)->Unit(benchmark::kMillisecond);
-
-BENCHMARK_TEMPLATE_DEFINE_F(LookUp_1000_1GB, SortedOnAccessList_1GB_1000LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
-    volatile std::size_t result;
-    while (state.KeepRunning()) {
-        for (std::size_t item : lookups) {
-            auto it = c.find(item);
-            if (it != c.end()) {
-                result = *it;
-            }
-        }
-    }
-}
-BENCHMARK_REGISTER_F(LookUp_1000_1GB, SortedOnAccessList_1GB_1000LookUp)->Unit(benchmark::kMillisecond);
+BENCHMARK_REGISTER_F(LookUpFixture, SortedList_LookUp)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({128, 10}) // 1KB, 10 lookup
+    ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 100000}) // 1KB, 100000 lookup
+    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 100000}) // 100KB, 100000 lookup
+    ->Args({128*1024, 10}) // 1MB, 10 lookup
+    ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
+    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
+    ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 /** Insertion benchmarks */
 class InsertionFixture_1KB : public ::benchmark::Fixture {
