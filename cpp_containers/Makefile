@@ -1,5 +1,12 @@
 CC = clang++ -std=c++20
 
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
+	CC = clang++ -std=c++20
+else
+	CC = ~/tools/clang+llvm-12.0.0-x86_64-linux-sles12.4/bin/clang++ -std=c++20 -stdlib=libc++
+endif
+
 all: containers.cpp containers_v2.cpp containers_v3.cpp containers_v4.cpp containers_v5.cpp containers_v6.hpp tests.cpp vectors.cpp
 	mkdir -p build
 	$(CC) -Wall -Werror -o ./build/containers containers.cpp
