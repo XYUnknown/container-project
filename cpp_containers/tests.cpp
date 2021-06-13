@@ -2,6 +2,7 @@
 // should be replaced by some unit test
 #include <string>
 #include <string_view>
+#include <cassert> // To be compiled on Ubuntu
 
 #include "containers_v6.hpp"
 int main() {
