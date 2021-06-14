@@ -60,4 +60,4 @@ cabal.project.local~
 
 # CPP
 build/
-./cpp_containers/benchmark/*
+benchmark/
