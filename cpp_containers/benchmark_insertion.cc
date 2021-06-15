@@ -132,9 +132,9 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedList_Insertion)
     ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
     ->Args({128*1024}) // 1MB
-    ->Args({10*128*1024}) // 10MB
-    ->Args({100*128*1024}) // 100MB
-    ->Args({128*1024*1024}); // 1GB
+    //->Args({10*128*1024}) // 10MB
+    //->Args({100*128*1024}) // 100MB
+    //->Args({128*1024*1024}); // 1GB
 
 /* Sorted list (on access) insertion */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessList_Insertion)(benchmark::State& state) {
