@@ -40,6 +40,8 @@ public:
     //std::size_t lookup_size = 1000; // perform 1000 lookups
     std::vector<std::size_t> lookups;
 
+    //std::chrono::milliseconds timeout{60000}; // 1 min
+
     void SetUp(const ::benchmark::State& st) {
         lookups = Generate(st.range(1));
         Generate(c, st.range(0));
@@ -68,20 +70,28 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, UnsortedVec_LookUp, std::vector)(benc
 }
 BENCHMARK_REGISTER_F(LookUpFixture, UnsortedVec_LookUp)
     ->Unit(benchmark::kMillisecond)
-    ->Args({128, 10}) // 1KB, 10 lookup
     ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 10000}) // 1KB, 10000 lookup
     ->Args({128, 100000}) // 1KB, 100000 lookup
-    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({10*128, 1000}) // 10KB, 1000 lookup
+    ->Args({10*128, 10000}) // 10KB, 10000 lookup
+    ->Args({10*128, 100000}) // 10KB, 100000 lookup
     ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 10000}) // 100KB, 10000 lookup
     ->Args({100*128, 100000}) // 100KB, 100000 lookup
-    ->Args({128*1024, 10}) // 1MB, 10 lookup
     ->Args({128*1024, 1000}) // 1MB, 1000 lookup
-    ->Args({128*1024, 100000}); // 1MB, 100000 lookup
-    //->Args({100*128*1024, 10}) // 100MB, 10 lookup
-    //->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({128*1024, 10000}) // 1MB, 10000 lookup
+    ->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    ->Args({10*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({10*128*1024, 10000}) // 100MB, 10000 lookup
+    ->Args({10*128*1024, 100000}) // 100MB, 100000 lookup
+    ->Args({100*128*1024, 1000}); // 100MB, 1000 lookup
+
+    /* > 1min */
+    //->Args({100*128*1024, 10000}) // 100MB, 10000 lookup
     //->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
-    //->Args({128*1024*1024, 10}) // 1GB, 10 lookup
     //->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    //->Args({128*1024*1024, 10000}) // 1GB, 10 lookup
     //->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // Sorted Vector Lookup
@@ -98,20 +108,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedOnAccessVec_LookUp, std::vector
 }
 BENCHMARK_REGISTER_F(LookUpFixture, SortedOnAccessVec_LookUp)
     ->Unit(benchmark::kMillisecond)
-    ->Args({128, 10}) // 1KB, 10 lookup
     ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 10000}) // 1KB, 10000 lookup
     ->Args({128, 100000}) // 1KB, 100000 lookup
-    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({10*128, 1000}) // 10KB, 1000 lookup
+    ->Args({10*128, 10000}) // 10KB, 10000 lookup
+    ->Args({10*128, 100000}) // 10KB, 100000 lookup
     ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 10000}) // 100KB, 10000 lookup
     ->Args({100*128, 100000}) // 100KB, 100000 lookup
-    ->Args({128*1024, 10}) // 1MB, 10 lookup
     ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 10000}) // 1MB, 10000 lookup
     ->Args({128*1024, 100000}) // 1MB, 100000 lookup
-    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({10*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({10*128*1024, 10000}) // 100MB, 10000 lookup
+    ->Args({10*128*1024, 100000}) // 100MB, 100000 lookup
     ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 10000}) // 100MB, 10000 lookup
     ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
-    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 10000}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // Binary Search Tree (Multiset) Lookup
@@ -128,20 +144,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, BST_LookUp, TreeWrapper)(benchmark::S
 }
 BENCHMARK_REGISTER_F(LookUpFixture, BST_LookUp)
     ->Unit(benchmark::kMillisecond)
-    ->Args({128, 10}) // 1KB, 10 lookup
     ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 10000}) // 1KB, 10000 lookup
     ->Args({128, 100000}) // 1KB, 100000 lookup
-    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({10*128, 1000}) // 10KB, 1000 lookup
+    ->Args({10*128, 10000}) // 10KB, 10000 lookup
+    ->Args({10*128, 100000}) // 10KB, 100000 lookup
     ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 10000}) // 100KB, 10000 lookup
     ->Args({100*128, 100000}) // 100KB, 100000 lookup
-    ->Args({128*1024, 10}) // 1MB, 10 lookup
     ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 10000}) // 1MB, 10000 lookup
     ->Args({128*1024, 100000}) // 1MB, 100000 lookup
-    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({10*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({10*128*1024, 10000}) // 100MB, 10000 lookup
+    ->Args({10*128*1024, 100000}) // 100MB, 100000 lookup
     ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 10000}) // 100MB, 10000 lookup
     ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
-    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 10000}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // TreeSet Lookup
@@ -158,20 +180,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, TreeSet_LookUp, TreeSetWrapper)(bench
 }
 BENCHMARK_REGISTER_F(LookUpFixture, TreeSet_LookUp)
     ->Unit(benchmark::kMillisecond)
-    ->Args({128, 10}) // 1KB, 10 lookup
     ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 10000}) // 1KB, 10000 lookup
     ->Args({128, 100000}) // 1KB, 100000 lookup
-    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({10*128, 1000}) // 10KB, 1000 lookup
+    ->Args({10*128, 10000}) // 10KB, 10000 lookup
+    ->Args({10*128, 100000}) // 10KB, 100000 lookup
     ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 10000}) // 100KB, 10000 lookup
     ->Args({100*128, 100000}) // 100KB, 100000 lookup
-    ->Args({128*1024, 10}) // 1MB, 10 lookup
     ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 10000}) // 1MB, 10000 lookup
     ->Args({128*1024, 100000}) // 1MB, 100000 lookup
-    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({10*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({10*128*1024, 10000}) // 100MB, 10000 lookup
+    ->Args({10*128*1024, 100000}) // 100MB, 100000 lookup
     ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 10000}) // 100MB, 10000 lookup
     ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
-    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 10000}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // HashSet Lookup
@@ -188,20 +216,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, HashSet_LookUp, HashSetWrapper)(bench
 }
 BENCHMARK_REGISTER_F(LookUpFixture, HashSet_LookUp)
     ->Unit(benchmark::kMillisecond)
-    ->Args({128, 10}) // 1KB, 10 lookup
     ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 10000}) // 1KB, 10000 lookup
     ->Args({128, 100000}) // 1KB, 100000 lookup
-    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({10*128, 1000}) // 10KB, 1000 lookup
+    ->Args({10*128, 10000}) // 10KB, 10000 lookup
+    ->Args({10*128, 100000}) // 10KB, 100000 lookup
     ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 10000}) // 100KB, 10000 lookup
     ->Args({100*128, 100000}) // 100KB, 100000 lookup
-    ->Args({128*1024, 10}) // 1MB, 10 lookup
     ->Args({128*1024, 1000}) // 1MB, 1000 lookup
+    ->Args({128*1024, 10000}) // 1MB, 10000 lookup
     ->Args({128*1024, 100000}) // 1MB, 100000 lookup
-    ->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({10*128*1024, 1000}) // 10MB, 1000 lookup
+    ->Args({10*128*1024, 10000}) // 10MB, 10000 lookup
+    ->Args({10*128*1024, 100000}) // 10MB, 100000 lookup
     ->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({100*128*1024, 10000}) // 100MB, 10000 lookup
     ->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
-    ->Args({128*1024*1024, 10}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    ->Args({128*1024*1024, 10000}) // 1GB, 10 lookup
     ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // Sorted List Lookup
@@ -218,20 +252,28 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedList_LookUp, std::list, SortedO
 }
 BENCHMARK_REGISTER_F(LookUpFixture, SortedList_LookUp)
     ->Unit(benchmark::kMillisecond)
-    ->Args({128, 10}) // 1KB, 10 lookup
     ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 10000}) // 1KB, 10000 lookup
     ->Args({128, 100000}) // 1KB, 100000 lookup
-    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({10*128, 1000}) // 10KB, 1000 lookup
+    ->Args({10*128, 10000}) // 10KB, 10000 lookup
+    ->Args({10*128, 100000}) // 10KB, 100000 lookup
     ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 10000}) // 100KB, 10000 lookup
     ->Args({100*128, 100000}) // 100KB, 100000 lookup
-    ->Args({128*1024, 10}) // 1MB, 10 lookup
     ->Args({128*1024, 1000}) // 1MB, 1000 lookup
-    ->Args({128*1024, 100000}); // 1MB, 100000 lookup
-    //->Args({100*128*1024, 10}) // 100MB, 10 lookup
+    ->Args({128*1024, 10000}); // 1MB, 10000 lookup
+
+    /* > 1 min */
+    //->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    //->Args({10*128*1024, 1000}) // 10MB, 1000 lookup
+    //->Args({10*128*1024, 10000}) // 10MB, 10000 lookup
+    //->Args({10*128*1024, 100000}) // 10MB, 100000 lookup
     //->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    //->Args({100*128*1024, 10000}) // 100MB, 10000 lookup
     //->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
-    //->Args({128*1024*1024, 10}) // 1GB, 10 lookup
     //->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    //->Args({128*1024*1024, 10000}) // 1GB, 10 lookup
     //->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // Unsorted List Lookup
@@ -248,20 +290,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, UnsortedList_LookUp, std::list)(bench
 }
 BENCHMARK_REGISTER_F(LookUpFixture, UnsortedList_LookUp)
     ->Unit(benchmark::kMillisecond)
-    ->Args({128, 10}) // 1KB, 10 lookup
     ->Args({128, 1000}) // 1KB, 1000 lookup
+    ->Args({128, 10000}) // 1KB, 10000 lookup
     ->Args({128, 100000}) // 1KB, 100000 lookup
-    ->Args({100*128, 10}) // 100KB, 10 lookup
+    ->Args({10*128, 1000}) // 10KB, 1000 lookup
+    ->Args({10*128, 10000}) // 10KB, 10000 lookup
+    ->Args({10*128, 100000}) // 10KB, 100000 lookup
     ->Args({100*128, 1000}) // 100KB, 1000 lookup
+    ->Args({100*128, 10000}) // 100KB, 10000 lookup
     ->Args({100*128, 100000}) // 100KB, 100000 lookup
-    ->Args({128*1024, 10}) // 1MB, 10 lookup
     ->Args({128*1024, 1000}) // 1MB, 1000 lookup
-    ->Args({128*1024, 100000}); // 1MB, 100000 lookup
-    //->Args({100*128*1024, 10}) // 100MB, 10 lookup
-    //->Args({100*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({128*1024, 10000}) // 1MB, 10000 lookup
+    ->Args({128*1024, 100000}) // 1MB, 100000 lookup
+    ->Args({10*128*1024, 1000}) // 100MB, 1000 lookup
+    ->Args({10*128*1024, 10000}) // 100MB, 10000 lookup
+    //->Args({10*128*1024, 100000}) // 100MB, 100000 lookup
+    ->Args({100*128*1024, 1000}); // 100MB, 1000 lookup
+    //->Args({100*128*1024, 10000}) // 100MB, 10000 lookup
     //->Args({100*128*1024, 100000}) // 100MB, 100000 lookup
-    //->Args({128*1024*1024, 10}) // 1GB, 10 lookup
     //->Args({128*1024*1024, 1000}) // 1GB, 1000 lookup
+    //->Args({128*1024*1024, 10000}) // 1GB, 10 lookup
     //->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 /** Insertion benchmarks */
@@ -291,8 +339,10 @@ BENCHMARK_DEFINE_F(InsertionFixture, BST_Insertion)(benchmark::State& state) {
 BENCHMARK_REGISTER_F(InsertionFixture, BST_Insertion)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
     ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}) // 10MB
     ->Args({100*128*1024}) // 100MB
     ->Args({128*1024*1024}); // 1GB
 
@@ -307,10 +357,12 @@ BENCHMARK_DEFINE_F(InsertionFixture, SortedVector_Insertion)(benchmark::State& s
 BENCHMARK_REGISTER_F(InsertionFixture, SortedVector_Insertion)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
-    ->Args({128*1024}); // 1MB
-    //->Args({100*128*1024}) // 100MB
-    //->Args({128*1024*1024}); // 1GB
+    ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}) // 10MB
+    ->Args({100*128*1024}) // 100MB
+    ->Args({128*1024*1024}); // 1GB
 
 /* Sorted vector (on access) insertion */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessVector_Insertion)(benchmark::State& state) {
@@ -323,8 +375,10 @@ BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessVector_Insertion)(benchmark::
 BENCHMARK_REGISTER_F(InsertionFixture, SortedOnAccessVector_Insertion)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
     ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}) // 10MB
     ->Args({100*128*1024}) // 100MB
     ->Args({128*1024*1024}); // 1GB
 
@@ -339,8 +393,10 @@ BENCHMARK_DEFINE_F(InsertionFixture, TreeSet_Insertion)(benchmark::State& state)
 BENCHMARK_REGISTER_F(InsertionFixture, TreeSet_Insertion)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
     ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}) // 10MB
     ->Args({100*128*1024}) // 100MB
     ->Args({128*1024*1024}); // 1GB
 
@@ -355,8 +411,10 @@ BENCHMARK_DEFINE_F(InsertionFixture, HashSet_Insertion)(benchmark::State& state)
 BENCHMARK_REGISTER_F(InsertionFixture, HashSet_Insertion)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
     ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}) // 10MB
     ->Args({100*128*1024}) // 100MB
     ->Args({128*1024*1024}); // 1GB
 
@@ -371,10 +429,12 @@ BENCHMARK_DEFINE_F(InsertionFixture, SortedList_Insertion)(benchmark::State& sta
 BENCHMARK_REGISTER_F(InsertionFixture, SortedList_Insertion)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
-    ->Args({128*1024}); // 1MB
-    //->Args({100*128*1024}) // 100MB
-    //->Args({128*1024*1024}); // 1GB
+    ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}) // 10MB
+    ->Args({100*128*1024}) // 100MB
+    ->Args({128*1024*1024}); // 1GB
 
 /* Sorted list (on access) insertion */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessList_Insertion)(benchmark::State& state) {
@@ -387,8 +447,10 @@ BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessList_Insertion)(benchmark::St
 BENCHMARK_REGISTER_F(InsertionFixture, SortedOnAccessList_Insertion)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
     ->Args({100*128}) // 100KB
     ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}) // 10MB
     ->Args({100*128*1024}) // 100MB
     ->Args({128*1024*1024}); // 1GB
 
@@ -651,6 +713,5 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedOnAccessList_Insertion_LookUp)
     //->Args({128*1024*1024, 1}) // 1GB, 1 step
     //->Args({128*1024*1024, 1000}) // 1GB, 1000 step
     //->Args({128*1024*1024, 1000000}); // 1GB, 1000000 step
-
 
 BENCHMARK_MAIN();
