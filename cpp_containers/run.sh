@@ -1,6 +1,6 @@
 #!/bin/bash
 mkdir -p results
-
-./build/benchmark_o2 --benchmark_out=./results/benchmark_o2.json --benchmark_out_format=json
-
-./build/benchmark_o3 --benchmark_out=./results/benchmark_o3.json --benchmark_out_format=json
+./bench/benchmark_unique_o2 --benchmark_out=./results/benchmark_unique_o2.json --benchmark_out_format=json
+./bench/benchmark_insertion_o2 --benchmark_out=./results/benchmark_insertion_o2.json --benchmark_out_format=json
+./bench/benchmark_lookup_o2 --benchmark_out=./results/benchmark_lookup_o2.json --benchmark_out_format=json
+./bench/benchmark_insertion_lookup_o2 --benchmark_out=./results/benchmark_insertion_lookup_o2.json --benchmark_out_format=json
