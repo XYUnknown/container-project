@@ -98,6 +98,24 @@ BENCHMARK_REGISTER_F(UniqueFixture, Vector_Remove_Dup)
     //->Args({100*128*1024}) // 100MB
     //->Args({128*1024*1024}); // 1GB
 
+// using a sorted unique vector
+BENCHMARK_DEFINE_F(UniqueFixture, Vector_Sorted_Unique_Remove_Dup)(benchmark::State& state) {
+    Container<std::size_t, std::vector, Sorted, Unique> c;
+    while (state.KeepRunning()) {
+        for (size_t e : data)
+            c.insert(e);
+    }
+}
+BENCHMARK_REGISTER_F(UniqueFixture, Vector_Sorted_Unique_Remove_Dup)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({128}) // 1KB
+    ->Args({10*128}) // 10KB
+    ->Args({100*128}) // 100KB
+    ->Args({128*1024}) // 1MB
+    ->Args({10*128*1024}); // 10MB
+    //->Args({100*128*1024}) // 100MB
+    //->Args({128*1024*1024}); // 1GB
+
 // using a unique list
 BENCHMARK_DEFINE_F(UniqueFixture, List_Remove_Dup)(benchmark::State& state) {
     Container<std::size_t, std::list, Unique> c;
