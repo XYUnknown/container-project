@@ -53,6 +53,16 @@ concept CUnique = C<T>::template has_property<Unique>();
 template<typename T, template<class...> class C>
 concept CSorted = C<T>::template has_property<Sorted>();
 
+/*template<typename T>
+void print_element(T t) {
+    std::cout << ' ' << *t;
+}
+
+template<typename K, typename V>
+void print_element(std::pair<K, V> p) {
+    std::cout << p->first << ", " << p->second << '\n';
+}*/
+
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
     friend constexpr auto operator<= (Container<T, C>const & lhs, Container<T, C>const & rhs) {
@@ -196,10 +206,24 @@ struct Container<T, C> : private C<T> {
         std::sort(this->begin(), this->end());
     }
 
+    // Type T is not a pair 
+    template<typename Q = T>
+        requires (!requires (Q t) { std::get<0>(t); })
     void print() {
         std::cout << "Size: " << this->size() << std::endl;
         for (auto it=this->begin(); it!=this->end(); it++)
             std::cout << ' ' << *it;
+        std::cout << '\n';
+        std::cout << '\n';
+    }
+
+    // If type T is std::pair
+    template<typename Q = T>
+        requires requires (Q t) { std::get<0>(t); }
+    void print() {
+        std::cout << "Size: " << this->size() << std::endl;
+        for (auto it=this->begin(); it!=this->end(); it++)
+            std::cout << " <"<< std::get<0>(*it) << ", " << std::get<1>(*it)<< ">";
         std::cout << '\n';
         std::cout << '\n';
     }
@@ -461,8 +485,8 @@ struct Container<T, C, SortedOnAccess, Ps...> : private Container<T, C, Ps...> {
 };
 
 /* Maps */
-template<class K, class V, template<class...> /*template<class, class> */ class C>
-struct Container<std::pair<K, V>, C> : private C<K, V> {
+//template<class K, class V, /*template<class...>*/ template<class, class> class C>
+/*struct Container<std::pair<K, V>, C> : private C<K, V> {
     friend constexpr auto operator<= (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
         return (static_cast<C<K, V>const &>(lhs) <= static_cast<C<K, V>const &>(rhs));
     }
@@ -528,8 +552,8 @@ struct Container<std::pair<K, V>, C> : private C<K, V> {
         return C<K1, V1>::insert(val);
     }
 
-    /*template <class K1 = K, class V1 = V>
-        requires (requires (C<K1, V1>& c, K1&& k, V1&& v) { { c.insert_or_assign(k, v) } -> std::same_as<std::pair<typename C<K1, V1>::iterator, bool>>; })*/
+    //template <class K1 = K, class V1 = V>
+    //    requires (requires (C<K1, V1>& c, K1&& k, V1&& v) { { c.insert_or_assign(k, v) } -> std::same_as<std::pair<typename C<K1, V1>::iterator, bool>>; })
     // TODO : fix this
     auto insert_or_assign(K&& k, V&& v) {
         return C<K, V>::insert_or_assign(k, v);
@@ -542,7 +566,7 @@ struct Container<std::pair<K, V>, C> : private C<K, V> {
         std::cout << '\n';
         std::cout << '\n';
     }
-};
+};*/
 
 template<class P, class ...Ps>
 constexpr bool is_present() {

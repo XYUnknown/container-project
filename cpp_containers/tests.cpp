@@ -294,13 +294,20 @@ int main() {
     c3.print();
 
     // maps
-    Container<std::pair<std::string, int>, TreeMapWrapper> m1;
+    /*Container<std::pair<std::string, int>, TreeMapWrapper> m1;
     m1.insert({"a", 1});
     m1.insert({"b", 2});
     m1.insert_or_assign("b", 9);
     
     std::cout << "Container for a tree map" << std::endl;
     std::cout << "has key \"a\"? " << m1.contains("a") << std::endl;
-    m1.print();
+    m1.print();*/
+
+    // a vector of pairs
+    Container<std::pair<std::string, int>, std::vector, Sorted> vp1;
+    vp1.insert({"c", 1});
+    vp1.insert({"b", 2});
+    vp1.print();
+
     return 0;
 }
