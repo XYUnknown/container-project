@@ -115,6 +115,18 @@ struct Container<T, C> : private C<T> {
     }
 
     template <class Q = T>
+        requires requires (C<Q>& c) { { c.pop_back() } -> std::same_as<void>; }
+    void pop_back() {
+        C<Q>::pop_back();
+    }
+
+    template <class Q = T>
+        requires requires (C<Q>& c) { { c.pop_front() } -> std::same_as<void>; }
+    void pop_front() {
+        C<Q>::pop_front();
+    }
+
+    template <class Q = T>
         requires requires (C<Q>& c, typename C<Q>::iterator pos, Q val) { { c.insert(pos, val) } -> std::same_as<typename C<Q>::iterator>; }
     typename C<Q>::iterator insert(typename C<Q>::iterator pos, Q t) {
         return C<Q>::insert(pos, t);
@@ -233,6 +245,8 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::at;
     using Container<T, C, Ps...>::reserve;
     using Container<T, C, Ps...>::sort;
+    using Container<T, C, Ps...>::pop_front;
+    using Container<T, C, Ps...>::pop_back;
 
     friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
@@ -303,6 +317,8 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::at;
     using Container<T, C, Ps...>::reserve;
     using Container<T, C, Ps...>::sort; // to be consistent
+    using Container<T, C, Ps...>::pop_front;
+    using Container<T, C, Ps...>::pop_back;
 
     friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
@@ -459,6 +475,46 @@ struct Container<T, C, SortedOnAccess, Ps...> : private Container<T, C, Ps...> {
                 return this->end();
             }
             return pos;
+        }
+    }
+
+    void push_back(T t) {
+        if constexpr (CSorted<T, C>) {
+            Container<T, C, Ps...>::push_back(t);
+        } else {
+            this->isSorted = false;
+            Container<T, C, Ps...>::push_back();
+        }
+    }
+
+    void push_front(T t) {
+        if constexpr (CSorted<T, C>) {
+            Container<T, C, Ps...>::push_front(t);
+        } else {
+            this->isSorted = false;
+            Container<T, C, Ps...>::push_front();
+        }
+    }
+
+    void pop_back() {
+        if constexpr (CSorted<T, C>) {
+            Container<T, C, Ps...>::pop_back();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            Container<T, C, Ps...>::pop_back();
+        }
+    }
+
+    void pop_front() {
+        if constexpr (CSorted<T, C>) {
+            Container<T, C, Ps...>::pop_front();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            Container<T, C, Ps...>::pop_front();
         }
     }
 

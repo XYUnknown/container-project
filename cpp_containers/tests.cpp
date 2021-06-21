@@ -11,6 +11,7 @@ int main() {
     v1.push_back(3);
     v1.insert(v1.begin(), 5);
     v1.insert(v1.end(), 7);
+    v1.pop_back();
     v1.erase(v1.begin());
     assert(v1.find(5) == v1.end());
     std::cout << typeid(v1).name() << std::endl;
@@ -28,6 +29,7 @@ int main() {
     l1.insert(l1.begin(), 5);
     l1.insert(l1.end(), 7);
     l1.erase(l1.begin());
+    l1.pop_front();
     // std::cout << l1.at(0) << std::endl; // error
     std::cout << typeid(l1).name() << std::endl;
     std::cout << "Container for default list" << std::endl;
