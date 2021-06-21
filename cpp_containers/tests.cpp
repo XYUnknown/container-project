@@ -4,7 +4,7 @@
 #include <string_view>
 #include <cassert> // To be compiled on Ubuntu
 
-#include "containers_v6.hpp"
+#include "containers.hpp"
 int main() {
     Container<int, std::vector> v1;
     v1.insert(6);

@@ -6,7 +6,7 @@
 #include <vector>
 #include <set>
 
-#include "containers_v6.hpp"
+#include "containers.hpp"
 #include "rng.hpp"
 
 /** Helper */
