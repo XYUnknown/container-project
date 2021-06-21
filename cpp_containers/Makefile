@@ -13,9 +13,9 @@ else
 	EXT = -I$(INCLUDE) -L$(LIB)
 endif
 
-tests: tests.cpp containers.hpp
+examples: examples.cpp containers.hpp
 	mkdir -p build
-	$(CC) -Wall -Werror -o ./build/tests tests.cpp
+	$(CC) -Wall -Werror -o ./build/examples examples.cpp
 
 benchlookup: benchmark_lookup.cc containers.hpp rng.hpp
 	mkdir -p bench
@@ -44,11 +44,18 @@ benchunique: benchmark_unique.cc containers.hpp rng.hpp
 oldsource: 
 	+$(MAKE) -C old
 
+alltests:
+	+$(MAKE) -C tests
+
 clean:
 	rm -f *.o
 	rm -rf ./old/build
+	rm -rf ./tests/build
 	rm -rf ./build
 	rm -rf ./bench
+
+cleantests:
+	rm -rf ./tests/build
 
 cleanbench:
 	rm -f ./bench
