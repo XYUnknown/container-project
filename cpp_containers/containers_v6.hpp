@@ -53,16 +53,6 @@ concept CUnique = C<T>::template has_property<Unique>();
 template<typename T, template<class...> class C>
 concept CSorted = C<T>::template has_property<Sorted>();
 
-/*template<typename T>
-void print_element(T t) {
-    std::cout << ' ' << *t;
-}
-
-template<typename K, typename V>
-void print_element(std::pair<K, V> p) {
-    std::cout << p->first << ", " << p->second << '\n';
-}*/
-
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
     friend constexpr auto operator<= (Container<T, C>const & lhs, Container<T, C>const & rhs) {
