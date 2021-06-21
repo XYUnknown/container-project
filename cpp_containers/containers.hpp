@@ -163,6 +163,18 @@ struct Container<T, C> : private C<T> {
     }
 
     template <class Q = T>
+        requires requires (C<Q>& c) { { c.front() } -> std::same_as<Q&>; }
+    Q& front() {
+        return C<Q>::front();
+    }
+
+    template <class Q = T>
+        requires requires (C<Q>& c) { { c.back() } -> std::same_as<Q&>; }
+    Q& back() {
+        return C<Q>::back();
+    }
+
+    template <class Q = T>
         requires requires (C<Q>& c, typename C<Q>::iterator pos) { { c.erase(pos) } -> std::same_as<typename C<Q>::iterator>; }
     typename C<Q>::iterator erase(typename C<Q>::iterator pos) {
         return C<Q>::erase(pos);
@@ -247,6 +259,8 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::sort;
     using Container<T, C, Ps...>::pop_front;
     using Container<T, C, Ps...>::pop_back;
+    using Container<T, C, Ps...>::front;
+    using Container<T, C, Ps...>::back;
 
     friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
@@ -319,6 +333,8 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::sort; // to be consistent
     using Container<T, C, Ps...>::pop_front;
     using Container<T, C, Ps...>::pop_back;
+    using Container<T, C, Ps...>::front;
+    using Container<T, C, Ps...>::back;
 
     friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
@@ -515,6 +531,28 @@ struct Container<T, C, SortedOnAccess, Ps...> : private Container<T, C, Ps...> {
                 this->sortOnAccess();
             }
             Container<T, C, Ps...>::pop_front();
+        }
+    }
+
+    auto front() {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::front();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::front();
+        }
+    }
+
+    auto back() {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::back();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::back();
         }
     }
 

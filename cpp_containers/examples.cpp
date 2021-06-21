@@ -16,6 +16,8 @@ int main() {
     assert(v1.find(5) == v1.end());
     std::cout << typeid(v1).name() << std::endl;
     std::cout << "at position 0: " << v1.at(0) << std::endl;
+    std::cout << "front: " << v1.front() << std::endl;
+    std::cout << "back: " << v1.back() << std::endl;
     std::cout << "is empty? " << v1.empty() << std::endl;
     std::cout << "Container for default vector" << std::endl;
     v1.print();
