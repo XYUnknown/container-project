@@ -40,7 +40,7 @@ public:
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(PopFixturePQ, Vec_PQ_Pop, std::priority_queue<std::pair<std::size_t, std::string>, std::vector<std::pair<std::size_t, std::string>>>)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(PopFixturePQ, Vec_PQ, std::priority_queue<std::pair<std::size_t, std::string>, std::vector<std::pair<std::size_t, std::string>>>)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         while (!q.empty()) {
@@ -49,7 +49,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixturePQ, Vec_PQ_Pop, std::priority_queue<std::p
         }        
     }
 }
-BENCHMARK_REGISTER_F(PopFixturePQ, Vec_PQ_Pop)
+BENCHMARK_REGISTER_F(PopFixturePQ, Vec_PQ)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
@@ -59,7 +59,7 @@ BENCHMARK_REGISTER_F(PopFixturePQ, Vec_PQ_Pop)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_TEMPLATE_DEFINE_F(PopFixturePQ, Deque_PQ_Pop, std::priority_queue<std::pair<std::size_t, std::string>, std::deque<std::pair<std::size_t, std::string>>>)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(PopFixturePQ, Deque_PQ, std::priority_queue<std::pair<std::size_t, std::string>, std::deque<std::pair<std::size_t, std::string>>>)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         while (!q.empty()) {
@@ -68,7 +68,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixturePQ, Deque_PQ_Pop, std::priority_queue<std:
         }        
     }
 }
-BENCHMARK_REGISTER_F(PopFixturePQ, Deque_PQ_Pop)
+BENCHMARK_REGISTER_F(PopFixturePQ, Deque_PQ)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
@@ -78,7 +78,7 @@ BENCHMARK_REGISTER_F(PopFixturePQ, Deque_PQ_Pop)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, Vec_SortedOnAccess_Pop, std::vector, SortedOnAccess)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessVec, std::vector, SortedOnAccess)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         while (!c.empty()) {
@@ -87,7 +87,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, Vec_SortedOnAccess_Pop, std::vector, So
         }        
     }
 }
-BENCHMARK_REGISTER_F(PopFixtureC, Vec_SortedOnAccess_Pop)
+BENCHMARK_REGISTER_F(PopFixtureC, SortedOnAccessVec)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
@@ -97,7 +97,7 @@ BENCHMARK_REGISTER_F(PopFixtureC, Vec_SortedOnAccess_Pop)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, Tree_Pop, TreeWrapper)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, Tree, TreeWrapper)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         while (!c.empty()) {
@@ -106,7 +106,26 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, Tree_Pop, TreeWrapper)(benchmark::State
         }        
     }
 }
-BENCHMARK_REGISTER_F(PopFixtureC, Tree_Pop)
+BENCHMARK_REGISTER_F(PopFixtureC, Tree)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({32}) // 1KB
+    ->Args({10*32}) // 10KB
+    ->Args({100*32}) // 100KB
+    ->Args({32*1024}) // 1MB
+    ->Args({10*32*1024}) // 10MB
+    ->Args({100*32*1024}) // 100MB
+    ->Args({32*1024*1024}); // 1GB
+
+BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessList, std::list, SortedOnAccess)(benchmark::State& state) {
+    while (state.KeepRunning()) {
+        Container<std::pair<std::size_t, std::string>, std::vector> results;
+        while (!c.empty()) {
+            results.push_back(c.back());
+            c.pop_back();
+        }        
+    }
+}
+BENCHMARK_REGISTER_F(PopFixtureC, SortedOnAccessList)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB

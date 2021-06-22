@@ -1,6 +1,7 @@
 #include <benchmark/benchmark.h>
 #include <queue>
 #include <vector>
+#include <list>
 #include <set>
 #include <deque>
 #include <functional>
@@ -23,7 +24,7 @@ public:
 };
 
 /* constucting pq with using vector */
-BENCHMARK_DEFINE_F(PQFixture, Vec_PQ_Construction)(benchmark::State& state) {
+/*BENCHMARK_DEFINE_F(PQFixture, Vec_PQ_Construction)(benchmark::State& state) {
     while (state.KeepRunning()) {
         std::priority_queue<std::pair<std::size_t, std::string>, std::vector<std::pair<std::size_t, std::string>>> q(data.begin(), data.end());
     }
@@ -52,17 +53,17 @@ BENCHMARK_REGISTER_F(PQFixture, Deque_PQ_Construction)
     ->Args({10*32*1024}) // 10MB
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
-
+*/
 
 /* push elements into pq */
-BENCHMARK_DEFINE_F(PQFixture, Vec_PQ_Push)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(PQFixture, Vec_PQ)(benchmark::State& state) {
     while (state.KeepRunning()) {
         std::priority_queue<std::pair<std::size_t, std::string>, std::vector<std::pair<std::size_t, std::string>>> q;
         for (std::pair<std::size_t, std::string> e: data)
             q.push(e);
     }
 }
-BENCHMARK_REGISTER_F(PQFixture, Vec_PQ_Push)
+BENCHMARK_REGISTER_F(PQFixture, Vec_PQ)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
@@ -72,14 +73,14 @@ BENCHMARK_REGISTER_F(PQFixture, Vec_PQ_Push)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_DEFINE_F(PQFixture, Deque_PQ_Push)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(PQFixture, Deque_PQ)(benchmark::State& state) {
     while (state.KeepRunning()) {
         std::priority_queue<std::pair<std::size_t, std::string>, std::deque<std::pair<std::size_t, std::string>>> q;
         for (std::pair<std::size_t, std::string>e: data)
             q.push(e);
     }
 }
-BENCHMARK_REGISTER_F(PQFixture, Deque_PQ_Push)
+BENCHMARK_REGISTER_F(PQFixture, Deque_PQ)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
@@ -89,7 +90,7 @@ BENCHMARK_REGISTER_F(PQFixture, Deque_PQ_Push)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_DEFINE_F(PQFixture, Vec_Push)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(PQFixture, SortedOnAccessVec)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, std::vector, SortedOnAccess> q;
         for (std::pair<std::size_t, std::string> e: data)
@@ -97,7 +98,7 @@ BENCHMARK_DEFINE_F(PQFixture, Vec_Push)(benchmark::State& state) {
         q.sort();
     }
 }
-BENCHMARK_REGISTER_F(PQFixture, Vec_Push)
+BENCHMARK_REGISTER_F(PQFixture, SortedOnAccessVec)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
@@ -107,14 +108,32 @@ BENCHMARK_REGISTER_F(PQFixture, Vec_Push)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_DEFINE_F(PQFixture, Tree_Push)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(PQFixture, Tree)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, TreeWrapper> q;
         for (std::pair<std::size_t, std::string> e: data)
             q.insert(e);
     }
 }
-BENCHMARK_REGISTER_F(PQFixture, Tree_Push)
+BENCHMARK_REGISTER_F(PQFixture, Tree)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({32}) // 1KB
+    ->Args({10*32}) // 10KB
+    ->Args({100*32}) // 100KB
+    ->Args({32*1024}) // 1MB
+    ->Args({10*32*1024}) // 10MB
+    ->Args({100*32*1024}) // 100MB
+    ->Args({32*1024*1024}); // 1GB
+
+BENCHMARK_DEFINE_F(PQFixture, SortedOnAccessList)(benchmark::State& state) {
+    while (state.KeepRunning()) {
+        Container<std::pair<std::size_t, std::string>, std::list, SortedOnAccess> q;
+        for (std::pair<std::size_t, std::string> e: data)
+            q.insert(e);
+        q.sort();
+    }
+}
+BENCHMARK_REGISTER_F(PQFixture, SortedOnAccessList)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
