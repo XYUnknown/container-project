@@ -37,12 +37,12 @@ BENCHMARK_REGISTER_F(PQFixture, Vec_PQ_Construction)
     ->Args({100*128*1024}) // 100MB
     ->Args({128*1024*1024}); // 1GB
 
-BENCHMARK_DEFINE_F(PQFixture, DQueue_PQ_Construction)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(PQFixture, Deque_PQ_Construction)(benchmark::State& state) {
     while (state.KeepRunning()) {
         std::priority_queue<std::size_t, std::deque<std::size_t>> q(data.begin(), data.end());
     }
 }
-BENCHMARK_REGISTER_F(PQFixture, DQueue_PQ_Construction)
+BENCHMARK_REGISTER_F(PQFixture, Deque_PQ_Construction)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
     ->Args({10*128}) // 10KB
@@ -69,14 +69,14 @@ BENCHMARK_REGISTER_F(PQFixture, Vec_PQ_Push)
     ->Args({100*128*1024}) // 100MB
     ->Args({128*1024*1024}); // 1GB
 
-BENCHMARK_DEFINE_F(PQFixture, DQueue_PQ_Push)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(PQFixture, Deque_PQ_Push)(benchmark::State& state) {
     while (state.KeepRunning()) {
         std::priority_queue<std::size_t, std::deque<std::size_t>> q;
         for (std::size_t e: data)
             q.push(e);
     }
 }
-BENCHMARK_REGISTER_F(PQFixture, DQueue_PQ_Push)
+BENCHMARK_REGISTER_F(PQFixture, Deque_PQ_Push)
     ->Unit(benchmark::kMillisecond)
     ->Args({128}) // 1KB
     ->Args({10*128}) // 10KB
