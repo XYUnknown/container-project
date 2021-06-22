@@ -107,64 +107,14 @@ BENCHMARK_REGISTER_F(PQFixture, Vec_Push)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-/* push elements into pq and pop to arrange accoring to priority */
-BENCHMARK_DEFINE_F(PQFixture, Vec_PQ_Push_POP)(benchmark::State& state) {
+BENCHMARK_DEFINE_F(PQFixture, Tree_Push)(benchmark::State& state) {
     while (state.KeepRunning()) {
-        std::priority_queue<std::pair<std::size_t, std::string>, std::vector<std::pair<std::size_t, std::string>>> q;
-        Container<std::pair<std::size_t, std::string>, std::vector> results;
-        for (std::pair<std::size_t, std::string> e: data)
-            q.push(e);
-        while (!q.empty()) {
-            results.push_back(q.top());
-            q.pop();
-        } 
-    }
-}
-BENCHMARK_REGISTER_F(PQFixture, Vec_PQ_Push_POP)
-    ->Unit(benchmark::kMillisecond)
-    ->Args({32}) // 1KB
-    ->Args({10*32}) // 10KB
-    ->Args({100*32}) // 100KB
-    ->Args({32*1024}) // 1MB
-    ->Args({10*32*1024}) // 10MB
-    ->Args({100*32*1024}) // 100MB
-    ->Args({32*1024*1024}); // 1GB
-
-BENCHMARK_DEFINE_F(PQFixture, Deque_PQ_Push_POP)(benchmark::State& state) {
-    while (state.KeepRunning()) {
-        std::priority_queue<std::pair<std::size_t, std::string>, std::deque<std::pair<std::size_t, std::string>>> q;
-        Container<std::pair<std::size_t, std::string>, std::vector> results;
-        for (std::pair<std::size_t, std::string>e: data)
-            q.push(e);
-        while (!q.empty()) {
-            results.push_back(q.top());
-            q.pop();
-        }
-    }
-}
-BENCHMARK_REGISTER_F(PQFixture, Deque_PQ_Push_POP)
-    ->Unit(benchmark::kMillisecond)
-    ->Args({32}) // 1KB
-    ->Args({10*32}) // 10KB
-    ->Args({100*32}) // 100KB
-    ->Args({32*1024}) // 1MB
-    ->Args({10*32*1024}) // 10MB
-    ->Args({100*32*1024}) // 100MB
-    ->Args({32*1024*1024}); // 1GB
-
-BENCHMARK_DEFINE_F(PQFixture, Vec_Push_POP)(benchmark::State& state) {
-    while (state.KeepRunning()) {
-        Container<std::pair<std::size_t, std::string>, std::vector, SortedOnAccess> q;
-        Container<std::pair<std::size_t, std::string>, std::vector> results;
+        Container<std::pair<std::size_t, std::string>, TreeWrapper> q;
         for (std::pair<std::size_t, std::string> e: data)
             q.insert(e);
-        while (!q.empty()) {
-            results.push_back(q.back());
-            q.pop_back();
-        }
     }
 }
-BENCHMARK_REGISTER_F(PQFixture, Vec_Push_POP)
+BENCHMARK_REGISTER_F(PQFixture, Tree_Push)
     ->Unit(benchmark::kMillisecond)
     ->Args({32}) // 1KB
     ->Args({10*32}) // 10KB
