@@ -163,6 +163,18 @@ struct Container<T, C> : private C<T> {
     }
 
     template <class Q = T>
+        requires requires (C<Q>& c) { { c.rbegin() } -> std::same_as<typename C<Q>::reverse_iterator>; }
+    typename C<Q>::reverse_iterator rbegin() {
+        return C<Q>::rbegin();
+    }
+
+    template <class Q = T>
+        requires requires (C<Q>& c) { { c.rend() } -> std::same_as<typename C<Q>::reverse_iterator>; }
+    typename C<Q>::reverse_iterator rend() {
+        return C<Q>::rend();
+    }
+
+    template <class Q = T>
         requires requires (C<Q>& c) { { c.front() } -> std::same_as<Q&>; }
     Q& front() {
         return C<Q>::front();
@@ -247,6 +259,8 @@ template<class T, template<typename...> class C, class ...Ps>
 struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::begin;
     using Container<T, C, Ps...>::end;
+    using Container<T, C, Ps...>::rbegin;
+    using Container<T, C, Ps...>::rend;
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
     using Container<T, C, Ps...>::contains;
@@ -323,6 +337,8 @@ template<class T, template<typename...> class C, class ...Ps>
 struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::begin;
     using Container<T, C, Ps...>::end;
+    using Container<T, C, Ps...>::rbegin;
+    using Container<T, C, Ps...>::rend;
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
     using Container<T, C, Ps...>::print;
@@ -454,6 +470,28 @@ struct Container<T, C, SortedOnAccess, Ps...> : private Container<T, C, Ps...> {
                 this->sortOnAccess();
             }
             return Container<T, C, Ps...>::end();
+        }
+    }
+
+    auto rbegin() {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::rbegin();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::rbegin();
+        }
+    }
+
+    auto rend() {
+        if constexpr (CSorted<T, C>) {
+            return Container<T, C, Ps...>::rend();
+        } else {
+            if (!this->isSorted) {
+                this->sortOnAccess();
+            }
+            return Container<T, C, Ps...>::rend();
         }
     }
 

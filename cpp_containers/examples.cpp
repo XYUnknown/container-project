@@ -3,6 +3,8 @@
 #include <string>
 #include <string_view>
 #include <cassert> // To be compiled on Ubuntu
+#include <queue>
+#include <deque>
 
 #include "containers.hpp"
 #include "rng.hpp"
@@ -20,6 +22,7 @@ int main() {
     std::cout << "at position 0: " << v1.at(0) << std::endl;
     std::cout << "front: " << v1.front() << std::endl;
     std::cout << "back: " << v1.back() << std::endl;
+    std::cout << "rbegin: " << *v1.rbegin() << std::endl;
     std::cout << "is empty? " << v1.empty() << std::endl;
     std::cout << "Container for default vector" << std::endl;
     v1.print();
@@ -324,6 +327,15 @@ int main() {
     for (auto it=vpp.begin(); it!=vpp.end(); it++)
         std::cout << " <"<< std::get<0>(*it) << ", " << std::get<1>(*it)<< ">";
     std::cout << vpp.size() << std::endl;
+
+    std::priority_queue<std::pair<std::size_t, std::string>, std::vector<std::pair<std::size_t, std::string>>> q1(vpp.begin(), vpp.end());
+    std::priority_queue<std::pair<std::size_t, std::string>, std::deque<std::pair<std::size_t, std::string>>> q2(vpp.begin(), vpp.end());
+    Container<std::pair<std::size_t, std::string>, std::vector, SortedOnAccess> q3;
+    for (std::pair<std::size_t, std::string> e: vpp)
+        q3.insert(e);
+    std::cout << " <"<< std::get<0>(q1.top()) << ", " << std::get<1>(q1.top())<< ">" << std::endl;
+    std::cout << " <"<< std::get<0>(q2.top()) << ", " << std::get<1>(q2.top())<< ">" << std::endl;
+    std::cout << " <"<< std::get<0>(q3.back()) << ", " << std::get<1>(q3.back())<< ">" << std::endl;
 
     return 0;
 }
