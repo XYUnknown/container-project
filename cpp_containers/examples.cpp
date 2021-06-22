@@ -5,6 +5,8 @@
 #include <cassert> // To be compiled on Ubuntu
 
 #include "containers.hpp"
+#include "rng.hpp"
+
 int main() {
     Container<int, std::vector> v1;
     v1.insert(6);
@@ -312,6 +314,16 @@ int main() {
     vp1.insert({"c", 1});
     vp1.insert({"b", 2});
     vp1.print();
+
+    // rng for std::pair<std::size_t, std::string>
+    std::pair<std::size_t, std::string> p = generate_pair(5, 10000);
+    std::cout << std::get<0>(p) << ", " << std::get<1>(p) << std::endl;
+    std::cout << sizeof(p) << std::endl;
+
+    std::vector<std::pair<std::size_t, std::string>> vpp = generate_pairs(5, 10);
+    for (auto it=vpp.begin(); it!=vpp.end(); it++)
+        std::cout << " <"<< std::get<0>(*it) << ", " << std::get<1>(*it)<< ">";
+    std::cout << vpp.size() << std::endl;
 
     return 0;
 }
