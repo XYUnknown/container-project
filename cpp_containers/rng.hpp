@@ -48,3 +48,35 @@ std::vector<std::pair<std::size_t, std::string>> generate_pairs(std::size_t len,
     }
     return v;
 }
+
+template<class T, template<typename...> class C, class ...Ps>
+void generate_pairs_c(Container<T, C, Ps...>& c, std::size_t len, std::size_t size) {
+    static constexpr auto chars =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    std::minstd_rand generator;
+    generator.seed(size);
+    for (std::size_t i=0; i < size; i++) {
+        auto dist = std::uniform_int_distribution{{}, std::strlen(chars) - 1};
+        auto result = std::string(len, '\0');
+        std::generate_n(begin(result), len, [&]() { return chars[dist(generator)]; });
+        c.insert(std::pair<std::size_t, std::string>((std::size_t)generator(), result));
+    }
+}
+
+template<class C, class ...Ps>
+void generate_pairs_pq(C& c, std::size_t len, std::size_t size) {
+    static constexpr auto chars =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    std::minstd_rand generator;
+    generator.seed(size);
+    for (std::size_t i=0; i < size; i++) {
+        auto dist = std::uniform_int_distribution{{}, std::strlen(chars) - 1};
+        auto result = std::string(len, '\0');
+        std::generate_n(begin(result), len, [&]() { return chars[dist(generator)]; });
+        c.push(std::pair<std::size_t, std::string>((std::size_t)generator(), result));
+    }
+}
