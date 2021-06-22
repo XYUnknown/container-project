@@ -318,6 +318,11 @@ int main() {
     vp1.insert({"b", 2});
     vp1.print();
 
+    Container<std::pair<std::string, int>, TreeWrapper, Sorted> tp1;
+    tp1.insert({"c", 1});
+    tp1.insert({"b", 2});
+    tp1.print();
+
     // rng for std::pair<std::size_t, std::string>
     std::pair<std::size_t, std::string> p = generate_pair(5, 10000);
     std::cout << std::get<0>(p) << ", " << std::get<1>(p) << std::endl;
