@@ -41,11 +41,17 @@ benchunique: benchmark_unique.cc containers.hpp rng.hpp
 	$(CC) $(EXT) benchmark_unique.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_unique_o2
 	$(CC) $(EXT) benchmark_unique.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_unique_o3
 
-benchpq: benchmark_priority_queue.cc containers.hpp rng.hpp
+benchpq: benchmark_pq.cc containers.hpp rng.hpp
 	mkdir -p bench
-	$(CC) $(EXT) benchmark_priority_queue.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_pq
-	$(CC) $(EXT) benchmark_priority_queue.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_pq_o2
-	$(CC) $(EXT) benchmark_priority_queue.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_pq_o3
+	$(CC) $(EXT) benchmark_pq.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_pq
+	$(CC) $(EXT) benchmark_pq.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_pq_o2
+	$(CC) $(EXT) benchmark_pq.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_pq_o3
+
+benchpqpair: benchmark_pq_pair.cc containers.hpp rng.hpp
+	mkdir -p bench
+	$(CC) $(EXT) benchmark_pq_pair.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_pq_pair
+	$(CC) $(EXT) benchmark_pq_pair.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_pq_pair_o2
+	$(CC) $(EXT) benchmark_pq_pair.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_pq_pair_o3
 
 oldsource: 
 	+$(MAKE) -C old
