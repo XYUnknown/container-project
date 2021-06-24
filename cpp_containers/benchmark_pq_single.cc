@@ -88,7 +88,7 @@ BENCHMARK_REGISTER_F(PQFixture, Deque_PQ_Push)
 
 BENCHMARK_DEFINE_F(PQFixture, Vec_SortedOnAccess_Push)(benchmark::State& state) {
     while (state.KeepRunning()) {
-        Container<std::size_t, std::vector, SortedOnAccess> q;
+        Container<std::size_t, std::vector, SortedOnAccess<std::size_t>> q;
         for (std::size_t e: data)
             q.insert(e);
         q.sort();

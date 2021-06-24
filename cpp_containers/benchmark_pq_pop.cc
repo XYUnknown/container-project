@@ -78,7 +78,7 @@ BENCHMARK_REGISTER_F(PopFixturePQ, Deque_PQ)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessVec, std::vector, SortedOnAccess)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessVec, std::vector, SortedOnAccess<std::pair<std::size_t, std::string>>)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         while (!c.empty()) {
@@ -116,7 +116,7 @@ BENCHMARK_REGISTER_F(PopFixtureC, Tree)
     ->Args({100*32*1024}) // 100MB
     ->Args({32*1024*1024}); // 1GB
 
-BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessList, std::list, SortedOnAccess)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessList, std::list, SortedOnAccess<std::pair<std::size_t, std::string>>)(benchmark::State& state) {
     while (state.KeepRunning()) {
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         while (!c.empty()) {

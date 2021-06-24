@@ -27,7 +27,7 @@ public:
 /** Consecutive insertion and lookup benchmarks */
 /* BST (multiset) consecutive insertion and lookup */
 BENCHMARK_DEFINE_F(InsertionFixture, BST_Insertion_LookUp)(benchmark::State& state) {
-    Container<std::size_t, std::vector, Sorted> c;
+    Container<std::size_t, TreeWrapper> c;
     volatile std::size_t result;
     std::size_t counter = 0;
     std::size_t step = state.range(1);
@@ -60,17 +60,17 @@ BENCHMARK_REGISTER_F(InsertionFixture, BST_Insertion_LookUp)
     ->Args({128*1024, 10000}) // 1MB, 10000 step
     ->Args({10*128*1024, 1}) // 10MB, 1 step
     ->Args({10*128*1024, 100}) // 10MB, 100 step
-    ->Args({10*128*1024, 10000}); // 10MB, 10000 step
-    //->Args({100*128*1024, 1}) // 100MB, 1 step
-    //->Args({100*128*1024, 100}) // 100MB, 100 step
-    //->Args({100*128*1024, 10000}); // 100MB, 10000 step
-    //->Args({128*1024*1024, 1}) // 1GB, 1 step
-    //->Args({128*1024*1024, 1000}) // 1GB, 1000 step
-    //->Args({128*1024*1024, 1000000}); // 1GB, 1000000 step
+    ->Args({10*128*1024, 10000}) // 10MB, 10000 step
+    ->Args({100*128*1024, 1}) // 100MB, 1 step
+    ->Args({100*128*1024, 100}) // 100MB, 100 step
+    ->Args({100*128*1024, 10000}) // 100MB, 10000 step
+    ->Args({128*1024*1024, 1}) // 1GB, 1 step
+    ->Args({128*1024*1024, 1000}) // 1GB, 1000 step
+    ->Args({128*1024*1024, 1000000}); // 1GB, 1000000 step
 
 /* Sorted vector consecutive insertion and lookup */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedVector_Insertion_LookUp)(benchmark::State& state) {
-    Container<std::size_t, std::vector, Sorted> c;
+    Container<std::size_t, std::vector, Sorted<std::size_t>> c;
     volatile std::size_t result;
     std::size_t counter = 0;
     std::size_t step = state.range(1);
@@ -113,7 +113,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedVector_Insertion_LookUp)
 
 /* Sorted vector (on access) consecutive insertion and lookup */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessVector_Insertion_LookUp)(benchmark::State& state) {
-    Container<std::size_t, std::vector, SortedOnAccess> c;
+    Container<std::size_t, std::vector, SortedOnAccess<std::size_t>> c;
     volatile std::size_t result;
     std::size_t counter = 0;
     std::size_t step = state.range(1);
@@ -242,7 +242,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, HashSet_Insertion_LookUp)
 
 /* Sorted list consecutive insertion and lookup */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedList_Insertion_LookUp)(benchmark::State& state) {
-    Container<std::size_t, std::list, Sorted> c;
+    Container<std::size_t, std::list, Sorted<std::size_t>> c;
     volatile std::size_t result;
     std::size_t counter = 0;
     std::size_t step = state.range(1);
@@ -285,7 +285,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedList_Insertion_LookUp)
 
 /* Sorted list (on access) consecutive insertion and lookup */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessList_Insertion_LookUp)(benchmark::State& state) {
-    Container<std::size_t, std::list, SortedOnAccess> c;
+    Container<std::size_t, std::list, SortedOnAccess<std::size_t>> c;
     volatile std::size_t result;
     std::size_t counter = 0;
     std::size_t step = state.range(1);

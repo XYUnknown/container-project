@@ -69,7 +69,7 @@ BENCHMARK_REGISTER_F(PQFixture, Deque_PQ)
 
 BENCHMARK_DEFINE_F(PQFixture, SortedOnAccessVec)(benchmark::State& state) {
     while (state.KeepRunning()) {
-        Container<std::pair<std::size_t, std::string>, std::vector, SortedOnAccess> q;
+        Container<std::pair<std::size_t, std::string>, std::vector, SortedOnAccess<std::pair<std::size_t, std::string>>> q;
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         for (std::pair<std::size_t, std::string> e: data)
             q.insert(e);
@@ -113,7 +113,7 @@ BENCHMARK_REGISTER_F(PQFixture, Tree)
 
 BENCHMARK_DEFINE_F(PQFixture, SortedOnAccessList)(benchmark::State& state) {
     while (state.KeepRunning()) {
-        Container<std::pair<std::size_t, std::string>, std::list, SortedOnAccess> q;
+        Container<std::pair<std::size_t, std::string>, std::list, SortedOnAccess<std::pair<std::size_t, std::string>>> q;
         Container<std::pair<std::size_t, std::string>, std::vector> results;
         for (std::pair<std::size_t, std::string> e: data)
             q.insert(e);

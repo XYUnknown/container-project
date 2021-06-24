@@ -30,7 +30,7 @@ public:
     void SetUp(const ::benchmark::State& st) {
         lookups = Generate(st.range(1));
         Generate(c, st.range(0));
-        if constexpr (has_property<SortedOnAccess, Ps...>()) {
+        if constexpr (has_property<SortedOnAccess<std::size_t>, Ps...>()) {
             c.sort(); // for sorted vectors and sorted lists
         }
     }
@@ -80,7 +80,7 @@ BENCHMARK_REGISTER_F(LookUpFixture, UnsortedVec_LookUp)
     //->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // Sorted Vector Lookup
-BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedOnAccessVec_LookUp, std::vector, SortedOnAccess)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedOnAccessVec_LookUp, std::vector, SortedOnAccess<std::size_t>)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {
@@ -224,7 +224,7 @@ BENCHMARK_REGISTER_F(LookUpFixture, HashSet_LookUp)
     ->Args({128*1024*1024, 100000}); // 1GB, 100000 lookup
 
 // Sorted List Lookup
-BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedList_LookUp, std::list, SortedOnAccess)(benchmark::State& state) {
+BENCHMARK_TEMPLATE_DEFINE_F(LookUpFixture, SortedList_LookUp, std::list, SortedOnAccess<std::size_t>)(benchmark::State& state) {
     volatile std::size_t result;
     while (state.KeepRunning()) {
         for (std::size_t item : lookups) {

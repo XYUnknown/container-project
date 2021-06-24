@@ -45,7 +45,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, BST_Insertion)
 
 /* Sorted vector insertion */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedVector_Insertion)(benchmark::State& state) {
-    Container<std::size_t, std::vector, Sorted> c;
+    Container<std::size_t, std::vector, Sorted<std::size_t>> c;
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++)
             c.insert((std::size_t)generator());
@@ -64,7 +64,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedVector_Insertion)
 
 /* Sorted vector (on access) insertion */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessVector_Insertion)(benchmark::State& state) {
-    Container<std::size_t, std::vector, SortedOnAccess> c;
+    Container<std::size_t, std::vector, SortedOnAccess<std::size_t>> c;
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++)
             c.insert((std::size_t)generator());
@@ -119,7 +119,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, HashSet_Insertion)
 
 /* Sorted list insertion */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedList_Insertion)(benchmark::State& state) {
-    Container<std::size_t, std::list, Sorted> c;
+    Container<std::size_t, std::list, Sorted<std::size_t>> c;
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++)
             c.insert((std::size_t)generator());
@@ -137,7 +137,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedList_Insertion)
 
 /* Sorted list (on access) insertion */
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessList_Insertion)(benchmark::State& state) {
-    Container<std::size_t, std::list, SortedOnAccess> c;
+    Container<std::size_t, std::list, SortedOnAccess<std::size_t>> c;
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++)
             c.insert((std::size_t)generator());
