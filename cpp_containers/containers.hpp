@@ -9,9 +9,14 @@
 #include <type_traits>
 #include <concepts>
 #include <algorithm>
+#include <functional>
 
 class Unique {};
+
+template<class T, class CMP=std::less<T>>
 class Sorted {};
+
+template<class T, class CMP=std::less<T>>
 class SortedOnAccess{};
 
 template<class T, template<class...> class C, class... Ps>
@@ -33,11 +38,11 @@ struct WithProperty<std::pair<K, V>, C, Ps...> : public C<K, V> {
 
 // A set implemented using a binary search tree
 template<class T>
-using TreeSetWrapper = WithProperty<T, std::set, Unique, Sorted>;
+using TreeSetWrapper = WithProperty<T, std::set, Unique, Sorted<T>>;
 
 // a binary search tree
 template<class T>
-using TreeWrapper = WithProperty<T, std::multiset, Sorted>;
+using TreeWrapper = WithProperty<T, std::multiset, Sorted<T>>;
 
 // a hashset wrapper
 template<class T>
@@ -51,7 +56,7 @@ template<typename T, template<class...> class C>
 concept CUnique = C<T>::template has_property<Unique>();
 
 template<typename T, template<class...> class C>
-concept CSorted = C<T>::template has_property<Sorted>();
+concept CSorted = C<T>::template has_property<Sorted<T>>();
 
 template<class T, template<class...> class C>
 struct Container<T, C> : private C<T> {
@@ -226,10 +231,22 @@ struct Container<T, C> : private C<T> {
         return C<Q>::sort();
     }
 
+    template <class Q = T, class CMP>
+        requires requires (C<Q>& c, CMP cmp) { { c.sort(cmp) } -> std::same_as<void>; }
+    void sort(CMP cmp) {
+        return C<Q>::sort(cmp);
+    }
+
     template <class Q = T>
         requires (!requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; })
     void sort() {
         std::sort(this->begin(), this->end());
+    }
+
+    template <class Q = T, class CMP>
+        requires (!requires (C<Q>& c, CMP cmp) { { c.sort(cmp) } -> std::same_as<void>; })
+    void sort(CMP cmp) {
+        std::sort(this->begin(), this->end(), cmp);
     }
 
     // Type T is not a pair 
@@ -333,8 +350,8 @@ struct Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
     }
 };
 
-template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
+template<class T, template<typename...> class C, class CMP, class ...Ps>
+struct Container<T, C, Sorted<T, CMP>, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::begin;
     using Container<T, C, Ps...>::end;
     using Container<T, C, Ps...>::rbegin;
@@ -352,19 +369,19 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::front;
     using Container<T, C, Ps...>::back;
 
-    friend constexpr auto operator<= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+    friend constexpr auto operator<= (const Container<T, C, Sorted<T, CMP>, Ps...>& lhs, const Container<T, C, Sorted<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
     }
 
-    friend constexpr auto operator< (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+    friend constexpr auto operator< (const Container<T, C, Sorted<T, CMP>, Ps...>& lhs, const Container<T, C, Sorted<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...>&>(lhs) < static_cast<const Container<T, C, Ps...>&>(rhs));
     }
 
-    friend constexpr auto operator== (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+    friend constexpr auto operator== (const Container<T, C, Sorted<T, CMP>, Ps...>& lhs, const Container<T, C, Sorted<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...>&>(lhs) == static_cast<const Container<T, C, Ps...>&>(rhs));
     }
 
-    friend constexpr auto operator!= (const Container<T, C, Sorted, Ps...>& lhs, const Container<T, C, Sorted, Ps...>& rhs) {
+    friend constexpr auto operator!= (const Container<T, C, Sorted<T, CMP>, Ps...>& lhs, const Container<T, C, Sorted<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...>&>(lhs) != static_cast<const Container<T, C, Ps...>&>(rhs));
     }
     // for a sorted container, it is not meaningful to choose the position for an element
@@ -373,7 +390,7 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
         if constexpr (CSorted<T, C>) {
             Container<T, C, Ps...>::insert(t);
         } else {
-            auto pos = std::lower_bound(this->begin(), this->end(), t);
+            auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
             Container<T, C, Ps...>::insert(pos, t);
         }
     }
@@ -382,7 +399,7 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
         if constexpr (CSorted<T, C>) {
             return Container<T, C, Ps...>::contains(t);
         } else {
-            return std::binary_search(this->begin(), this->end(), t);
+            return std::binary_search(this->begin(), this->end(), t, CMP());
         }
     }
 
@@ -390,7 +407,7 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
         if constexpr (CSorted<T, C>) {
             return Container<T, C, Ps...>::find(t);
         } else {
-            auto pos = std::lower_bound(this->begin(), this->end(), t);
+            auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
             if (*pos != t) { // element not found
                 return this->end();
             }
@@ -399,8 +416,8 @@ struct Container<T, C, Sorted, Ps...> : private Container<T, C, Ps...> {
     }
 };
 
-template<class T, template<typename...> class C, class ...Ps>
-struct Container<T, C, SortedOnAccess, Ps...> : private Container<T, C, Ps...> {
+template<class T, template<typename...> class C, class CMP, class ...Ps>
+struct Container<T, C, SortedOnAccess<T, CMP>, Ps...> : private Container<T, C, Ps...> {
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
     using Container<T, C, Ps...>::clear;
@@ -410,24 +427,24 @@ struct Container<T, C, SortedOnAccess, Ps...> : private Container<T, C, Ps...> {
     private:
     bool isSorted = true;
     void sortOnAccess() {
-        this->sort();
+        this->sort(CMP());
         isSorted = true;
     }
     
     public:
-    friend constexpr auto operator<= (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+    friend constexpr auto operator<= (const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& lhs, const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...> &>(lhs) <= static_cast<const Container<T, C, Ps...>&>(rhs));
     }
 
-    friend constexpr auto operator< (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+    friend constexpr auto operator< (const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& lhs, const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...>&>(lhs) < static_cast<const Container<T, C, Ps...>&>(rhs));
     }
 
-    friend constexpr auto operator== (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+    friend constexpr auto operator== (const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& lhs, const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...>&>(lhs) == static_cast<const Container<T, C, Ps...>&>(rhs));
     }
 
-    friend constexpr auto operator!= (const Container<T, C, SortedOnAccess, Ps...>& lhs, const Container<T, C, SortedOnAccess, Ps...>& rhs) {
+    friend constexpr auto operator!= (const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& lhs, const Container<T, C, SortedOnAccess<T, CMP>, Ps...>& rhs) {
         return (static_cast<const Container<T, C, Ps...>&>(lhs) != static_cast<const Container<T, C, Ps...>&>(rhs));
     }
 
@@ -697,7 +714,7 @@ constexpr bool is_present() {
 
 template<class T, class ...Ps>
 auto make_container() {
-    if constexpr (is_present<Sorted, Ps...>()) {
+    if constexpr (is_present<Sorted<T>, Ps...>()) {
         if constexpr (is_present<Unique, Ps...>()) {
             Container<T, TreeSetWrapper, Ps...> c;
             return c;
@@ -706,7 +723,7 @@ auto make_container() {
             return c;
         }
     } else if constexpr (is_present<Unique, Ps...>()) {
-        if constexpr (is_present<Sorted, Ps...>()) {
+        if constexpr (is_present<Sorted<T>, Ps...>()) {
             Container<T, TreeSetWrapper, Ps...> c;
             return c;
         } else {
