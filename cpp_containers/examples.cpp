@@ -63,7 +63,7 @@ int main() {
     std::cout << "Container for unique list" << std::endl;
     l2.print();
 
-    Container<int, std::vector, Sorted> v3;
+    Container<int, std::vector, Sorted<int>> v3;
     v3.insert(6);
     v3.insert(1);
     v3.insert(6);
@@ -73,7 +73,17 @@ int main() {
     std::cout << "Container for sorted vector" << std::endl;
     v3.print();
 
-    Container<int, std::list, Sorted> l3;
+    Container<int, std::vector, Sorted<int, std::greater<int>>> v3g;
+    v3g.insert(6);
+    v3g.insert(1);
+    v3g.insert(6);
+    v3g.insert(5);
+    assert(v3g.find(7) == v3g.end());
+    assert(!v3g.contains(7));
+    std::cout << "Container for sorted vector (descending)" << std::endl;
+    v3g.print();
+
+    Container<int, std::list, Sorted<int>> l3;
     l3.insert(6);
     l3.insert(4);
     l3.insert(1);
@@ -83,35 +93,59 @@ int main() {
     std::cout << "Container for sorted list" << std::endl;
     l3.print();
 
-    Container<int, std::vector, Sorted, Unique> v4;
+    Container<int, std::list, Sorted<int, std::greater<int>>> l3g;
+    l3g.insert(6);
+    l3g.insert(4);
+    l3g.insert(1);
+    l3g.insert(4);
+    assert(l3g.find(7) == l3g.end());
+    assert(!l3g.contains(7));
+    std::cout << "Container for sorted list (descending)" << std::endl;
+    l3g.print();
+
+    Container<int, std::vector, Sorted<int>, Unique> v4;
     v4.insert(6);
     v4.insert(1);
     v4.insert(1);
     std::cout << "Container for sorted unique vector" << std::endl;
     v4.print();
 
-    Container<int, std::list, Sorted, Unique> l4;
+    Container<int, std::vector, Sorted<int, std::greater<int>>, Unique> v4g;
+    v4g.insert(6);
+    v4g.insert(1);
+    v4g.insert(1);
+    std::cout << "Container for sorted (descending) unique vector" << std::endl;
+    v4g.print();
+
+    Container<int, std::list, Sorted<int>, Unique> l4;
     l4.insert(6);
     l4.insert(1);
     l4.insert(1);
     std::cout << "Container for sorted unique list" << std::endl;
     l4.print();
 
-    Container<int, std::vector, Unique, Sorted> v5;
+    Container<int, std::list, Sorted<int, std::greater<int>>, Unique> l4g;
+    l4g.insert(6);
+    l4g.insert(1);
+    l4g.insert(1);
+    std::cout << "Container for sorted unique list" << std::endl;
+    l4g.print();
+
+    Container<int, std::vector, Unique, Sorted<int>> v5;
     v5.insert(6);
     v5.insert(1);
     v5.insert(1);
     std::cout << "Container for unique sorted vector" << std::endl;
     v5.print();
 
-    Container<int, std::list, Unique, Sorted> l5;
+    Container<int, std::list, Unique, Sorted<int>> l5;
     l5.insert(6);
     l5.insert(1);
     l5.insert(1);
     std::cout << "Container for unique sorted list" << std::endl;
     l5.print();
 
-    Container<int, std::vector, SortedOnAccess> v6;
+    Container<int, std::vector, SortedOnAccess<int>> v6;
     v6.insert(6);
     v6.insert(1);
     v6.insert(6);
@@ -121,7 +155,17 @@ int main() {
     std::cout << "Container for sorted (on access) vector" << std::endl;
     v6.print();
 
-    Container<int, std::list, SortedOnAccess> l6;
+    Container<int, std::vector, SortedOnAccess<int, std::greater<int>>> v7;
+    v7.insert(6);
+    v7.insert(1);
+    v7.insert(6);
+    v7.insert(5);
+    assert(v7.find(7) == v7.end());
+    assert(!v7.contains(7));
+    std::cout << "Container for sorted (on access) vector" << std::endl;
+    v7.print();
+
+    Container<int, std::list, SortedOnAccess<int>> l6;
     l6.insert(6);
     l6.insert(4);
     l6.insert(1);
@@ -130,6 +174,16 @@ int main() {
     assert(!l6.contains(7));
     std::cout << "Container for sorted (on access) list" << std::endl;
     l6.print();
+
+    Container<int, std::list, SortedOnAccess<int, std::greater<int>>> l7;
+    l7.insert(6);
+    l7.insert(4);
+    l7.insert(1);
+    l7.insert(4);
+    assert(l7.find(7) == l7.end());
+    assert(!l7.contains(7));
+    std::cout << "Container for sorted (on access) list" << std::endl;
+    l7.print();
 
     TreeSetWrapper<int> sw;
     sw.size();
@@ -151,7 +205,7 @@ int main() {
     std::cout << "Container for unique set(tree set) is sorted and unique" << std::endl;
     s2.print();
 
-    Container<int, TreeSetWrapper, Sorted> s3;
+    Container<int, TreeSetWrapper, Sorted<int>> s3;
     s3.insert(6);
     s3.insert(1);
     s3.insert(1);
@@ -159,7 +213,7 @@ int main() {
     std::cout << "Container for sorted set(tree set) is sorted and unique" << std::endl;
     s3.print();
 
-    Container<int, TreeSetWrapper, Unique, Sorted> s4;
+    Container<int, TreeSetWrapper, Unique, Sorted<int>> s4;
     s4.insert(6);
     s4.insert(1);
     s4.insert(1);
@@ -169,7 +223,7 @@ int main() {
 
     TreeWrapper<int> tw;
     tw.size();
-    static_assert(tw.has_property<Sorted>());
+    static_assert(tw.has_property<Sorted<int>>());
     //static_assert(tw.has_property<Unique>());//fail
 
     static_assert(CSorted<int, TreeWrapper>);
@@ -189,14 +243,14 @@ int main() {
     std::cout << "Container for unique tree (multiset) is unique sorted" << std::endl;
     t2.print();
 
-    Container<int, TreeWrapper, Sorted> t3;
+    Container<int, TreeWrapper, Sorted<int>> t3;
     t3.insert(6);
     t3.insert(1);
     t3.insert(1);
     std::cout << "Container for sorted tree (multiset) is sorted" << std::endl;
     t3.print();
 
-    Container<int, TreeWrapper, Unique, Sorted> t4;
+    Container<int, TreeWrapper, Unique, Sorted<int>> t4;
     t4.insert(6);
     t4.insert(1);
     t4.insert(1);
@@ -237,7 +291,7 @@ int main() {
     hs3.print();*/
 
     // Nested containers
-    Container<Container<int, std::vector, Unique>, std::vector, Sorted> n1;
+    Container<Container<int, std::vector, Unique>, std::vector, Sorted<Container<int, std::vector, Unique>>> n1;
     Container<int, std::vector, Unique> e1, e2, e3;
     e1.insert(4);
     e1.insert(3);
@@ -253,8 +307,8 @@ int main() {
     for (auto it=n1.begin(); it!=n1.end(); it++)
         it->print();
 
-    Container<Container<int, std::vector, Sorted>, std::vector, Unique> n2;
-    Container<int, std::vector, Sorted> e4, e5, e6;
+    Container<Container<int, std::vector, Sorted<int>>, std::vector, Unique> n2;
+    Container<int, std::vector, Sorted<int>> e4, e5, e6;
     e4.insert(4);
     e4.insert(3);
     e5.insert(5);
@@ -271,8 +325,9 @@ int main() {
         it->print();
     
     // test is present
-    static_assert(!is_present<Unique, Sorted>());
-    static_assert(is_present<Unique, Unique, Sorted>());
+    static_assert(!is_present<Unique, Sorted<int>>());
+    static_assert(is_present<Unique, Unique, Sorted<int>>());
+    static_assert(is_present<Sorted<int>, Unique, Sorted<int>>());
 
     // test the make_container
     auto c1 = make_container<int, Unique>();
@@ -284,7 +339,7 @@ int main() {
     std::cout << "Unique Container from function make_container" << std::endl;
     c1.print();
 
-    auto c2 = make_container<int, Sorted>();
+    auto c2 = make_container<int, Sorted<int>>();
     c2.insert(6);
     c2.insert(1);
     c2.insert(1);
@@ -293,7 +348,7 @@ int main() {
     std::cout << "Sorted Container from function make_container" << std::endl;
     c2.print();
 
-    auto c3 = make_container<int, Unique, Sorted>();
+    auto c3 = make_container<int, Unique, Sorted<int>>();
     c3.insert(6);
     c3.insert(1);
     c3.insert(1);
@@ -313,12 +368,12 @@ int main() {
     m1.print();*/
 
     // a vector of pairs
-    Container<std::pair<std::string, int>, std::vector, Sorted> vp1;
+    Container<std::pair<std::string, int>, std::vector, Sorted<std::pair<std::string, int>>> vp1;
     vp1.insert({"c", 1});
     vp1.insert({"b", 2});
     vp1.print();
 
-    Container<std::pair<std::string, int>, TreeWrapper, Sorted> tp1;
+    Container<std::pair<std::string, int>, TreeWrapper, Sorted<std::pair<std::string, int>>> tp1;
     tp1.insert({"c", 1});
     tp1.insert({"b", 2});
     tp1.print();
@@ -335,7 +390,7 @@ int main() {
 
     std::priority_queue<std::pair<std::size_t, std::string>, std::vector<std::pair<std::size_t, std::string>>> q1(vpp.begin(), vpp.end());
     std::priority_queue<std::pair<std::size_t, std::string>, std::deque<std::pair<std::size_t, std::string>>> q2(vpp.begin(), vpp.end());
-    Container<std::pair<std::size_t, std::string>, std::vector, SortedOnAccess> q3;
+    Container<std::pair<std::size_t, std::string>, std::vector, SortedOnAccess<std::pair<std::size_t, std::string>>> q3;
     for (std::pair<std::size_t, std::string> e: vpp)
         q3.insert(e);
     std::cout << " <"<< std::get<0>(q1.top()) << ", " << std::get<1>(q1.top())<< ">" << std::endl;
