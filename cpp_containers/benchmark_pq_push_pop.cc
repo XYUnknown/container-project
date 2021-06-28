@@ -32,6 +32,7 @@ BENCHMARK_DEFINE_F(PQFixture, Vec_PQ)(benchmark::State& state) {
         while (!q.empty()) {
             results.push_back(q.top());
             q.pop();
+            results = results;
         } 
     }
 }
@@ -54,6 +55,7 @@ BENCHMARK_DEFINE_F(PQFixture, Deque_PQ)(benchmark::State& state) {
         while (!q.empty()) {
             results.push_back(q.top());
             q.pop();
+            results = results;
         }
     }
 }
@@ -76,6 +78,7 @@ BENCHMARK_DEFINE_F(PQFixture, SortedOnAccessVec)(benchmark::State& state) {
         while (!q.empty()) {
             results.push_back(q.back());
             q.pop_back();
+            results = results;
         }
     }
 }
@@ -98,6 +101,7 @@ BENCHMARK_DEFINE_F(PQFixture, Tree)(benchmark::State& state) {
         while (!q.empty()) {
             results.push_back(*q.rbegin());
             q.erase(--q.end());
+            results = results;
         }
     }
 }
@@ -120,6 +124,7 @@ BENCHMARK_DEFINE_F(PQFixture, SortedOnAccessList)(benchmark::State& state) {
         while (!q.empty()) {
             results.push_back(q.back());
             q.pop_back();
+            results = results;
         }
     }
 }

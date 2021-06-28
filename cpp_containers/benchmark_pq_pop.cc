@@ -65,6 +65,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixturePQ, Deque_PQ, std::priority_queue<std::pai
         while (!q.empty()) {
             results.push_back(q.top());
             q.pop();
+            results = results;
         }        
     }
 }
@@ -84,6 +85,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessVec, std::vector, SortedO
         while (!c.empty()) {
             results.push_back(c.back());
             c.pop_back();
+            results = results;
         }        
     }
 }
@@ -103,6 +105,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, Tree, TreeWrapper)(benchmark::State& st
         while (!c.empty()) {
             results.push_back(*c.rbegin());
             c.erase(--c.end());
+            results = results;
         }        
     }
 }
@@ -122,6 +125,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(PopFixtureC, SortedOnAccessList, std::list, SortedOn
         while (!c.empty()) {
             results.push_back(c.back());
             c.pop_back();
+            results = results;
         }        
     }
 }
