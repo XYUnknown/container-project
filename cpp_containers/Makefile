@@ -64,6 +64,11 @@ benchpqpushpop: benchmark_pq_push_pop.cc containers.hpp rng.hpp
 	$(CC) $(EXT) benchmark_pq_push_pop.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_pq_push_pop
 	$(CC) $(EXT) benchmark_pq_push_pop.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_pq_push_pop_o2
 	$(CC) $(EXT) benchmark_pq_push_pop.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_pq_push_pop_o3
+benchpqcons: benchmark_pq_cons.cc containers.hpp rng.hpp
+	mkdir -p bench
+	$(CC) $(EXT) benchmark_pq_cons.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_pq_cons
+	$(CC) $(EXT) benchmark_pq_cons.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_pq_cons_o2
+	$(CC) $(EXT) benchmark_pq_cons.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_pq_cons_o3
 
 oldsource: 
 	+$(MAKE) -C old
