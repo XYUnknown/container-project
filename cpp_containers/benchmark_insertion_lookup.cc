@@ -29,7 +29,7 @@ public:
 BENCHMARK_DEFINE_F(InsertionFixture, BST_Insertion_LookUp)(benchmark::State& state) {
     Container<std::size_t, TreeWrapper> c;
     volatile std::size_t result;
-    std::size_t counter = 0;
+    std::size_t counter = 1;
     std::size_t step = state.range(1);
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++) {
@@ -72,7 +72,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, BST_Insertion_LookUp)
 BENCHMARK_DEFINE_F(InsertionFixture, SortedVector_Insertion_LookUp)(benchmark::State& state) {
     Container<std::size_t, std::vector, Sorted<std::size_t>> c;
     volatile std::size_t result;
-    std::size_t counter = 0;
+    std::size_t counter = 1;
     std::size_t step = state.range(1);
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++) {
@@ -115,7 +115,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedVector_Insertion_LookUp)
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessVector_Insertion_LookUp)(benchmark::State& state) {
     Container<std::size_t, std::vector, SortedOnAccess<std::size_t>> c;
     volatile std::size_t result;
-    std::size_t counter = 0;
+    std::size_t counter = 1;
     std::size_t step = state.range(1);
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++) {
@@ -158,7 +158,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedOnAccessVector_Insertion_LookUp)
 BENCHMARK_DEFINE_F(InsertionFixture, TreeSet_Insertion_LookUp)(benchmark::State& state) {
     Container<std::size_t, TreeSetWrapper> c;
     volatile std::size_t result;
-    std::size_t counter = 0;
+    std::size_t counter = 1;
     std::size_t step = state.range(1);
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++) {
@@ -201,7 +201,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, TreeSet_Insertion_LookUp)
 BENCHMARK_DEFINE_F(InsertionFixture, HashSet_Insertion_LookUp)(benchmark::State& state) {
     Container<std::size_t, HashSetWrapper> c;
     volatile std::size_t result;
-    std::size_t counter = 0;
+    std::size_t counter = 1;
     std::size_t step = state.range(1);
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++) {
@@ -244,7 +244,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, HashSet_Insertion_LookUp)
 BENCHMARK_DEFINE_F(InsertionFixture, SortedList_Insertion_LookUp)(benchmark::State& state) {
     Container<std::size_t, std::list, Sorted<std::size_t>> c;
     volatile std::size_t result;
-    std::size_t counter = 0;
+    std::size_t counter = 1;
     std::size_t step = state.range(1);
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++) {
@@ -287,7 +287,7 @@ BENCHMARK_REGISTER_F(InsertionFixture, SortedList_Insertion_LookUp)
 BENCHMARK_DEFINE_F(InsertionFixture, SortedOnAccessList_Insertion_LookUp)(benchmark::State& state) {
     Container<std::size_t, std::list, SortedOnAccess<std::size_t>> c;
     volatile std::size_t result;
-    std::size_t counter = 0;
+    std::size_t counter = 1;
     std::size_t step = state.range(1);
     while (state.KeepRunning()) {
         for (std::size_t i=0; i < size; i++) {
