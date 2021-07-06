@@ -198,6 +198,12 @@ struct Container<T, C> : private C<T> {
     }
 
     template <class Q = T>
+        requires requires (C<Q>& c, const Q& t) { { c.erase(t) } -> std::same_as<std::size_t>; }
+    std::size_t erase(const Q& t) {
+        return C<Q>::erase(t);
+    }
+
+    template <class Q = T>
         requires requires (C<Q>& c, const Q& t) { { c.find(t) } -> std::same_as<typename C<Q>::iterator>; }
     typename C<Q>::iterator find(const Q& value) {
         return C<Q>::find(value);
