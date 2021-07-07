@@ -70,9 +70,15 @@ benchpqcons: benchmark_pq_cons.cc containers.hpp rng.hpp
 	$(CC) $(EXT) benchmark_pq_cons.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_pq_cons_o2
 	$(CC) $(EXT) benchmark_pq_cons.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_pq_cons_o3
 
-dijkstra: dijkstra.cc #containers.hpp
+benchdijkstra: dijkstra.hpp containers.hpp benchmark_dijkstra.cc
+	mkdir -p bench
+	$(CC) $(EXT) benchmark_dijkstra.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_dijkstra
+	$(CC) $(EXT) benchmark_dijkstra.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_dijkstra_o2
+	$(CC) $(EXT) benchmark_dijkstra.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_dijkstra_o3
+
+dijkstra: dijkstra.hpp containers.hpp graph_examples.cpp
 	mkdir -p build
-	$(CC) -Wall -Werror -o ./build/dijkstra dijkstra.cc
+	$(CC) -Wall -Werror -o ./build/graph graph_examples.cpp
 
 oldsource: 
 	+$(MAKE) -C old
