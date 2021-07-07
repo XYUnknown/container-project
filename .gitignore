@@ -63,6 +63,7 @@ build/
 bench/
 benchmark/
 results/
+matrix/
 
 # jupyter notebook
 .ipynb_checkpoints/
