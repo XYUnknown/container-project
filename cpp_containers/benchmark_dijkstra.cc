@@ -29,7 +29,6 @@ BENCHMARK_DEFINE_F(GraphFixture, BST)(benchmark::State& state) {
         std::vector<vertex_t> previous;
         DijkstraComputePaths<Container<weight_vertex_pair_t, TreeWrapper>>(0, adjList, min_distance, previous);
         std::list<vertex_t> path = DijkstraGetShortestPathTo(state.range(1), previous);
-        path = path;
     }
 }
 BENCHMARK_REGISTER_F(GraphFixture, BST)
@@ -47,7 +46,6 @@ BENCHMARK_DEFINE_F(GraphFixture, PQ_Vec)(benchmark::State& state) {
         std::vector<vertex_t> previous;
         DijkstraComputePaths<std::priority_queue<weight_vertex_pair_t, std::vector<weight_vertex_pair_t>, std::greater<weight_vertex_pair_t>>>(0, adjList, min_distance, previous);
         std::list<vertex_t> path = DijkstraGetShortestPathTo(state.range(1), previous);
-        path = path;
     }
 }
 BENCHMARK_REGISTER_F(GraphFixture, PQ_Vec)
@@ -65,7 +63,6 @@ BENCHMARK_DEFINE_F(GraphFixture, SortedVec)(benchmark::State& state) {
         std::vector<vertex_t> previous;
         DijkstraComputePaths<Container<weight_vertex_pair_t, std::vector, Sorted<weight_vertex_pair_t, std::greater<weight_vertex_pair_t>>>>(0, adjList, min_distance, previous);
         std::list<vertex_t> path = DijkstraGetShortestPathTo(state.range(1), previous);
-        path = path;
     }
 }
 BENCHMARK_REGISTER_F(GraphFixture, SortedVec)
@@ -83,7 +80,6 @@ BENCHMARK_DEFINE_F(GraphFixture, UnsortedVec)(benchmark::State& state) {
         std::vector<vertex_t> previous;
         DijkstraComputePaths<Container<weight_vertex_pair_t, std::vector>>(0, adjList, min_distance, previous);
         std::list<vertex_t> path = DijkstraGetShortestPathTo(state.range(1), previous);
-        path = path;
     }
 }
 BENCHMARK_REGISTER_F(GraphFixture, UnsortedVec)
