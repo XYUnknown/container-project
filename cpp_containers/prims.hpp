@@ -12,21 +12,9 @@
 #include <iterator>
 
 #include "containers.hpp"
-
-typedef int vertex_t;
-typedef double weight_t;
+#include "graph.hpp"
  
 const weight_t max_weight = std::numeric_limits<double>::infinity();
- 
-struct neighbor {
-    vertex_t target;
-    weight_t weight;
-    neighbor(vertex_t arg_target, weight_t arg_weight)
-        : target(arg_target), weight(arg_weight) { }
-};
-
-typedef std::vector<std::vector<neighbor>> adjacency_list_t;
-typedef std::pair<weight_t, vertex_t> weight_vertex_pair_t;
 
 void makegraph(int m, int n, weight_t wght, adjacency_list_t &adj_list) {
 
@@ -70,7 +58,7 @@ std::pair<std::size_t, std::size_t> graphInfo(adjacency_list_t l) {
     for (std::vector<neighbor> n : l) {
         numE += n.size();
     }
-    return std::pair(numV, numE);
+    return std::pair(numV, numE / 2);
 }
 
 void printAdjList(adjacency_list_t l) {

@@ -82,6 +82,18 @@ benchprims: benchmark_prims.cc
 	$(CC) $(EXT) benchmark_prims.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_prims_o2
 	$(CC) $(EXT) benchmark_prims.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_prims_o3
 
+benchprimss: benchmark_prims_s.cc
+	mkdir -p bench
+	$(CC) $(EXT) benchmark_prims_s.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_prims_s
+	$(CC) $(EXT) benchmark_prims_s.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_prims_s_o2
+	$(CC) $(EXT) benchmark_prims_s.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_prims_s_o3
+
+benchprimsd: benchmark_prims_d.cc
+	mkdir -p bench
+	$(CC) $(EXT) benchmark_prims_d.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_prims_d
+	$(CC) $(EXT) benchmark_prims_d.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_prims_d_o2
+	$(CC) $(EXT) benchmark_prims_d.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_prims_d_o3
+
 dijkstra: dijkstra_examples.cpp
 	mkdir -p build
 	$(CC) -Wall -Werror -o ./build/dijkstra dijkstra_examples.cpp

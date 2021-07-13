@@ -19,12 +19,15 @@ int main() {
     makegraph(2, 1, 7, adj_list);
 
     adjacency_list_t adjList = constructGraph("./matrix/uw800s.mtx");
+    adjacency_list_t randomG = generateUndirectedWeightGraph(10, 20, 30);
+    printAdjList(randomG);
     //printAdjList(adjList);
     //prims<std::priority_queue<weight_vertex_pair_t, std::vector<weight_vertex_pair_t>, std::greater<weight_vertex_pair_t>>>(adjList, visited, connection, value);  //call the function the perform the minimum spanning tree algorithm
     //prims<Container<weight_vertex_pair_t, TreeWrapper>>(adj_list, visited, connection, value); 
     //prims<Container<weight_vertex_pair_t, std::vector, SortedOnAccess<weight_vertex_pair_t, std::greater<weight_vertex_pair_t>>>>(adjList, visited, connection, value); 
-    prims<Container<weight_vertex_pair_t, std::vector>>(adj_list, visited, connection, value); 
+    prims<Container<weight_vertex_pair_t, std::vector>>(randomG, visited, connection, value); 
     print_graph(connection);        //print the final minimum spanning tree
+
 
     return 0;
 }
