@@ -76,6 +76,12 @@ benchdijkstra: dijkstra.hpp containers.hpp benchmark_dijkstra.cc
 	$(CC) $(EXT) benchmark_dijkstra.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_dijkstra_o2
 	$(CC) $(EXT) benchmark_dijkstra.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_dijkstra_o3
 
+benchprims: benchmark_prims.cc
+	mkdir -p bench
+	$(CC) $(EXT) benchmark_prims.cc -isystem benchmark/include -lbenchmark -lpthread -o ./bench/benchmark_prims
+	$(CC) $(EXT) benchmark_prims.cc -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./bench/benchmark_prims_o2
+	$(CC) $(EXT) benchmark_prims.cc -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./bench/benchmark_prims_o3
+
 dijkstra: dijkstra_examples.cpp
 	mkdir -p build
 	$(CC) -Wall -Werror -o ./build/dijkstra dijkstra_examples.cpp
