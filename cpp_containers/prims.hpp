@@ -10,6 +10,7 @@
 #include <fstream> // read graph data
 #include <algorithm>
 #include <iterator>
+#include <deque>
 
 #include "containers.hpp"
 #include "graph.hpp"
@@ -84,7 +85,9 @@ void prims(const adjacency_list_t &adj_list,
     value.clear();
     value.resize(n, max_weight);
     C que;
-    if constexpr (std::is_same<C, std::priority_queue<weight_vertex_pair_t, std::vector<weight_vertex_pair_t>, std::greater<weight_vertex_pair_t>>>::value) {
+    if constexpr ((std::is_same<C, std::priority_queue<weight_vertex_pair_t, std::vector<weight_vertex_pair_t>, std::greater<weight_vertex_pair_t>>>::value)
+    || (std::is_same<C, std::priority_queue<weight_vertex_pair_t, std::deque<weight_vertex_pair_t>, std::greater<weight_vertex_pair_t>>>::value) )
+    {
         que.push(std::make_pair(0, 0));  //push the weight required to insert the source node =0 and the node itself(i.e 1)
         value[0] = 0;                 //minimum weight for source is 0  
         while (!que.empty()) {      

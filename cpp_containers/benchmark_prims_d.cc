@@ -56,6 +56,21 @@ BENCHMARK_REGISTER_F(GraphFixture, PQ_Vec)
     ->Args({1000, getEdgeNum(1000, 0.7)})
     ->Args({5000, getEdgeNum(5000, 0.7)});
 
+BENCHMARK_DEFINE_F(GraphFixture, PQ_Deque)(benchmark::State& state) {
+    while (state.KeepRunning()) {
+        std::vector<bool> visited;
+        std::vector<vertex_t> connection;
+        std::vector<weight_t> value;
+        prims<std::priority_queue<weight_vertex_pair_t, std::deque<weight_vertex_pair_t>, std::greater<weight_vertex_pair_t>>>(adjList, visited, connection, value);
+    }
+}
+BENCHMARK_REGISTER_F(GraphFixture, PQ_Deque)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({100, getEdgeNum(100, 0.7)})
+    ->Args({500, getEdgeNum(500, 0.7)})
+    ->Args({1000, getEdgeNum(1000, 0.7)})
+    ->Args({5000, getEdgeNum(5000, 0.7)});
+
 BENCHMARK_DEFINE_F(GraphFixture, SortedVec)(benchmark::State& state) {
     while (state.KeepRunning()) {
         std::vector<bool> visited;

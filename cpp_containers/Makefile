@@ -102,6 +102,10 @@ prims: prims_examples.cpp
 	mkdir -p build
 	$(CC) -Wall -Werror -o ./build/prims prims_examples.cpp
 
+huffman: huffman.cpp
+	mkdir -p build
+	$(CC) -Wall -Werror -o ./build/huffman huffman.cpp
+
 oldsource: 
 	+$(MAKE) -C old
 
