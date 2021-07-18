@@ -13,7 +13,7 @@ class GraphFixture: public ::benchmark::Fixture {
 public:
     adjacency_list_t adjList;
     // data source : https://sparse.tamu.edu/vanHeukelum
-    std::vector<std::string> files = {"./matrix/uw800s.mtx", "./matrix/uw800d.mtx", "./matrix/uw2000s.mtx", "./matrix/uw2000d.mtx", "./matrix/uw5000s.mtx", "./matrix/uw5000d.mtx", "./matrix/uw7000s.mtx", "./matrix/uw7000d.mtx"};
+    std::vector<std::string> files = {"../matrix/uw800s.mtx", "../matrix/uw800d.mtx", "../matrix/uw2000s.mtx", "../matrix/uw2000d.mtx", "../matrix/uw5000s.mtx", "../matrix/uw5000d.mtx", "../matrix/uw7000s.mtx", "../matrix/uw7000d.mtx"};
     void SetUp(const ::benchmark::State& st) {
         adjList = constructGraph(files[st.range(0)]);
     }
