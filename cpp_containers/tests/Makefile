@@ -2,6 +2,7 @@ CC = clang++ -std=c++20
 CMP = /afs/inf.ed.ac.uk/user/s16/s1673055/tools/clang+llvm-12.0.0-x86_64-linux-sles12.4
 INCLUDE = /afs/inf.ed.ac.uk/user/s16/s1673055/usr/include/benchmark
 LIB = /afs/inf.ed.ac.uk/user/s16/s1673055/usr/lib
+CON = /Users/yukiko/Documents/container-project/cpp_containers/includes
 
 EXT =
 
