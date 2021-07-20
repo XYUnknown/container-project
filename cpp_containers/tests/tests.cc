@@ -173,3 +173,25 @@ TEST(ContainerAdapterTests, PriorityQueueAssert) {
     c.clear();
     EXPECT_EQ(c.empty(), true);
 }
+
+TEST(SortedContainerTests, SetAssert) {
+    Container<int, TreeSetWrapperAsc, Sorted<int, std::greater<int>>>c;
+    c.insert(2);
+    c.insert(3);
+    c.insert(1);
+    EXPECT_EQ(*c.begin(), 1);
+    EXPECT_EQ(c.peek(), 3);
+    EXPECT_EQ(c.contains(3), true);
+    EXPECT_EQ(c.find(4), c.end());
+}
+
+TEST(SortedContainerTests, VectorAssert) {
+    Container<int, std::vector, Sorted<int, std::greater<int>>>c;
+    c.insert(2);
+    c.insert(3);
+    c.insert(1);
+    EXPECT_EQ(*c.begin(), 3);
+    EXPECT_EQ(c.peek(), 1);
+    EXPECT_EQ(c.contains(3), true);
+    EXPECT_EQ(c.find(4), c.end());
+}

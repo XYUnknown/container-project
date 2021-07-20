@@ -60,6 +60,9 @@ using HashSetWrapper = MapWithProperty<K, V, std::unordered_set<K, V>, Unique>;
 template<class C>
 concept CUnique = C::template has_property<Unique>();
 
+template<class T, class C>
+concept CSorted = C::template has_property<Sorted<T>>();
+
 template<class T, template<class...> class C, class... Ps>
 class Container;
 
@@ -212,6 +215,7 @@ class Container<T, C, Iterable> : private Container<T, C>, private virtual C<T> 
     }
 
 public:
+    using Container<T, C>::peek;
     using Container<T, C>::insert;
     using Container<T, C>::pop;
     using Container<T, C>::size;
@@ -262,11 +266,19 @@ public:
 template<class T, template<typename...> class C, class ...Ps>
 class Container<T, C, Unique, Ps...> : private Container<T, C, Iterable, Ps...>, private virtual C<T> {
 public:
-    //using Container<T, C, Ps...>::insert;
-    using Container<T, C, Iterable, Ps...>::pop;
     using Container<T, C, Iterable, Ps...>::size;
     using Container<T, C, Iterable, Ps...>::empty;
+
+    using Container<T, C, Iterable, Ps...>::peek;
+    using Container<T, C, Iterable, Ps...>::begin;
+    using Container<T, C, Iterable, Ps...>::end;
+
+    using Container<T, C, Iterable, Ps...>::pop;
+    using Container<T, C, Iterable, Ps...>::erase;
     using Container<T, C, Iterable, Ps...>::clear;
+
+    using Container<T, C, Iterable, Ps...>::find;
+    using Container<T, C, Iterable, Ps...>::contains;
 
     void insert(typename C<T>::iterator pos, T t) {
         if constexpr (CUnique<C<T>>) {
@@ -286,6 +298,52 @@ public:
             if (!this->contains(t)) {
                 Container<T, C, Iterable, Ps...>::insert(t);
             }
+        }
+    }
+};
+
+// Sorted Property -- eager
+template<class T, template<typename...> class C, class CMP, class ...Ps>
+class Container<T, C, Sorted<T, CMP>, Ps...> : private Container<T, C, Iterable, Ps...>, private virtual C<T> {
+public:
+    using Container<T, C, Iterable, Ps...>::size;
+    using Container<T, C, Iterable, Ps...>::empty;
+
+    using Container<T, C, Iterable, Ps...>::peek;
+    using Container<T, C, Iterable, Ps...>::begin;
+    using Container<T, C, Iterable, Ps...>::end;
+
+    using Container<T, C, Iterable, Ps...>::pop;
+    using Container<T, C, Iterable, Ps...>::erase;
+    using Container<T, C, Iterable, Ps...>::clear;
+
+    // insert(pos, t) is removed
+    void insert(T t) {
+        if constexpr (CSorted<T, C<T>>) {
+            Container<T, C, Iterable, Ps...>::insert(t);
+        } else {
+            auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
+            Container<T, C, Iterable, Ps...>::insert(pos, t);
+        }
+    }
+
+    bool contains(const T& t) {
+        if constexpr (CSorted<T, C<T>>){
+            return Container<T, C, Iterable, Ps...>::contains(t);
+        } else {
+            return std::binary_search(this->begin(), this->end(), t, CMP());
+        }
+    }
+
+    typename C<T>::iterator find(const T& t) {
+        if constexpr (CSorted<T, C<T>>) {
+            return Container<T, C, Iterable, Ps...>::find(t);
+        } else {
+            auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
+            if (*pos != t) { // element not found
+                return this->end();
+            }
+            return pos;
         }
     }
 };
