@@ -28,7 +28,7 @@ class FIFO {};
 template<class T, class CMP=std::less<T>>
 class HeapOrd{};
 
-template<class T, class CMP=std::less<T>>
+template<class T, class CMP=std::less<T>, bool IsEager=true>
 class Sorted {};
 
 template<class T, class C, class... Ps>
@@ -279,6 +279,7 @@ public:
 
     using Container<T, C, Ps...>::find;
     using Container<T, C, Ps...>::contains;
+    using Container<T, C, Ps...>::at;
 
     void insert(typename C<T>::iterator pos, T t) {
         if constexpr (CUnique<C<T>>) {
@@ -316,6 +317,7 @@ public:
     using Container<T, C, Ps...>::pop;
     using Container<T, C, Ps...>::erase;
     using Container<T, C, Ps...>::clear;
+    using Container<T, C, Ps...>::at;
 
     // insert(pos, t) is removed
     void insert(T t) {
@@ -344,6 +346,156 @@ public:
                 return this->end();
             }
             return pos;
+        }
+    }
+};
+
+// Sorted Property -- lazy
+template<class T, template<typename...> class C, class CMP, class ...Ps>
+class Container<T, C, Sorted<T, CMP, false>, Ps...> : private Container<T, C, Ps...>, private virtual C<T> {
+private:
+    template <class Q = T>
+    requires requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; }
+    void sort() {
+        return C<Q>::sort();
+    }
+
+    template <class Q = T, class CMPs = CMP>
+        requires requires (C<Q>& c, CMPs cmp) { { c.sort(cmp) } -> std::same_as<void>; }
+    void sort(CMPs cmp) {
+        return C<Q>::sort(cmp);
+    }
+
+    template <class Q = T>
+        requires (!requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; })
+    void sort() {
+        std::sort(this->begin(), this->end());
+    }
+
+    template <class Q = T, class CMPs = CMP>
+        requires (!requires (C<Q>& c, CMPs cmp) { { c.sort(cmp) } -> std::same_as<void>; })
+    void sort(CMPs cmp) {
+        std::sort(this->begin(), this->end(), cmp);
+    }
+
+    bool is_sorted = true;
+    void sort_on_access() {
+        this->sort(CMP());
+        is_sorted = true;
+    }
+
+public:
+    using Container<T, C, Ps...>::size;
+    using Container<T, C, Ps...>::empty;
+
+    //using Container<T, C, Ps...>::peek;
+    //using Container<T, C, Ps...>::begin;
+    //using Container<T, C, Ps...>::end;
+
+    //using Container<T, C, Ps...>::pop;
+    //using Container<T, C, Ps...>::erase;
+    using Container<T, C, Ps...>::clear;
+    using Container<T, C, Ps...>::at;
+
+    // insert(pos, t) is removed
+    void insert(T t) {
+        if constexpr (CSorted<T, C<T>>) {
+            Container<T, C, Ps...>::insert(t);
+        } else {
+            this->is_sorted = false;
+            Container<T, C, Ps...>::insert(t);
+        }
+    }
+
+    auto begin() {
+        if constexpr (CSorted<T, C<T>>){
+            return Container<T, C, Ps...>::begin();
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            return Container<T, C, Ps...>::begin();
+        }
+    }
+
+    auto end() {
+        if constexpr (CSorted<T, C<T>>) {
+            return Container<T, C, Ps...>::end();
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            return Container<T, C, Ps...>::end();
+        }
+    }
+
+    auto peek() {
+        if constexpr (CSorted<T, C<T>>) {
+            return Container<T, C, Ps...>::peek();
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            return Container<T, C, Ps...>::peek();
+        }
+    }
+
+    bool contains(const T& t) {
+        if constexpr (CSorted<T, C<T>>){
+            return Container<T, C, Ps...>::contains(t);
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            return std::binary_search(this->begin(), this->end(), t, CMP());
+        }
+    }
+
+    typename C<T>::iterator find(const T& t) {
+        if constexpr (CSorted<T, C<T>>) {
+            return Container<T, C, Ps...>::find(t);
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
+            if (*pos != t) { // element not found
+                return this->end();
+            }
+            return pos;
+        }
+    }
+
+    auto at(size_t pos) {
+        if constexpr (CSorted<T, C<T>>) {
+            return Container<T, C, Ps...>::at(pos);
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            return Container<T, C, Ps...>::at(pos);
+        }
+    }
+
+    void pop() {
+        if constexpr (CSorted<T, C<T>>){
+            Container<T, C, Ps...>::pop();
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            Container<T, C, Ps...>::pop();
+        }
+    }
+
+    auto erase(typename C<T>::iterator pos) {
+        if constexpr (CSorted<T, C<T>>) {
+            return Container<T, C, Ps...>::erase(pos);
+        } else {
+            if (!this->is_sorted) {
+                this->sort_on_access();
+            }
+            return Container<T, C, Ps...>::erase(pos);
         }
     }
 };

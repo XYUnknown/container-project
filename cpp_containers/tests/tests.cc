@@ -208,3 +208,14 @@ TEST(SortedUniqueContainerTests, VectorAssert) {
     EXPECT_EQ(c.contains(3), true);
     EXPECT_EQ(c.find(4), c.end());
 }
+
+TEST(SortedLazyContainerTests, VectorAssert) {
+    Container<int, std::vector, Sorted<int, std::greater<int>, false>, Iterable>c;
+    c.insert(2);
+    c.insert(3);
+    c.insert(1);
+    EXPECT_EQ(*c.begin(), 3);
+    EXPECT_EQ(c.peek(), 1);
+    EXPECT_EQ(c.contains(3), true);
+    EXPECT_EQ(c.find(4), c.end());
+}
