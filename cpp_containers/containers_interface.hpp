@@ -264,39 +264,39 @@ public:
 
 // Unique Property
 template<class T, template<typename...> class C, class ...Ps>
-class Container<T, C, Unique, Ps...> : private Container<T, C, Iterable, Ps...>, private virtual C<T> {
+class Container<T, C, Unique, Ps...> : private Container<T, C, Ps...>, private virtual C<T> {
 public:
-    using Container<T, C, Iterable, Ps...>::size;
-    using Container<T, C, Iterable, Ps...>::empty;
+    using Container<T, C, Ps...>::size;
+    using Container<T, C, Ps...>::empty;
 
-    using Container<T, C, Iterable, Ps...>::peek;
-    using Container<T, C, Iterable, Ps...>::begin;
-    using Container<T, C, Iterable, Ps...>::end;
+    using Container<T, C, Ps...>::peek;
+    using Container<T, C, Ps...>::begin;
+    using Container<T, C, Ps...>::end;
 
-    using Container<T, C, Iterable, Ps...>::pop;
-    using Container<T, C, Iterable, Ps...>::erase;
-    using Container<T, C, Iterable, Ps...>::clear;
+    using Container<T, C, Ps...>::pop;
+    using Container<T, C, Ps...>::erase;
+    using Container<T, C, Ps...>::clear;
 
-    using Container<T, C, Iterable, Ps...>::find;
-    using Container<T, C, Iterable, Ps...>::contains;
+    using Container<T, C, Ps...>::find;
+    using Container<T, C, Ps...>::contains;
 
     void insert(typename C<T>::iterator pos, T t) {
         if constexpr (CUnique<C<T>>) {
             std::cout<<"called"<<std::endl;
-            Container<T, C, Iterable, Ps...>::insert(pos, t);
+            Container<T, C, Ps...>::insert(pos, t);
         } else {
             if (!this->contains(t)) {
-                Container<T, C, Iterable, Ps...>::insert(pos, t);
+                Container<T, C, Ps...>::insert(pos, t);
             }
         }
     }
 
     void insert(T t) {
         if constexpr (CUnique<C<T>>) {
-            Container<T, C, Iterable, Ps...>::insert(t);
+            Container<T, C, Ps...>::insert(t);
         } else {
             if (!this->contains(t)) {
-                Container<T, C, Iterable, Ps...>::insert(t);
+                Container<T, C, Ps...>::insert(t);
             }
         }
     }
@@ -304,32 +304,32 @@ public:
 
 // Sorted Property -- eager
 template<class T, template<typename...> class C, class CMP, class ...Ps>
-class Container<T, C, Sorted<T, CMP>, Ps...> : private Container<T, C, Iterable, Ps...>, private virtual C<T> {
+class Container<T, C, Sorted<T, CMP>, Ps...> : private Container<T, C, Ps...>, private virtual C<T> {
 public:
-    using Container<T, C, Iterable, Ps...>::size;
-    using Container<T, C, Iterable, Ps...>::empty;
+    using Container<T, C, Ps...>::size;
+    using Container<T, C, Ps...>::empty;
 
-    using Container<T, C, Iterable, Ps...>::peek;
-    using Container<T, C, Iterable, Ps...>::begin;
-    using Container<T, C, Iterable, Ps...>::end;
+    using Container<T, C, Ps...>::peek;
+    using Container<T, C, Ps...>::begin;
+    using Container<T, C, Ps...>::end;
 
-    using Container<T, C, Iterable, Ps...>::pop;
-    using Container<T, C, Iterable, Ps...>::erase;
-    using Container<T, C, Iterable, Ps...>::clear;
+    using Container<T, C, Ps...>::pop;
+    using Container<T, C, Ps...>::erase;
+    using Container<T, C, Ps...>::clear;
 
     // insert(pos, t) is removed
     void insert(T t) {
         if constexpr (CSorted<T, C<T>>) {
-            Container<T, C, Iterable, Ps...>::insert(t);
+            Container<T, C, Ps...>::insert(t);
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
-            Container<T, C, Iterable, Ps...>::insert(pos, t);
+            Container<T, C, Ps...>::insert(pos, t);
         }
     }
 
     bool contains(const T& t) {
         if constexpr (CSorted<T, C<T>>){
-            return Container<T, C, Iterable, Ps...>::contains(t);
+            return Container<T, C, Ps...>::contains(t);
         } else {
             return std::binary_search(this->begin(), this->end(), t, CMP());
         }
@@ -337,7 +337,7 @@ public:
 
     typename C<T>::iterator find(const T& t) {
         if constexpr (CSorted<T, C<T>>) {
-            return Container<T, C, Iterable, Ps...>::find(t);
+            return Container<T, C, Ps...>::find(t);
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
             if (*pos != t) { // element not found
