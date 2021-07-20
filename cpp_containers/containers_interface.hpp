@@ -12,6 +12,9 @@
 #include <map>
 #include <unordered_set>
 
+#include <stack>
+#include <queue>
+
 class Iterable {};
 
 class Orderable {};
@@ -19,6 +22,11 @@ class Orderable {};
 class Mapping {};
 
 class Unique {};
+
+class LIFO {};
+class FIFO {};
+template<class T, class CMP=std::less<T>>
+class HeapOrd{};
 
 template<class T, class CMP=std::less<T>>
 class Sorted {};
@@ -119,6 +127,71 @@ public:
     }
 };
 
+template<class T, template<class...> class C>
+class Container<T, C, Sorted<T, LIFO>> : private std::stack<T, C<T>> {
+public:
+    using std::stack<T, C<T>>::size;
+    using std::stack<T, C<T>>::empty;
+    using std::stack<T, C<T>>::pop;
+
+    void clear() {
+        while(!this->empty()) 
+            this->pop();
+    }
+
+    const T& peek() const {
+        return std::stack<T, C<T>>::top();
+    }
+
+    void insert(const T& t) { 
+        std::stack<T, C<T>>::push(t);
+    }
+};
+
+template<class T, template<class...> class C>
+class Container<T, C, Sorted<T, FIFO>> : private std::queue<T, C<T>> {
+public:
+    using std::queue<T, C<T>>::size;
+    using std::queue<T, C<T>>::empty;
+    using std::queue<T, C<T>>::pop;
+
+    void clear() {
+        while(!this->empty()) {
+            this->pop();
+        }
+    }
+
+    const T& peek() const {
+        return std::queue<T, C<T>>::front();
+    }
+
+    void insert(const T& t) { 
+        std::queue<T, C<T>>::push(t);
+    }
+};
+
+template<class T, template<class...> class C, class CMP>
+class Container<T, C, Sorted<T, HeapOrd<T, CMP>>> : private std::priority_queue<T, C<T>, CMP> {
+public:
+    using std::priority_queue<T, C<T>, CMP>::size;
+    using std::priority_queue<T, C<T>, CMP>::empty;
+    using std::priority_queue<T, C<T>, CMP>::pop;
+
+    void clear() {
+        while(!this->empty()) {
+            this->pop();
+        }
+    }
+
+    const T& peek() const {
+        return std::priority_queue<T, C<T>, CMP>::top();
+    }
+
+    void insert(const T& t) { 
+        std::priority_queue<T, C<T>, CMP>::push(t);
+    }
+};
+
 // A iterable container interface
 template<class T, template<class...> class C>
 class Container<T, C, Iterable> : private Container<T, C>, private virtual C<T> {
@@ -187,7 +260,7 @@ public:
 
 // Unique Property
 template<class T, template<typename...> class C, class ...Ps>
-class Container<T, C, Iterable, Unique, Ps...> : private Container<T, C, Iterable, Ps...>, private virtual C<T> {
+class Container<T, C, Unique, Ps...> : private Container<T, C, Iterable, Ps...>, private virtual C<T> {
 public:
     //using Container<T, C, Ps...>::insert;
     using Container<T, C, Iterable, Ps...>::pop;

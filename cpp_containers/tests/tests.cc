@@ -123,7 +123,7 @@ TEST(IterableContainerTest, SetFindAssertion) {
 }
 
 TEST(UniqueContainerTest, VectorInsertAssert) {
-    Container<int, std::vector, Iterable, Unique> c;
+    Container<int, std::vector, Unique> c;
     c.insert(3);
     c.insert(3);
     c.insert(1);
@@ -131,9 +131,45 @@ TEST(UniqueContainerTest, VectorInsertAssert) {
 }
 
 TEST(UniqueContainerTest, SetInsertAssert) {
-    Container<int, TreeSetWrapperAsc, Iterable, Unique> c;
+    Container<int, TreeSetWrapperAsc, Unique> c;
     c.insert(3);
     c.insert(3);
     c.insert(1);
     EXPECT_EQ(c.size(), 2);
+}
+
+TEST(ContainerAdapterTests, StackAssert) {
+    Container<int, std::vector, Sorted<int, LIFO>> c;
+    c.insert(3);
+    c.insert(3);
+    c.insert(1);
+    EXPECT_EQ(c.peek(), 1);
+    c.pop();
+    EXPECT_EQ(c.peek(), 3);
+    c.clear();
+    EXPECT_EQ(c.empty(), true);
+}
+
+TEST(ContainerAdapterTests, QueueAssert) {
+    Container<int, std::list, Sorted<int, FIFO>> c;
+    c.insert(2);
+    c.insert(3);
+    c.insert(1);
+    EXPECT_EQ(c.peek(), 2);
+    c.pop();
+    EXPECT_EQ(c.peek(), 3);
+    c.clear();
+    EXPECT_EQ(c.empty(), true);
+}
+
+TEST(ContainerAdapterTests, PriorityQueueAssert) {
+    Container<int, std::vector, Sorted<int, HeapOrd<int, std::greater<int>>>>c;
+    c.insert(2);
+    c.insert(3);
+    c.insert(1);
+    EXPECT_EQ(c.peek(), 1);
+    c.pop();
+    EXPECT_EQ(c.peek(), 2);
+    c.clear();
+    EXPECT_EQ(c.empty(), true);
 }
