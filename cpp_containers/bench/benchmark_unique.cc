@@ -100,7 +100,7 @@ BENCHMARK_REGISTER_F(UniqueFixture, Vector_Remove_Dup)
 
 // using a sorted unique vector
 BENCHMARK_DEFINE_F(UniqueFixture, Vector_Sorted_Unique_Remove_Dup)(benchmark::State& state) {
-    Container<std::size_t, std::vector, Sorted, Unique> c;
+    Container<std::size_t, std::vector, Sorted<std::size_t>, Unique> c;
     while (state.KeepRunning()) {
         for (size_t e : data)
             c.insert(e);

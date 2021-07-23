@@ -60,7 +60,6 @@ cabal.project.local~
 
 # CPP
 build/
-bench/
 benchmark/
 results/
 matrix/
