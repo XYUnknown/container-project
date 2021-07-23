@@ -2,6 +2,8 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <string>
+#include <string_view>
 
 #include "../containers_interface.hpp"
 //#include "containers.hpp"
@@ -71,29 +73,29 @@ TEST(ContainerTest, SetClearAssertion) {
     EXPECT_EQ(c.empty(), true);
 }
 
-TEST(IterableContainerTest, VectorAtAssertion) {
-    Container<int, std::vector, Iterable> c;
+TEST(LookUpContainerTest, VectorAtAssertion) {
+    Container<int, std::vector, LookUp> c;
     c.insert(3);
     c.insert(1);
     EXPECT_EQ(c.at(0), 3);
 }
 
-TEST(IterableContainerTest, SetAtAssertion) {
-    Container<int, TreeSetWrapperAsc, Iterable> c;
+TEST(LookUpContainerTest, SetAtAssertion) {
+    Container<int, TreeSetWrapperAsc, LookUp, Iterable> c;
     c.insert(3);
     c.insert(1);
     EXPECT_EQ(c.at(0), 1);
 }
 
 TEST(IterableContainerTest, VectorInsertPosAssertion) {
-    Container<int, std::vector, Iterable> c;
+    Container<int, std::vector, LookUp, Iterable> c;
     c.insert(3);
     c.insert(c.begin(), 1);
     EXPECT_EQ(c.at(0), 1);
 }
 
 TEST(IterableContainerTest, VectorContainsAssertion) {
-    Container<int, std::vector, Iterable> c;
+    Container<int, std::vector, LookUp, Iterable> c;
     c.insert(3);
     c.insert(c.begin(), 1);
     EXPECT_EQ(c.contains(3), true);
@@ -101,7 +103,7 @@ TEST(IterableContainerTest, VectorContainsAssertion) {
 }
 
 TEST(IterableContainerTest, SetContainsAssertion) {
-    Container<int, TreeSetWrapperAsc, Iterable> c;
+    Container<int, TreeSetWrapperAsc, LookUp, Iterable> c;
     c.insert(3);
     c.insert(c.begin(), 1);
     EXPECT_EQ(c.contains(3), true);
@@ -109,21 +111,21 @@ TEST(IterableContainerTest, SetContainsAssertion) {
 }
 
 TEST(IterableContainerTest, VectorFindAssertion) {
-    Container<int, std::vector, Iterable> c;
+    Container<int, std::vector, LookUp, Iterable> c;
     c.insert(3);
     c.insert(1);
     EXPECT_EQ(c.find(3), c.begin());
 }
 
 TEST(IterableContainerTest, SetFindAssertion) {
-    Container<int, TreeSetWrapperAsc, Iterable> c;
+    Container<int, TreeSetWrapperAsc, LookUp, Iterable> c;
     c.insert(3);
     c.insert(1);
     EXPECT_EQ(c.find(1), c.begin());
 }
 
 TEST(UniqueContainerTest, VectorInsertAssert) {
-    Container<int, std::vector, Unique, Iterable> c;
+    Container<int, std::vector, Unique, LookUp, Iterable> c;
     c.insert(3);
     c.insert(3);
     c.insert(1);
@@ -131,7 +133,7 @@ TEST(UniqueContainerTest, VectorInsertAssert) {
 }
 
 TEST(UniqueContainerTest, SetInsertAssert) {
-    Container<int, TreeSetWrapperAsc, Unique, Iterable> c;
+    Container<int, TreeSetWrapperAsc, Unique, LookUp, Iterable> c;
     c.insert(3);
     c.insert(3);
     c.insert(1);
@@ -175,7 +177,7 @@ TEST(ContainerAdapterTests, PriorityQueueAssert) {
 }
 
 TEST(SortedContainerTests, SetAssert) {
-    Container<int, TreeSetWrapperAsc, Sorted<int, std::greater<int>>, Iterable>c;
+    Container<int, TreeSetWrapperAsc, Sorted<int, std::greater<int>>, LookUp, Iterable>c;
     c.insert(2);
     c.insert(3);
     c.insert(1);
@@ -186,7 +188,7 @@ TEST(SortedContainerTests, SetAssert) {
 }
 
 TEST(SortedContainerTests, VectorAssert) {
-    Container<int, std::vector, Sorted<int, std::greater<int>>, Iterable>c;
+    Container<int, std::vector, Sorted<int, std::greater<int>>, LookUp, Iterable>c;
     c.insert(2);
     c.insert(3);
     c.insert(1);
@@ -197,7 +199,7 @@ TEST(SortedContainerTests, VectorAssert) {
 }
 
 TEST(SortedUniqueContainerTests, VectorAssert) {
-    Container<int, std::vector, Sorted<int, std::greater<int>>, Unique, Iterable>c;
+    Container<int, std::vector, Sorted<int, std::greater<int>>, Unique, LookUp, Iterable>c;
     c.insert(2);
     c.insert(3);
     c.insert(3);
@@ -210,7 +212,7 @@ TEST(SortedUniqueContainerTests, VectorAssert) {
 }
 
 TEST(SortedLazyContainerTests, VectorAssert) {
-    Container<int, std::vector, Sorted<int, std::greater<int>, false>, Iterable>c;
+    Container<int, std::vector, Sorted<int, std::greater<int>, false>, LookUp, Iterable>c;
     c.insert(2);
     c.insert(3);
     c.insert(1);
@@ -218,4 +220,29 @@ TEST(SortedLazyContainerTests, VectorAssert) {
     EXPECT_EQ(c.peek(), 1);
     EXPECT_EQ(c.contains(3), true);
     EXPECT_EQ(c.find(4), c.end());
+}
+
+TEST(MapContainerTests, OrderedMap) {
+    Container<std::pair<int, std::string>, TreeMapWrapperAsc, Map>c;
+    c.insert({0, "hello"});
+    EXPECT_EQ(c.empty(), false);
+    EXPECT_EQ(c.size(), 1);
+    EXPECT_EQ(c.lookup(1), std::nullopt);
+    EXPECT_EQ(c.lookup(0), "hello");
+    EXPECT_EQ(c.contains(1), false);
+    EXPECT_EQ(c.at(0), "hello");
+}
+
+TEST(MapContainerTests, IterableOrderedMap) {
+    Container<std::pair<int, std::string>, TreeMapWrapperAsc, Iterable, Map>c;
+    c.insert({0, "hello"});
+    EXPECT_EQ(c.empty(), false);
+    EXPECT_EQ(c.size(), 1);
+    EXPECT_EQ(c.lookup(1), std::nullopt);
+    EXPECT_EQ(c.lookup(0), "hello");
+    EXPECT_EQ(c.contains(1), false);
+    EXPECT_EQ(c.at(0), "hello");
+    c.insert({10, "hello"});
+    EXPECT_EQ(c.begin()->first, 0);
+    EXPECT_EQ(c.begin()->second, "hello");
 }

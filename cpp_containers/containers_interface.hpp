@@ -6,20 +6,22 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <optional>
 
 #include <list>
 #include <set>
 #include <map>
 #include <unordered_set>
+#include <unordered_map>
 
 #include <stack>
 #include <queue>
 
 class Iterable {};
 
-class Orderable {};
+class LookUp {};
 
-class Mapping {};
+class Map {};
 
 class Unique {};
 
@@ -53,9 +55,15 @@ using TreeSetWrapperAsc = WithProperty<T, std::set<T, std::less<T>>, Unique, Sor
 template<class T>
 using TreeSetWrapperDesc = WithProperty<T, std::set<T, std::greater<T>>, Unique, Sorted<T, std::greater<T>>>;
 
-// a hashset wrapper
+
 template<class K, class V>
-using HashSetWrapper = MapWithProperty<K, V, std::unordered_set<K, V>, Unique>;
+using TreeMapWrapperAsc = MapWithProperty<K, V, std::map<K, V, std::less<K>>, Unique, Sorted<K, std::less<K>>>;
+
+template<class K, class V>
+using TreeMapWrapperDesc = MapWithProperty<K, V, std::map<K, V, std::greater<K>>, Unique, Sorted<K, std::greater<K>>>;
+
+template<class K, class V>
+using HashMapWrapper = MapWithProperty<K, V, std::unordered_map<K, V>, Unique>;
 
 template<class C>
 concept CUnique = C::template has_property<Unique>();
@@ -73,7 +81,7 @@ constexpr bool is_present() {
 
 // The minimal container interface
 template<class T, template<class...> class C>
-class Container<T, C> : private virtual C<T> {
+class Container<T, C> : protected C<T> {
     friend constexpr auto operator<= (Container<T, C>const & lhs, Container<T, C>const & rhs) {
         return (static_cast<C<T>const &>(lhs) <= static_cast<C<T>const &>(rhs));
     }
@@ -126,7 +134,31 @@ public:
         } else { // if a container does not have pop_back
             C<Q>::erase(std::prev(C<Q>::end()));
         }
-        
+    }
+};
+
+template<class K, class V, template<class...> class C>
+class Container<std::pair<K, V>, C, Map> : protected C<K, V> {
+public:
+    using C<K, V>::size;
+    using C<K, V>::empty;
+    using C<K, V>::clear;
+    using C<K, V>::insert;
+    using C<K, V>::contains;
+    using C<K, V>::at;
+
+    void pop() {
+        C<K, V>::erase(std::prev(C<K, V>::end()));
+    }
+
+    const std::pair<K, V>& peek() const {
+        return *(std::prev(C<K, V>::end())); 
+    }
+
+    auto lookup(const K& key) {
+        return (C<K, V>::find(key) != C<K, V>::end()) 
+                ? std::optional<V>{C<K, V>::find(key)->second} 
+                : std::nullopt;
     }
 };
 
@@ -195,9 +227,44 @@ public:
     }
 };
 
+template<class K, class V, template<class...> class C>
+class Container<std::pair<K, V>, C, Iterable, Map> : public Container<std::pair<K, V>, C, Map> {
+public:
+    using C<K, V>::begin;
+    using C<K, V>::end;
+    using C<K, V>::erase;
+    using C<K, V>::find;
+};
+
+template<class T, template<class...> class C, class ...Ps>
+class Container<T, C, LookUp, Ps...> : public Container<T, C, Ps...> {
+public:
+    template <class Q = T>
+    const Q& at(size_t pos) {
+        if constexpr (requires (const C<Q>& c, size_t p) { { c.at(p) } -> std::same_as<const Q&>; }) {
+            return C<Q>::at(pos);
+        } else {
+            auto iter = C<Q>::begin();
+            for (size_t i=0; i<pos; i++) {
+                iter++;
+            }
+            return *iter;
+        }
+    }
+
+    template <class Q = T>
+    bool contains(const Q& value) {
+        if constexpr (requires (C<Q>& c, const Q& t) { { c.contains(t) } -> std::same_as<bool>; }) {
+            return C<Q>::contains(value);
+        } else {
+            return this->find(value) != C<Q>::end();
+        }
+    }
+};
+
 // A iterable container interface
 template<class T, template<class...> class C>
-class Container<T, C, Iterable> : private Container<T, C>, private virtual C<T> {
+class Container<T, C, Iterable> : public Container<T, C> {
     friend constexpr auto operator<= (Container<T, C, Iterable>const & lhs, Container<T, C, Iterable>const & rhs) {
         return (static_cast<Container<T, C>const &>(lhs) <= static_cast<Container<T, C>const &>(rhs));
     }
@@ -226,19 +293,6 @@ public:
     using C<T>::end;
     using C<T>::erase;
 
-    template <class Q = T>
-    const Q& at(size_t pos) {
-        if constexpr (requires (const C<Q>& c, size_t p) { { c.at(p) } -> std::same_as<const Q&>; }) {
-            return C<Q>::at(pos);
-        } else {
-            auto iter = this->begin();
-            for (size_t i=0; i<pos; i++) {
-                iter++;
-            }
-            return *iter;
-        }
-    }
-
     typename C<T>::iterator insert(typename C<T>::iterator pos, const T& t) {
         return C<T>::insert(pos, t);
     }
@@ -251,20 +305,11 @@ public:
             return std::find(this->begin(), this->end(), value);
         } 
     }
-
-    template <class Q = T>
-    bool contains(const Q& value) {
-        if constexpr (requires (C<Q>& c, const Q& t) { { c.contains(t) } -> std::same_as<bool>; }) {
-            return C<Q>::contains(value);
-        } else {
-            return this->find(value) != this->end();
-        }
-    }
 };
 
 // Unique Property
 template<class T, template<typename...> class C, class ...Ps>
-class Container<T, C, Unique, Ps...> : private Container<T, C, Ps...>, private virtual C<T> {
+class Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
 public:
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
@@ -305,7 +350,7 @@ public:
 
 // Sorted Property -- eager
 template<class T, template<typename...> class C, class CMP, class ...Ps>
-class Container<T, C, Sorted<T, CMP>, Ps...> : private Container<T, C, Ps...>, private virtual C<T> {
+class Container<T, C, Sorted<T, CMP>, Ps...> : private Container<T, C, Ps...> {
 public:
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
@@ -352,7 +397,7 @@ public:
 
 // Sorted Property -- lazy
 template<class T, template<typename...> class C, class CMP, class ...Ps>
-class Container<T, C, Sorted<T, CMP, false>, Ps...> : private Container<T, C, Ps...>, private virtual C<T> {
+class Container<T, C, Sorted<T, CMP, false>, Ps...> : private Container<T, C, Ps...> {
 private:
     template <class Q = T>
     requires requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; }
@@ -369,13 +414,13 @@ private:
     template <class Q = T>
         requires (!requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; })
     void sort() {
-        std::sort(this->begin(), this->end());
+        std::sort(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end());
     }
 
     template <class Q = T, class CMPs = CMP>
         requires (!requires (C<Q>& c, CMPs cmp) { { c.sort(cmp) } -> std::same_as<void>; })
     void sort(CMPs cmp) {
-        std::sort(this->begin(), this->end(), cmp);
+        std::sort(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end(), cmp);
     }
 
     bool is_sorted = true;
@@ -387,13 +432,6 @@ private:
 public:
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;
-
-    //using Container<T, C, Ps...>::peek;
-    //using Container<T, C, Ps...>::begin;
-    //using Container<T, C, Ps...>::end;
-
-    //using Container<T, C, Ps...>::pop;
-    //using Container<T, C, Ps...>::erase;
     using Container<T, C, Ps...>::clear;
     using Container<T, C, Ps...>::at;
 
