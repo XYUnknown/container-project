@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-#include "../containers_interface.hpp"
+#include "containers_interface.hpp"
 //#include "containers.hpp"
 
 TEST(ContainerTest, VecInsertAssertion) {
@@ -245,4 +245,10 @@ TEST(MapContainerTests, IterableOrderedMap) {
     c.insert({10, "hello"});
     EXPECT_EQ(c.begin()->first, 0);
     EXPECT_EQ(c.begin()->second, "hello");
+}
+
+TEST(UnorderedContainerTests, IterableUnOrderedSet) {
+    Container<int, HashSetWrapper, Iterable>c;
+    c.insert(0);
+    EXPECT_EQ(c.empty(), false);
 }
