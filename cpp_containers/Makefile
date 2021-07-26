@@ -30,6 +30,9 @@ dijkstranew: dijkstra_template.cpp
 	mkdir -p build
 	$(CC) -Wall -Werror -o ./build/dijkstra_template dijkstra_template.cpp
 
+powerset: powerset_examples.cpp
+	mkdir -p build
+	$(CC) -Wall -Werror -o ./build/powerset powerset_examples.cpp
 
 oldsource: 
 	+$(MAKE) -C old

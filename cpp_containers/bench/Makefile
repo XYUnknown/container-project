@@ -146,6 +146,12 @@ benchprimsd: benchmark_prims_d.cc
 	$(CC) $(EXT) benchmark_prims_d.cc -I$(CON) -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./build/benchmark_prims_d_o2
 	$(CC) $(EXT) benchmark_prims_d.cc -I$(CON) -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./build/benchmark_prims_d_o3
 
+benchpowerset: powerset.cc
+	mkdir -p build
+	$(CC) $(EXT) powerset.cc -I$(CON) -isystem benchmark/include -lbenchmark -lpthread -o ./build/powerset
+	$(CC) $(EXT) powerset.cc -I$(CON) -isystem benchmark/include -lbenchmark -lpthread -O2 -o ./build/powerset_o2
+	$(CC) $(EXT) powerset.cc -I$(CON) -isystem benchmark/include -lbenchmark -lpthread -O3 -o ./build/powerset_o3
+
 clean:
 	rm -f *.o
 	rm -rf ./build

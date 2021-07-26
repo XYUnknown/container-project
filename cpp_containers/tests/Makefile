@@ -16,4 +16,4 @@ endif
 
 tests: tests.cc
 	mkdir -p build
-	$(CC) -Wall -Werror tests.cc -isystem gtest/include -lgtest -lgtest_main -lpthread -o ./build/tests
+	$(CC) -Wall -Werror -I$(CON) tests.cc -isystem gtest/include -lgtest -lgtest_main -lpthread -o ./build/tests
