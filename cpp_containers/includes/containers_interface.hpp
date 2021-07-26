@@ -55,6 +55,8 @@ using TreeSetWrapperAsc = WithProperty<T, std::set<T, std::less<T>>, Unique, Sor
 template<class T>
 using TreeSetWrapperDesc = WithProperty<T, std::set<T, std::greater<T>>, Unique, Sorted<T, std::greater<T>>>;
 
+template<class T>
+using HashSetWrapper = WithProperty<T, std::unordered_set<T>, Unique>;
 
 template<class K, class V>
 using TreeMapWrapperAsc = MapWithProperty<K, V, std::map<K, V, std::less<K>>, Unique, Sorted<K, std::less<K>>>;
@@ -292,6 +294,7 @@ public:
     using C<T>::begin;
     using C<T>::end;
     using C<T>::erase;
+    using C<T>::emplace;
 
     typename C<T>::iterator insert(typename C<T>::iterator pos, const T& t) {
         return C<T>::insert(pos, t);
