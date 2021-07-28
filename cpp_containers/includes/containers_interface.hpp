@@ -141,6 +141,21 @@ public:
 
 template<class K, class V, template<class...> class C>
 class Container<std::pair<K, V>, C, Map> : protected C<K, V> {
+    friend constexpr auto operator<= (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) <= static_cast<C<K, V>const &>(rhs));
+    }
+
+    friend constexpr auto operator< (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) < static_cast<C<K, V>const &>(rhs));
+    }
+
+    friend constexpr auto operator== (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) == static_cast<C<K, V>const &>(rhs));
+    }
+
+    friend constexpr auto operator!= (Container<std::pair<K, V>, C>const & lhs, Container<std::pair<K, V>, C>const & rhs) {
+        return (static_cast<C<K, V>const &>(lhs) != static_cast<C<K, V>const &>(rhs));
+    }
 public:
     using C<K, V>::size;
     using C<K, V>::empty;
@@ -240,6 +255,21 @@ public:
 
 template<class T, template<class...> class C, class ...Ps>
 class Container<T, C, LookUp, Ps...> : public Container<T, C, Ps...> {
+    friend constexpr auto operator<= (Container<T, C, LookUp, Ps...>const & lhs, Container<T, C, LookUp, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator< (Container<T, C, LookUp, Ps...>const & lhs, Container<T, C, LookUp, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) < static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator== (Container<T, C, LookUp, Ps...>const & lhs, Container<T, C, LookUp, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) == static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator!= (Container<T, C, LookUp, Ps...>const & lhs, Container<T, C, LookUp, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) != static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
 public:
     template <class Q = T>
     const Q& at(size_t pos) {
@@ -313,6 +343,21 @@ public:
 // Unique Property
 template<class T, template<typename...> class C, class ...Ps>
 class Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
+    friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator< (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) < static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator== (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) == static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator!= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) != static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
 public:
     using Container<T, C, Ps...>::size;
     using Container<T, C, Ps...>::empty;

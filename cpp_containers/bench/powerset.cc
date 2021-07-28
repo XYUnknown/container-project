@@ -49,7 +49,7 @@ BENCHMARK_REGISTER_F(PowersetFixture, OrderedSet)
 
 BENCHMARK_TEMPLATE_DEFINE_F(PowersetFixture, UnorderedSet, Container<std::size_t, HashSetWrapper, Iterable>)(benchmark::State& state) {
     while (state.KeepRunning()) {
-        auto pset = powerset<Container<std::size_t, HashSetWrapper, Iterable>, std::vector, Iterable>(set);
+        auto pset = powerset<Container<std::size_t, HashSetWrapper, Iterable>, HashSetWrapperH, Iterable>(set);
     }
 }
 BENCHMARK_REGISTER_F(PowersetFixture, UnorderedSet)
