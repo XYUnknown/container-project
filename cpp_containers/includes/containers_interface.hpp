@@ -23,6 +23,7 @@ class LookUp {};
 
 class Map {};
 
+template<bool IsEager=true>
 class Unique {};
 
 class LIFO {};
@@ -50,25 +51,26 @@ public:
 };
 
 template<class T>
-using TreeSetWrapperAsc = WithProperty<T, std::set<T, std::less<T>>, Unique, Sorted<T, std::less<T>>>;
+using TreeSetWrapperAsc = WithProperty<T, std::set<T, std::less<T>>, Unique<true>, Sorted<T, std::less<T>>>;
 
 template<class T>
-using TreeSetWrapperDesc = WithProperty<T, std::set<T, std::greater<T>>, Unique, Sorted<T, std::greater<T>>>;
+using TreeSetWrapperDesc = WithProperty<T, std::set<T, std::greater<T>>, Unique<true>, Sorted<T, std::greater<T>>>;
 
 template<class T>
-using HashSetWrapper = WithProperty<T, std::unordered_set<T>, Unique>;
+using HashSetWrapper = WithProperty<T, std::unordered_set<T>, Unique<true>>;
 
 template<class K, class V>
-using TreeMapWrapperAsc = MapWithProperty<K, V, std::map<K, V, std::less<K>>, Unique, Sorted<K, std::less<K>>>;
+using TreeMapWrapperAsc = MapWithProperty<K, V, std::map<K, V, std::less<K>>, Unique<>, Sorted<K, std::less<K>>>;
 
 template<class K, class V>
-using TreeMapWrapperDesc = MapWithProperty<K, V, std::map<K, V, std::greater<K>>, Unique, Sorted<K, std::greater<K>>>;
+using TreeMapWrapperDesc = MapWithProperty<K, V, std::map<K, V, std::greater<K>>, Unique<>, Sorted<K, std::greater<K>>>;
 
 template<class K, class V>
-using HashMapWrapper = MapWithProperty<K, V, std::unordered_map<K, V>, Unique>;
+using HashMapWrapper = MapWithProperty<K, V, std::unordered_map<K, V>, Unique<>>;
 
 template<class C>
-concept CUnique = C::template has_property<Unique>();
+concept CUnique = (C::template has_property<Unique<true>>()) || (C::template has_property<Unique<false>>());
+//concept CUnique = C::template has_property<Unique<>>();
 
 template<class T, class C>
 concept CSorted = C::template has_property<Sorted<T>>();
@@ -340,22 +342,22 @@ public:
     }
 };
 
-// Unique Property
+// Unique Property - Eager
 template<class T, template<typename...> class C, class ...Ps>
-class Container<T, C, Unique, Ps...> : private Container<T, C, Ps...> {
-    friend constexpr auto operator<= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+class Container<T, C, Unique<>, Ps...> : private Container<T, C, Ps...> {
+    friend constexpr auto operator<= (Container<T, C, Unique<>, Ps...>const & lhs, Container<T, C, Unique<>, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
     }
 
-    friend constexpr auto operator< (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+    friend constexpr auto operator< (Container<T, C, Unique<>, Ps...>const & lhs, Container<T, C, Unique<>, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) < static_cast<Container<T, C, Ps...>const &>(rhs));
     }
 
-    friend constexpr auto operator== (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+    friend constexpr auto operator== (Container<T, C, Unique<>, Ps...>const & lhs, Container<T, C, Unique<>, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) == static_cast<Container<T, C, Ps...>const &>(rhs));
     }
 
-    friend constexpr auto operator!= (Container<T, C, Unique, Ps...>const & lhs, Container<T, C, Unique, Ps...>const & rhs) {
+    friend constexpr auto operator!= (Container<T, C, Unique<>, Ps...>const & lhs, Container<T, C, Unique<>, Ps...>const & rhs) {
         return (static_cast<Container<T, C, Ps...>const &>(lhs) != static_cast<Container<T, C, Ps...>const &>(rhs));
     }
 public:
@@ -376,7 +378,7 @@ public:
 
     void insert(typename C<T>::iterator pos, T t) {
         if constexpr (CUnique<C<T>>) {
-            std::cout<<"called"<<std::endl;
+            //std::cout<<"tagges unique called"<<std::endl;
             Container<T, C, Ps...>::insert(pos, t);
         } else {
             if (!this->contains(t)) {
@@ -388,10 +390,164 @@ public:
     void insert(T t) {
         if constexpr (CUnique<C<T>>) {
             Container<T, C, Ps...>::insert(t);
+            //std::cout<<"tagges unique called"<<std::endl;
         } else {
             if (!this->contains(t)) {
                 Container<T, C, Ps...>::insert(t);
             }
+        }
+    }
+};
+
+// Unique property -- Lazy
+template<class T, template<typename...> class C, class ...Ps>
+class Container<T, C, Unique<false>, Ps...> : private Container<T, C, Ps...> {
+    friend constexpr auto operator<= (Container<T, C, Unique<false>, Ps...>const & lhs, Container<T, C, Unique<false>, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) <= static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator< (Container<T, C, Unique<false>, Ps...>const & lhs, Container<T, C, Unique<false>, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) < static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator== (Container<T, C, Unique<false>, Ps...>const & lhs, Container<T, C, Unique<false>, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) == static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+    friend constexpr auto operator!= (Container<T, C, Unique<false>, Ps...>const & lhs, Container<T, C, Unique<false>, Ps...>const & rhs) {
+        return (static_cast<Container<T, C, Ps...>const &>(lhs) != static_cast<Container<T, C, Ps...>const &>(rhs));
+    }
+
+private:
+    template <class Q = T>
+    void sort() {
+        if constexpr ((requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; })) {
+            C<Q>::sort();
+        } else {
+            std::sort(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end());
+        }
+    }
+
+    bool is_unique = true;
+
+    template <class Q = T>
+    void dedup_on_access() {
+        this->sort();
+        if constexpr ((requires (C<Q>& c) { { c.unique() } -> std::same_as<void>; })) {
+            C<Q>::unique();
+        } else {
+            Container<T, C, Ps...>::erase(std::unique(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end()), Container<T, C, Ps...>::end());
+        }
+        is_unique = true;
+    }
+public:
+    using Container<T, C, Ps...>::empty;
+    using Container<T, C, Ps...>::clear;
+    using Container<T, C, Ps...>::contains;
+
+    void insert(typename C<T>::iterator pos, T t) {
+        if constexpr (CUnique<C<T>>) {
+            Container<T, C, Ps...>::insert(pos, t);
+        } else {
+            Container<T, C, Ps...>::insert(pos, t);
+            this->is_unique = false;
+        }
+    }
+
+    void insert(T t) {
+        if constexpr (CUnique<C<T>>) {
+            Container<T, C, Ps...>::insert(t);
+        } else {
+            Container<T, C, Ps...>::insert(t);
+            this->is_unique = false;
+        }
+    }
+
+    auto size() {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::size();
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::size();
+        }
+    }
+
+    auto peek() {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::peek();
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::peek();
+        }
+    }
+
+    auto begin() {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::begin();
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::begin();
+        }
+    }
+
+    auto end() {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::end();
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::end();
+        }
+    }
+
+    auto pop() {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::pop();
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::pop();
+        }
+    }
+
+    auto erase(typename C<T>::iterator pos) {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::erase(pos);
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::erase(pos);
+        }
+    }
+
+    auto find(const T& value) {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::find(value);
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::find(value);
+        }
+    }
+
+    auto at(size_t pos) {
+        if constexpr (CUnique<C<T>>) {
+            return Container<T, C, Ps...>::at(pos);
+        } else {
+            if (!this->is_unique) {
+                this->dedup_on_access();
+            }
+            return Container<T, C, Ps...>::at(pos);
         }
     }
 };
@@ -415,6 +571,7 @@ public:
     // insert(pos, t) is removed
     void insert(T t) {
         if constexpr (CSorted<T, C<T>>) {
+            //std::cout<<"tagges sorted called"<<std::endl;
             Container<T, C, Ps...>::insert(t);
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
@@ -448,27 +605,21 @@ template<class T, template<typename...> class C, class CMP, class ...Ps>
 class Container<T, C, Sorted<T, CMP, false>, Ps...> : private Container<T, C, Ps...> {
 private:
     template <class Q = T>
-    requires requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; }
     void sort() {
-        return C<Q>::sort();
+        if constexpr (requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; }) {
+            C<Q>::sort();
+        } else {
+            std::sort(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end());
+        }
     }
 
     template <class Q = T, class CMPs = CMP>
-        requires requires (C<Q>& c, CMPs cmp) { { c.sort(cmp) } -> std::same_as<void>; }
     void sort(CMPs cmp) {
-        return C<Q>::sort(cmp);
-    }
-
-    template <class Q = T>
-        requires (!requires (C<Q>& c) { { c.sort() } -> std::same_as<void>; })
-    void sort() {
-        std::sort(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end());
-    }
-
-    template <class Q = T, class CMPs = CMP>
-        requires (!requires (C<Q>& c, CMPs cmp) { { c.sort(cmp) } -> std::same_as<void>; })
-    void sort(CMPs cmp) {
-        std::sort(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end(), cmp);
+        if constexpr (requires (C<Q>& c, CMPs cmp) { { c.sort(cmp) } -> std::same_as<void>; }) {
+            C<Q>::sort(cmp);
+        } else {
+            std::sort(Container<T, C, Ps...>::begin(), Container<T, C, Ps...>::end(), cmp);
+        }
     }
 
     bool is_sorted = true;

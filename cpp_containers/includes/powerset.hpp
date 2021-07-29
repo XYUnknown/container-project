@@ -4,7 +4,7 @@
 #include "containers_interface.hpp"
  
 template <class S, template<class...> class C, class ...Ps>
-Container<S, C, Ps...> powerset(const S& s)
+Container<S, C, Ps...> powerset(S& s)
 {
     Container<S, C, Ps...> ret;
     S empty;
@@ -35,4 +35,4 @@ struct hash_on_sum
 };
 
 template<class T>
-using HashSetWrapperH = WithProperty<T, std::unordered_set<T, hash_on_sum<T>>, Unique>;
+using HashSetWrapperH = WithProperty<T, std::unordered_set<T, hash_on_sum<T>>, Unique<>>;

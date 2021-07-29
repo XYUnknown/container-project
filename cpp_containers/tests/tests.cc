@@ -125,7 +125,7 @@ TEST(IterableContainerTest, SetFindAssertion) {
 }
 
 TEST(UniqueContainerTest, VectorInsertAssert) {
-    Container<int, std::vector, Unique, LookUp, Iterable> c;
+    Container<int, std::vector, Unique<>, LookUp, Iterable> c;
     c.insert(3);
     c.insert(3);
     c.insert(1);
@@ -133,7 +133,15 @@ TEST(UniqueContainerTest, VectorInsertAssert) {
 }
 
 TEST(UniqueContainerTest, SetInsertAssert) {
-    Container<int, TreeSetWrapperAsc, Unique, LookUp, Iterable> c;
+    Container<int, TreeSetWrapperAsc, Unique<>, LookUp, Iterable> c;
+    c.insert(3);
+    c.insert(3);
+    c.insert(1);
+    EXPECT_EQ(c.size(), 2);
+}
+
+TEST(UniqueContainerTest, VectorInsertLazyAssert) {
+    Container<int, std::vector, Unique<false>, LookUp, Iterable> c;
     c.insert(3);
     c.insert(3);
     c.insert(1);
@@ -199,7 +207,7 @@ TEST(SortedContainerTests, VectorAssert) {
 }
 
 TEST(SortedUniqueContainerTests, VectorAssert) {
-    Container<int, std::vector, Sorted<int, std::greater<int>>, Unique, LookUp, Iterable>c;
+    Container<int, std::vector, Sorted<int, std::greater<int>>, Unique<>, LookUp, Iterable>c;
     c.insert(2);
     c.insert(3);
     c.insert(3);

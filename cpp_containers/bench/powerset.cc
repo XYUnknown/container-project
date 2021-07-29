@@ -71,4 +71,29 @@ BENCHMARK_REGISTER_F(PowersetFixture, Vector)
     ->Args({15})
     ->Args({20});
 
+BENCHMARK_TEMPLATE_DEFINE_F(PowersetFixture, UniqueVectorLazy, Container<std::size_t, std::vector, Unique<false>, LookUp, Iterable>)(benchmark::State& state) {
+    while (state.KeepRunning()) {
+        auto pset = powerset<Container<std::size_t, std::vector, Unique<false>, LookUp, Iterable>, std::vector, Unique<false>, LookUp, Iterable>(set);
+        pset.size();
+    }
+}
+BENCHMARK_REGISTER_F(PowersetFixture, UniqueVectorLazy)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({5})
+    ->Args({10})
+    ->Args({15})
+    ->Args({20});
+
+BENCHMARK_TEMPLATE_DEFINE_F(PowersetFixture, UniqueVectorEager, Container<std::size_t, std::vector, Unique<>, LookUp, Iterable>)(benchmark::State& state) {
+    while (state.KeepRunning()) {
+        auto pset = powerset<Container<std::size_t, std::vector, Unique<>, LookUp, Iterable>, std::vector, Unique<>, LookUp, Iterable>(set);
+    }
+}
+BENCHMARK_REGISTER_F(PowersetFixture, UniqueVectorEager)
+    ->Unit(benchmark::kMillisecond)
+    ->Args({5})
+    ->Args({10})
+    ->Args({15})
+    ->Args({20});
+
 BENCHMARK_MAIN();
