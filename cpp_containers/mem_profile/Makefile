@@ -16,60 +16,60 @@ endif
 
 all: powerset_set.cpp powerset_unordered_set.cpp powerset_vector.cpp powerset_uvector_eager.cpp powerset_uvector_lazy.cpp
 	mkdir -p build
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_5 powerset_set_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_10 powerset_set_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_15 powerset_set_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_14 powerset_set_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_16 powerset_set_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_18 powerset_set_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_set powerset_set.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_5 powerset_unordered_set_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_10 powerset_unordered_set_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_15 powerset_unordered_set_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_14 powerset_unordered_set_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_16 powerset_unordered_set_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_18 powerset_unordered_set_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set powerset_unordered_set.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_5 powerset_vector_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_10 powerset_vector_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_15 powerset_vector_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_14 powerset_vector_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_16 powerset_vector_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_18 powerset_vector_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector powerset_vector.cpp
-		$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_5 powerset_uvector_eager_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_10 powerset_uvector_eager_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_15 powerset_uvector_eager_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_14 powerset_uvector_eager_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_16 powerset_uvector_eager_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_18 powerset_uvector_eager_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager powerset_uvector_eager.cpp
-		$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_5 powerset_uvector_lazy_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_10 powerset_uvector_lazy_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_15 powerset_uvector_lazy_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_14 powerset_uvector_lazy_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_16 powerset_uvector_lazy_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_18 powerset_uvector_lazy_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy powerset_uvector_lazy.cpp
 	
 set: powerset_set.cpp
 	mkdir -p build
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_5 powerset_set_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_10 powerset_set_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_15 powerset_set_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_14 powerset_set_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_16 powerset_set_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_set_18 powerset_set_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_set powerset_set.cpp
 
 unorderedset: powerset_unordered_set.cpp
 	mkdir -p build
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_5 powerset_unordered_set_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_10 powerset_unordered_set_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_15 powerset_unordered_set_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_14 powerset_unordered_set_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_16 powerset_unordered_set_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set_18 powerset_unordered_set_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_unordered_set powerset_unordered_set.cpp
 
 vector: powerset_vector.cpp
 	mkdir -p build
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_5 powerset_vector_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_10 powerset_vector_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_15 powerset_vector_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_14 powerset_vector_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_16 powerset_vector_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector_18 powerset_vector_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_vector powerset_vector.cpp
 
 uvectore: powerset_uvector_eager.cpp
 	mkdir -p build
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_5 powerset_uvector_eager_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_10 powerset_uvector_eager_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_15 powerset_uvector_eager_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_14 powerset_uvector_eager_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_16 powerset_uvector_eager_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager_18 powerset_uvector_eager_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_eager powerset_uvector_eager.cpp
 
 uvectorl: powerset_uvector_lazy.cpp
 	mkdir -p build
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_5 powerset_uvector_lazy_5.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_10 powerset_uvector_lazy_10.cpp
-	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_15 powerset_uvector_lazy_15.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_14 powerset_uvector_lazy_14.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_16 powerset_uvector_lazy_16.cpp
+	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy_18 powerset_uvector_lazy_18.cpp
 	$(CC) -Wall -Werror -O2 -o ./build/powerset_uvector_lazy powerset_uvector_lazy.cpp
 
 clean:

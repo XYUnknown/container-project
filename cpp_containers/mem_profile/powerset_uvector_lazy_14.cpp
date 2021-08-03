@@ -3,7 +3,7 @@
 int main()
 {
     Container<std::size_t, std::vector, Unique<false>, LookUp, Iterable> set;
-    std::size_t size = 10;
+    std::size_t size = 14;
     for (std::size_t i=0; i < size; i++) {
         set.insert((std::size_t) 2 * i);
     }
