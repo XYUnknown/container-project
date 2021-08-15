@@ -260,3 +260,10 @@ TEST(UnorderedContainerTests, IterableUnOrderedSet) {
     c.insert(0);
     EXPECT_EQ(c.empty(), false);
 }
+
+TEST(MakeContainer, MakeUniqueContainer) {
+    auto c = make_container<int, void, Unique<>>();
+    c.insert(0);
+    c.insert(0);
+    EXPECT_EQ(c.size(), 1);
+}

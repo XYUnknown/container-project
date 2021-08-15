@@ -65,8 +65,17 @@ using TreeMapWrapperAsc = MapWithProperty<K, V, std::map<K, V, std::less<K>>, Un
 template<class K, class V>
 using TreeMapWrapperDesc = MapWithProperty<K, V, std::map<K, V, std::greater<K>>, Unique<>, Sorted<K, std::greater<K>>>;
 
+template<class K, class V, class CMP>
+using TreeMapWrapper = MapWithProperty<K, V, std::map<K, V, CMP>, Unique<>, Sorted<K, CMP>>;
+
+template<class K, class V, class CMP>
+using MultiTreeMapWrapper = MapWithProperty<K, V, std::multimap<K, V, CMP>, Unique<>, Sorted<K, CMP>>;
+
 template<class K, class V>
 using HashMapWrapper = MapWithProperty<K, V, std::unordered_map<K, V>, Unique<>>;
+
+template<class K, class V>
+using MultiHashMapWrapper = MapWithProperty<K, V, std::unordered_multimap<K, V>, Unique<>>;
 
 template<class C>
 concept CUnique = (C::template has_property<Unique<true>>()) || (C::template has_property<Unique<false>>());
@@ -80,7 +89,26 @@ class Container;
 
 template<class P, class ...Ps>
 constexpr bool is_present() {
-    return (std::is_same_v<P, Ps> || ...);
+    return (std::disjunction_v<std::is_same<P, Ps>...>);
+}
+
+template<class T, class ...Ps>
+constexpr bool is_sorted_present() {
+    return ((is_present<Sorted<T, std::less<T>, true>, Ps...>())
+        || (is_present<Sorted<T, std::less<T>, false>, Ps...>())
+        || (is_present<Sorted<T, std::greater<T>, true>, Ps...>())
+        || (is_present<Sorted<T, std::greater<T>, false>, Ps...>())
+        || (is_present<Sorted<T, LIFO>, Ps...>())
+        || (is_present<Sorted<T, FIFO>, Ps...>())
+        || (is_present<Sorted<T, HeapOrd<T, std::less<T>>>, Ps...>())
+        || (is_present<Sorted<T, HeapOrd<T, std::greater<T>>>, Ps...>())
+        );
+}
+
+template<class ...Ps>
+constexpr bool is_unique_present() {
+    return ((is_present<Unique<true>, Ps...>())
+        || (is_present<Unique<false>, Ps...>()));
 }
 
 // The minimal container interface
@@ -329,6 +357,7 @@ public:
     using C<T>::emplace;
 
     typename C<T>::iterator insert(typename C<T>::iterator pos, const T& t) {
+        std::cout<<"tagges unique called"<<std::endl;
         return C<T>::insert(pos, t);
     }
 
@@ -374,11 +403,17 @@ public:
 
     using Container<T, C, Ps...>::find;
     using Container<T, C, Ps...>::contains;
-    using Container<T, C, Ps...>::at;
+    //using Container<T, C, Ps...>::at;
+
+    template <class Q = T>
+        requires requires (const C<Q>& c, size_t p) { { c.at(p) } -> std::same_as<const Q&>; }
+    Q& at(size_t pos) {
+        return C<Q>::at(pos);
+    }
 
     void insert(typename C<T>::iterator pos, T t) {
         if constexpr (CUnique<C<T>>) {
-            //std::cout<<"tagges unique called"<<std::endl;
+            std::cout<<"tagges unique called"<<std::endl;
             Container<T, C, Ps...>::insert(pos, t);
         } else {
             if (!this->contains(t)) {
@@ -736,3 +771,35 @@ public:
         }
     }
 };
+
+template<class T, class S=void, class ...Ps>
+auto make_container() {
+    if constexpr (is_present<Map, Ps...>()) {
+        if constexpr ((is_sorted_present<T, Ps...>()) && (is_unique_present<Ps...>())) {
+            Container<std::pair<T, S>, TreeMapWrapper, Ps...> c;
+            return c;
+        } else if constexpr (is_sorted_present<T, Ps...>()) {
+            Container<std::pair<T, S>, MultiTreeMapWrapper, Ps...> c;
+            return c;
+        } else if constexpr (is_unique_present<Ps...>()) {
+            Container<std::pair<T, S>, HashSetWrapper, Ps...> c;
+            return c;
+        } else {
+            Container<std::pair<T, S>, MultiHashMapWrapper, Ps...> c;
+            return c;
+        }
+    } else {
+        if constexpr (is_sorted_present<T, Ps...>()) {
+            Container<T, std::vector, Ps...> c;
+            return c;
+        } else {
+            if constexpr (is_unique_present<Ps...>()) {
+                Container<T, HashSetWrapper, Ps...> c;
+                return c;
+            } else {
+                Container<T, std::vector, Ps...> c;
+                return c;
+            }
+        }
+    }
+}
