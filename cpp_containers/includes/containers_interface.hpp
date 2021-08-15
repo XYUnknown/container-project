@@ -72,8 +72,8 @@ template<class C>
 concept CUnique = (C::template has_property<Unique<true>>()) || (C::template has_property<Unique<false>>());
 //concept CUnique = C::template has_property<Unique<>>();
 
-template<class T, class C>
-concept CSorted = C::template has_property<Sorted<T>>();
+template<class T, class CMP, class C>
+concept CSorted = (C::template has_property<Sorted<T>>()) || (C::template has_property<Sorted<T, CMP, false>>()) || (C::template has_property<Sorted<T, CMP, true>>());
 
 template<class T, template<class...> class C, class... Ps>
 class Container;
@@ -570,7 +570,7 @@ public:
 
     // insert(pos, t) is removed
     void insert(T t) {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             //std::cout<<"tagges sorted called"<<std::endl;
             Container<T, C, Ps...>::insert(t);
         } else {
@@ -580,7 +580,7 @@ public:
     }
 
     bool contains(const T& t) {
-        if constexpr (CSorted<T, C<T>>){
+        if constexpr (CSorted<T, CMP, C<T>>){
             return Container<T, C, Ps...>::contains(t);
         } else {
             return std::binary_search(this->begin(), this->end(), t, CMP());
@@ -588,7 +588,7 @@ public:
     }
 
     typename C<T>::iterator find(const T& t) {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             return Container<T, C, Ps...>::find(t);
         } else {
             auto pos = std::lower_bound(this->begin(), this->end(), t, CMP());
@@ -636,7 +636,7 @@ public:
 
     // insert(pos, t) is removed
     void insert(T t) {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             Container<T, C, Ps...>::insert(t);
         } else {
             this->is_sorted = false;
@@ -645,7 +645,7 @@ public:
     }
 
     auto begin() {
-        if constexpr (CSorted<T, C<T>>){
+        if constexpr (CSorted<T, CMP, C<T>>){
             return Container<T, C, Ps...>::begin();
         } else {
             if (!this->is_sorted) {
@@ -656,7 +656,7 @@ public:
     }
 
     auto end() {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             return Container<T, C, Ps...>::end();
         } else {
             if (!this->is_sorted) {
@@ -667,7 +667,7 @@ public:
     }
 
     auto peek() {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             return Container<T, C, Ps...>::peek();
         } else {
             if (!this->is_sorted) {
@@ -678,7 +678,7 @@ public:
     }
 
     bool contains(const T& t) {
-        if constexpr (CSorted<T, C<T>>){
+        if constexpr (CSorted<T, CMP, C<T>>){
             return Container<T, C, Ps...>::contains(t);
         } else {
             if (!this->is_sorted) {
@@ -689,7 +689,7 @@ public:
     }
 
     typename C<T>::iterator find(const T& t) {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             return Container<T, C, Ps...>::find(t);
         } else {
             if (!this->is_sorted) {
@@ -704,7 +704,7 @@ public:
     }
 
     auto at(size_t pos) {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             return Container<T, C, Ps...>::at(pos);
         } else {
             if (!this->is_sorted) {
@@ -715,7 +715,7 @@ public:
     }
 
     void pop() {
-        if constexpr (CSorted<T, C<T>>){
+        if constexpr (CSorted<T, CMP, C<T>>){
             Container<T, C, Ps...>::pop();
         } else {
             if (!this->is_sorted) {
@@ -726,7 +726,7 @@ public:
     }
 
     auto erase(typename C<T>::iterator pos) {
-        if constexpr (CSorted<T, C<T>>) {
+        if constexpr (CSorted<T, CMP, C<T>>) {
             return Container<T, C, Ps...>::erase(pos);
         } else {
             if (!this->is_sorted) {
