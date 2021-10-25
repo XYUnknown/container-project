@@ -55,3 +55,7 @@ isEven x = x `mod` 2 == 0
 
 isOdd :: (Integral a) => a -> Bool
 isOdd x = x `mod` 2 == 1 
+
+-- Test run
+c :: Con Int
+c = insertElm (insertElm empty 1) 1
