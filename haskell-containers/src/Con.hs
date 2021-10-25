@@ -1,4 +1,4 @@
-module Con (Con, empty, isEmpty, insertElm, removeElm, contains, size) where
+module Con (Con, empty, isEmpty, insertElm, removeElm, contains, size, position) where
 import Data.List
 
 empty :: Con a
@@ -15,3 +15,9 @@ insertElm (ConImpl c) x = ConImpl (x:c)
 removeElm (ConImpl c) x = ConImpl (delete x c)
 contains (ConImpl c) x = elem x c
 size (ConImpl c) = length c
+
+class Pos t where
+    position :: (Eq a) => t a -> a -> Maybe Int
+
+instance Pos Con where
+    position (ConImpl c) x = elemIndex x c

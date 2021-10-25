@@ -36,10 +36,6 @@ reduce = undefined
 flatten :: Con (Con a) -> Con a
 flatten = undefined
 
--- TODO: implement it need as a operations introduced by a syntactic property
-position :: Con a -> a -> Int -- the position is an integer
-position = undefined
-
 ascendingComp :: (Ord a) => Con a -> a -> a -> Bool
 ascendingComp c x y = if (position c x) < (position c y)
                         then x <= y
@@ -58,4 +54,4 @@ isOdd x = x `mod` 2 == 1
 
 -- Test run
 c :: Con Int
-c = insertElm (insertElm empty 1) 1
+c = insertElm (insertElm empty 1) 2
