@@ -12,10 +12,10 @@ descending :: (Ord a) => Con a -> Bool
 descending c = for_all_unique_pairs c (descendingComp c)
 
 evenElm :: (Integral a) => Con a -> Bool
-evenElm c = for_all_elms c (isEven)
+evenElm c = for_all_elms c isEven
 
 oddElm :: (Integral a) => Con a -> Bool
-oddElm c = for_all_elms c (isOdd)
+oddElm c = for_all_elms c isOdd
 
 {- Combinators-}
 -- Unary Predicates
