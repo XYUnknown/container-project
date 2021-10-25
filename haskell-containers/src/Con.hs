@@ -1,4 +1,4 @@
-module Con (Con, empty, isEmpty, insert, removeElm, contains, size) where
+module Con (Con, empty, isEmpty, insertElm, removeElm, contains, size) where
 import Data.List
 
 empty :: Con a
