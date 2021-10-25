@@ -27,6 +27,7 @@ library
   exposed-modules:
       Con
       Lib
+      Properties
   other-modules:
       Paths_haskell_containers
   hs-source-dirs:
