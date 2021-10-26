@@ -17,6 +17,16 @@ evenElm c = for_all_elms c isEven
 oddElm :: (Integral a, ConLike t) => t a -> Bool
 oddElm c = for_all_elms c isOdd
 
+-- Observation : these two property functions do not have type Con a -> Bool
+-- Question: can we use them as refinements on Con a?
+lifo :: (ConLike t, ReadRemove t, Eq (t a)) => t a -> a -> Bool
+lifo c x = remove (insertElm c x) == c
+
+fifo :: (ConLike t, ReadRemove t, Eq (t a)) => t a -> a -> Bool
+fifo c x = if isEmpty c
+            then remove (insertElm c x) == c
+            else remove (insertElm c x) == insertElm (remove c) x
+
 {- Combinators-}
 -- Unary Predicates
 for_all_elms :: (ConLike t) => t a -> (a -> Bool) -> Bool

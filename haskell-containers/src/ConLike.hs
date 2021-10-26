@@ -12,6 +12,11 @@ class ConLike t where
 class Pos t where
     position :: (Eq a) => t a -> a -> Maybe Int
 
+class ReadRemove t where
+    read :: t a -> a
+    remove :: t a -> t a
+
+-- example implementation of a container using a list
 instance ConLike [] where
     empty = [] -- c = empty::[a]
     isEmpty c = null c
