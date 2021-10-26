@@ -1,3 +1,4 @@
+-- Old model, not in use
 module Con (Con, empty, isEmpty, insertElm, removeElm, contains, size, position) where
 import Data.List
 
