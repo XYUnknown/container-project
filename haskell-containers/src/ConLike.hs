@@ -9,10 +9,10 @@ class ConLike t where
     contains :: (Eq a) => t a -> a -> Bool
     size :: t a -> Int
 
-class Pos t where
+class (ConLike t) => Pos t where
     position :: (Eq a) => t a -> a -> Maybe Int
 
-class ReadRemove t where
+class (ConLike t) => ReadRemove t where
     read :: t a -> a
     remove :: t a -> t a
 
