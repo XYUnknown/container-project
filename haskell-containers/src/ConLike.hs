@@ -1,6 +1,7 @@
 module ConLike where
 import Data.List
 
+-- Basic Container and Operations
 class ConLike t where
     empty :: t a
     isEmpty :: t a -> Bool

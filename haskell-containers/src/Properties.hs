@@ -17,6 +17,11 @@ evenElm c = for_all_elms c isEven
 oddElm :: (Integral a, ConLike t) => t a -> Bool
 oddElm c = for_all_elms c isOdd
 
+-- potential usage
+{-
+type UniqueCon a = (Eq a, ConLike t) => {c :: t a | unique c}
+-}
+
 -- Observation : these two property functions do not have type Con a -> Bool
 -- Question: can we use them as refinements on Con a?
 lifo :: (ReadRemove t, Eq (t a)) => t a -> a -> Bool
