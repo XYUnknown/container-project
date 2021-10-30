@@ -5,10 +5,10 @@ import ConLike
 unique :: (Eq a, ConLike t) => t a -> Bool
 unique c = for_all_unique_pairs c (/=)
 
-ascending :: (Ord a, Pos t) => t a -> Bool
+ascending :: (Ord a, ConLike t, Pos t) => t a -> Bool
 ascending c = for_all_unique_pairs c (ascendingComp c)
 
-descending :: (Ord a, Pos t) => t a -> Bool
+descending :: (Ord a, ConLike t, Pos t) => t a -> Bool
 descending c = for_all_unique_pairs c (descendingComp c)
 
 evenElm :: (Integral a, ConLike t) => t a -> Bool
@@ -24,10 +24,10 @@ type UniqueCon a = (Eq a, ConLike t) => {c :: t a | unique c}
 
 -- Observation : these two property functions do not have type Con a -> Bool
 -- Question: can we use them as refinements on Con a?
-lifo :: (ReadRemove t, Eq (t a)) => t a -> a -> Bool
+lifo :: (ConLike t,ReadRemove t, Eq (t a)) => t a -> a -> Bool
 lifo c x = remove (insertElm c x) == c
 
-fifo :: (ReadRemove t, Eq (t a)) => t a -> a -> Bool
+fifo :: (ConLike t, ReadRemove t, Eq (t a)) => t a -> a -> Bool
 fifo c x = if isEmpty c
             then remove (insertElm c x) == c
             else remove (insertElm c x) == insertElm (remove c) x
@@ -51,12 +51,12 @@ reduce = undefined
 flatten :: (ConLike t) => t (t a) -> t a
 flatten = undefined
 
-ascendingComp :: (Ord a, Pos t) => t a -> a -> a -> Bool
+ascendingComp :: (Ord a,  ConLike t, Pos t) => t a -> a -> a -> Bool
 ascendingComp c x y = if (position c x) < (position c y)
                         then x <= y
                         else x >= y
 
-descendingComp :: (Ord a, Pos t) => t a -> a -> a -> Bool
+descendingComp :: (Ord a,  ConLike t, Pos t) => t a -> a -> a -> Bool
 descendingComp c x y = if (position c x) < (position c y)
                         then x >= y
                         else x <= y
