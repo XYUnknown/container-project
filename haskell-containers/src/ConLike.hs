@@ -11,16 +11,16 @@ class ConLike t where
     contains :: (Eq a) => t a -> a -> Bool
     size :: t a -> Int
 
-class (ConLike t) => Pos t where
+class Pos t where
     position :: (Eq a) => t a -> a -> Maybe Int
 
-class (ConLike t) => ReadRemove t where
+class ReadRemove t where
     read :: t a -> a
     remove :: t a -> t a
 
 -- Prototype
 -- Can we model the specification on library programmer side in this form?
-class (ReadRemove t) => Stack t where
+class (ConLike t, ReadRemove t) => Stack t where
     axiom :: (Eq (t a)) => t a -> a -> Bool
     axiom c x = remove (insertElm c x) == c
 
