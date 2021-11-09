@@ -4,23 +4,18 @@ use peg::parser;
 type Id = String;
 type Type = String;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Term {
     VarTerm(Box<Id>),
     LambdaTerm(Box<Id>, Box<Term>),
     AppTerm(Box<Term>, Box<Term>),
 }
 
-#[derive(Clone)]
-pub struct PropertyDecl (Box<Id>, Box<Term>);
-
-/*
-#[derive(Clone)]
-pub struct ContypeDecl { 
-    name : Id,
-    typedecl : (Id, Type, AppTerm)
-}*/
-
+#[derive(Clone, Debug)]
+pub enum Decl {
+    PropertyDecl(Box<Id>, Box<Term>),
+    ConTypeDecl(Box<Type>, (Box<Id>, Box<Type>, Box<Term>))
+}
 
 parser!{
 grammar spec() for str {
@@ -45,10 +40,16 @@ grammar spec() for str {
             _ "(" _ t1:term() _ ")" _ "(" _ t2:term() _ ")" _ { Term::AppTerm(Box::new(t1), Box::new(t2)) }
         }
 
-    pub rule prop() -> PropertyDecl
+    pub rule prop() -> Decl
         = _ "property" __ p:id() _ "{" _ t:term() _ "}" _ 
         {
-            PropertyDecl(Box::new(p), Box::new(t))
+            Decl::PropertyDecl(Box::new(p), Box::new(t))
+        }
+    
+    pub rule con() -> Decl
+        = _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:term() _ "}" _
+        {
+            Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(t2), Box::new(t)))
         }
     
     rule _ = quiet!{[' ' | '\n' | '\t']*}
@@ -58,7 +59,7 @@ grammar spec() for str {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::{Id, spec};
+    use crate::parser::{Id, Type, spec};
 
     #[test]
     fn test_id() {
@@ -67,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_ty() {
-        assert_eq!(spec::ty("UniqueCon<T>"), Ok(Id::from("UniqueCon<T>")));
+        assert_eq!(spec::ty("UniqueCon<T>"), Ok(Type::from("UniqueCon<T>")));
     }
 
     #[test]
@@ -105,6 +106,13 @@ mod tests {
             "property unique {
                 \\c -> ((for_all_unique_pairs) c) (\\a -> (\\b -> ((neq) a) b))
             }"
+            ).is_ok());
+    }
+
+    #[test]
+    fn test_contype() {
+        assert!(spec::con(
+            "type UniqueCon<T> = {c : Con<T> | (unique) c}"
             ).is_ok());
     }
 }

@@ -2,9 +2,9 @@
 
 /*SPEC*
 property unique {
-    \c -> for_all_unique_pairs c (\a -> \b -> neq a b)
+    \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
 }
-type UniqueCon<T> = {c : Con<T> | unique c}
+type UniqueCon<T> = {c : Con<T> | (unique) c}
 *ENDSPEC*/
 
 
