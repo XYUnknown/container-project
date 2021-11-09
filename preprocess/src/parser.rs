@@ -1,6 +1,8 @@
 extern crate peg;
 use peg::parser;
 
+use std::vec::Vec;
+
 type Id = String;
 type Type = String;
 
@@ -16,6 +18,8 @@ pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
     ConTypeDecl(Box<Type>, (Box<Id>, Box<Type>, Box<Term>))
 }
+
+type Spec = Vec<Decl>; 
 
 parser!{
 grammar spec() for str {
@@ -40,16 +44,22 @@ grammar spec() for str {
             _ "(" _ t1:term() _ ")" _ "(" _ t2:term() _ ")" _ { Term::AppTerm(Box::new(t1), Box::new(t2)) }
         }
 
-    pub rule prop() -> Decl
-        = _ "property" __ p:id() _ "{" _ t:term() _ "}" _ 
-        {
-            Decl::PropertyDecl(Box::new(p), Box::new(t))
+    pub rule decl() -> Decl
+        = precedence! {
+            _ "property" __ p:id() _ "{" _ t:term() _ "}" _ 
+            {
+                Decl::PropertyDecl(Box::new(p), Box::new(t))
+            }
+            --
+            _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:term() _ "}" _
+            {
+                Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(t2), Box::new(t)))
+            }
         }
-    
-    pub rule con() -> Decl
-        = _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:term() _ "}" _
-        {
-            Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(t2), Box::new(t)))
+
+    pub rule spec() -> Spec
+        = _ "/*SPEC*" _ decls: (d:decl() { d }) ** _ _ "*ENDSPEC*/" {
+            decls
         }
     
     rule _ = quiet!{[' ' | '\n' | '\t']*}
@@ -93,7 +103,7 @@ mod tests {
 
     #[test]
     fn test_property() {
-        assert!(spec::prop(
+        assert!(spec::decl(
             "property id {
                  \\c -> c 
                 }"
@@ -102,7 +112,7 @@ mod tests {
 
     #[test]
     fn test_property_unique() {
-        assert!(spec::prop(
+        assert!(spec::decl(
             "property unique {
                 \\c -> ((for_all_unique_pairs) c) (\\a -> (\\b -> ((neq) a) b))
             }"
@@ -111,8 +121,20 @@ mod tests {
 
     #[test]
     fn test_contype() {
-        assert!(spec::con(
+        assert!(spec::decl(
             "type UniqueCon<T> = {c : Con<T> | (unique) c}"
             ).is_ok());
+    }
+
+    #[test]
+    fn test_spec() {
+        assert!(spec::spec(
+            "/*SPEC*
+            property unique {
+                \\c -> ((for_all_unique_pairs) c) (\\a -> (\\b -> ((neq) a) b))
+            }
+            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            *ENDSPEC*/"
+        ).is_ok())
     }
 }
