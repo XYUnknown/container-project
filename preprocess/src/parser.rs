@@ -2,6 +2,8 @@ extern crate peg;
 use peg::parser;
 
 use std::vec::Vec;
+use std::env;
+use std::fs;
 
 type Id = String;
 type Type = String;
@@ -19,7 +21,22 @@ pub enum Decl {
     ConTypeDecl(Box<Type>, (Box<Id>, Box<Type>, Box<Term>))
 }
 
-type Spec = Vec<Decl>; 
+type Spec = Vec<Decl>;
+
+type Code = String;
+
+pub enum Block {
+    SpecBlock(Box<Spec>, usize),
+    CodeBlock(Box<Code>, usize)
+}
+
+type Prog = Vec<Block>;
+
+fn readfile(filename : String) -> String {
+    let contents = fs::read_to_string(filename)
+        .expect("Something went wrong reading the file");
+    contents
+}
 
 parser!{
 grammar spec() for str {
@@ -58,8 +75,31 @@ grammar spec() for str {
         }
 
     pub rule spec() -> Spec
-        = _ "/*SPEC*" _ decls: (d:decl() { d }) ** _ _ "*ENDSPEC*/" {
+        = _ "/*SPEC*" _ decls: (d:decl() { d }) ** _ _ "*ENDSPEC*/" _
+        {
             decls
+        }
+
+    pub rule code() -> Code
+        = _ c:$("/*CODE*/" (!"/*ENDCODE*/"[_])* "/*ENDCODE*/") _ { c.into() }
+    
+    pub rule block() -> Block
+        = precedence! {
+            _ p:position!() s:spec() _ 
+            {
+                Block::SpecBlock(Box::new(s), p)
+            }
+            --
+            _ p:position!() c:code() _
+            {
+                Block::CodeBlock(Box::new(c), p)
+            }
+        }
+
+    pub rule prog() -> Prog
+        = _ blocks: (b:block() { b }) ** _ _
+        {
+            blocks
         }
     
     rule _ = quiet!{[' ' | '\n' | '\t']*}
@@ -88,7 +128,7 @@ mod tests {
 
     #[test]
     fn test_lambdaterm() {
-        assert!(spec::term("\\c -> c").is_ok());
+        assert!(spec::term(r#"\c -> c"#).is_ok());
     }
 
     #[test]
@@ -104,18 +144,18 @@ mod tests {
     #[test]
     fn test_property() {
         assert!(spec::decl(
-            "property id {
-                 \\c -> c 
-                }"
+            r#"property id {
+                 \c -> c 
+                }"#
             ).is_ok());
     }
 
     #[test]
     fn test_property_unique() {
         assert!(spec::decl(
-            "property unique {
-                \\c -> ((for_all_unique_pairs) c) (\\a -> (\\b -> ((neq) a) b))
-            }"
+            r#"property unique {
+                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+            }"#
             ).is_ok());
     }
 
@@ -128,13 +168,99 @@ mod tests {
 
     #[test]
     fn test_spec() {
-        assert!(spec::spec(
-            "/*SPEC*
+        assert!(spec::spec( // raw string literal ????
+            r#"/*SPEC*
             property unique {
-                \\c -> ((for_all_unique_pairs) c) (\\a -> (\\b -> ((neq) a) b))
+                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
             }
             type UniqueCon<T> = {c : Con<T> | (unique) c}
-            *ENDSPEC*/"
+            *ENDSPEC*/"#
+        ).is_ok())
+    }
+
+    #[test]
+    fn test_code() {
+        assert!(spec::code(
+            r#"/*CODE*/
+            fn main () {
+                let mut c = UniqueCon::<u32>::new();
+                for x in 0..10 {
+                    c.insert(x);
+                    c.insert(x);
+                }
+                assert_eq!(c.len(), 10);
+            }
+            /*ENDCODE*/"#
+        ).is_ok())
+    }
+
+    #[test]
+    fn test_block_spec() {
+        assert!(spec::block(
+            r#"/*SPEC*
+            property unique {
+                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+            }
+            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            *ENDSPEC*/"#
+        ).is_ok())
+    }
+
+    #[test]
+    fn test_block_code() {
+        assert!(spec::block(
+            r#"/*CODE*/
+            fn main () {
+                let mut c = UniqueCon::<u32>::new();
+                for x in 0..10 {
+                    c.insert(x);
+                    c.insert(x);
+                }
+                assert_eq!(c.len(), 10);
+            }
+            /*ENDCODE*/"#
+        ).is_ok())
+    }
+
+    #[test]
+    fn test_prog() {
+        assert!(spec::prog(
+            r#"
+            /*SPEC*
+            property unique {
+                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+            }
+            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            *ENDSPEC*/
+
+            /*CODE*/
+            fn main () {
+                let mut c = UniqueCon::<u32>::new();
+                for x in 0..10 {
+                    c.insert(x);
+                    c.insert(x);
+                }
+                assert_eq!(c.len(), 10);
+            }
+            /*ENDCODE*/
+
+            /*SPEC*
+            property unique {
+                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+            }
+            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            *ENDSPEC*/
+            
+            /*CODE*/
+            fn main () {
+                let mut c = UniqueCon::<u32>::new();
+                for x in 0..10 {
+                    c.insert(x);
+                    c.insert(x);
+                }
+                assert_eq!(c.len(), 10);
+            }
+            /*ENDCODE*/"#
         ).is_ok())
     }
 }
