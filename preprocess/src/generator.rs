@@ -5,7 +5,7 @@ use std::io::{Write, BufReader, BufRead, Error};
 use crate::parser::{Block, Spec, spec};
 
 const CODEGEN: &str = "/*CODEGEN*/\n";
-const CODEGENEND: &str = "\n/*CODEGENEND*/\n";
+const CODEGENEND: &str = "\n/*ENDCODEGEN*/\n";
 
 pub fn readfile(filename : String) -> String {
     let contents = fs::read_to_string(filename)
