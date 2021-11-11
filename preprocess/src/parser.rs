@@ -5,8 +5,8 @@ use std::vec::Vec;
 use std::env;
 use std::fs;
 
-type Id = String;
-type Type = String;
+pub type Id = String;
+pub type Type = String;
 
 #[derive(Clone, Debug)]
 pub enum Term {
@@ -21,16 +21,16 @@ pub enum Decl {
     ConTypeDecl(Box<Type>, (Box<Id>, Box<Type>, Box<Term>))
 }
 
-type Spec = Vec<Decl>;
+pub type Spec = Vec<Decl>;
+pub type Code = String;
 
-type Code = String;
-
+#[derive(Clone, Debug)]
 pub enum Block {
     SpecBlock(Box<Spec>, usize),
     CodeBlock(Box<Code>, usize)
 }
 
-type Prog = Vec<Block>;
+pub type Prog = Vec<Block>;
 
 fn readfile(filename : String) -> String {
     let contents = fs::read_to_string(filename)
@@ -39,7 +39,7 @@ fn readfile(filename : String) -> String {
 }
 
 parser!{
-grammar spec() for str {
+pub grammar spec() for str {
     pub rule id() -> Id
         = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' ]*) 
         { s.into() }
