@@ -22,7 +22,7 @@ pub fn writefile(filename : String, contents: String) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn extract_code(block: Block) -> String {
+pub fn process_block(block: Block) -> String {
     match block {
         Block::SpecBlock(spec, n) => {
             process_spec(spec.to_vec())
@@ -46,7 +46,7 @@ pub fn process_src(filename : String) -> String {
         Ok(blocks) => {
             let mut result = String::new();
             for block in blocks.iter() {
-                result = result + &extract_code(block.to_owned());
+                result = result + &process_block(block.to_owned());
             }
             result
         },
