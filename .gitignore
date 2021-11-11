@@ -8,6 +8,8 @@ MAlonzo/**
 
 # Rust
 */target
+# Rust parser code gen testing dir.
+*/gen_code/
 
 # Others
 drafts/*
