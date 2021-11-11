@@ -2,8 +2,6 @@ extern crate peg;
 use peg::parser;
 
 use std::vec::Vec;
-use std::env;
-use std::fs;
 
 pub type Id = String;
 pub type Type = String;
@@ -31,12 +29,6 @@ pub enum Block {
 }
 
 pub type Prog = Vec<Block>;
-
-fn readfile(filename : String) -> String {
-    let contents = fs::read_to_string(filename)
-        .expect("Something went wrong reading the file");
-    contents
-}
 
 parser!{
 pub grammar spec() for str {
