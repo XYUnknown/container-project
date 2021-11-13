@@ -75,7 +75,7 @@ pub grammar spec() for str {
         }
 
     pub rule code() -> Code
-        = _ "/*CODE*/" c:$((!"/*ENDCODE*/"[_])*) "/*ENDCODE*/" _ { c.into() }
+        = _ "/*CODE*/" c:$((!"/*ENDCODE*/"!"/*SPEC*"!"*ENDSPEC*/"[_])*) "/*ENDCODE*/" _ { c.into() }
     
     pub rule block() -> Block
         = precedence! {
