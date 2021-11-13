@@ -7,8 +7,6 @@ property unique {
 type UniqueCon<T> = {c : Con<T> | (unique) c}
 *ENDSPEC*/
 
-
-/*CODE*/
 fn main () {
     let mut c = UniqueCon::<u32>::new();
     for x in 0..10 {
@@ -17,5 +15,3 @@ fn main () {
     }
     assert_eq!(c.len(), 10);
 }
-/*ENDCODE*/
-
