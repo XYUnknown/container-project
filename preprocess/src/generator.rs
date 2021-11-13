@@ -16,7 +16,7 @@ const SPECEND: &str = "*ENDSPEC*/";
 pub fn readfile(filename : String) -> String {
     let contents = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
-    contents
+        mark_src_blocks(contents)
 }
 
 pub fn writefile(filename : String, contents: String) -> Result<(), Error> {
@@ -60,8 +60,7 @@ pub fn process_spec(s: Spec) -> String {
 
 pub fn process_src(filename : String) -> String {
     let f = readfile("./spec_code/example.rs".to_string());
-    let marked_f = mark_src_blocks(f);
-    match spec::prog(&marked_f) {
+    match spec::prog(&f) {
         Ok(blocks) => {
             let mut result = String::new();
             for block in blocks.iter() {
@@ -73,7 +72,7 @@ pub fn process_src(filename : String) -> String {
     }
 }
 
-pub fn mark_src_blocks(src : String) -> String {
+fn mark_src_blocks(src : String) -> String {
     let mut trimed_src = src.trim();
     let mut result = String::new();
     while trimed_src.len() > 0 {
@@ -81,7 +80,6 @@ pub fn mark_src_blocks(src : String) -> String {
             Some(n) => {
                 match trimed_src.find(SPECEND)  {
                     Some(m) => {
-                        //println!("{}", m);
                         if (n > 0) {
                             let code = &trimed_src[..n];
                             result = result + CODE + &code + CODEEND;
@@ -120,8 +118,7 @@ mod tests {
     #[test]
     fn test_parse_file() {
         let f = readfile("./spec_code/example.rs".to_string());
-        let marked_f = mark_src_blocks(f);
-        assert!(spec::prog(&marked_f).is_ok())
+        assert!(spec::prog(&f).is_ok())
     }
 
     #[test]
