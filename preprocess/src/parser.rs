@@ -4,6 +4,8 @@ use peg::parser;
 use std::vec::Vec;
 
 pub type Id = String;
+
+// this will need to be refined
 pub type Type = String;
 
 #[derive(Clone, Debug)]
@@ -73,7 +75,7 @@ pub grammar spec() for str {
         }
 
     pub rule code() -> Code
-        = _ c:$("/*CODE*/" (!"/*ENDCODE*/"[_])* "/*ENDCODE*/") _ { c.into() }
+        = _ "/*CODE*/" c:$((!"/*ENDCODE*/"[_])*) "/*ENDCODE*/" _ { c.into() }
     
     pub rule block() -> Block
         = precedence! {
@@ -173,16 +175,14 @@ mod tests {
     #[test]
     fn test_code() {
         assert!(spec::code(
-            r#"/*CODE*/
-            fn main () {
+            r#"/*CODE*/fn main () {
                 let mut c = UniqueCon::<u32>::new();
                 for x in 0..10 {
                     c.insert(x);
                     c.insert(x);
                 }
                 assert_eq!(c.len(), 10);
-            }
-            /*ENDCODE*/"#
+            }/*ENDCODE*/"#
         ).is_ok())
     }
 
@@ -201,16 +201,14 @@ mod tests {
     #[test]
     fn test_block_code() {
         assert!(spec::block(
-            r#"/*CODE*/
-            fn main () {
+            r#"/*CODE*/fn main () {
                 let mut c = UniqueCon::<u32>::new();
                 for x in 0..10 {
                     c.insert(x);
                     c.insert(x);
                 }
                 assert_eq!(c.len(), 10);
-            }
-            /*ENDCODE*/"#
+            }/*ENDCODE*/"#
         ).is_ok())
     }
 
