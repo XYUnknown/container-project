@@ -6,7 +6,12 @@ use std::vec::Vec;
 pub type Id = String;
 
 // this will need to be refined
-pub type Type = String;
+#[derive(Eq, PartialEq, Clone, Debug)]
+pub enum Type {
+    Bool(),
+    Ty(Box<Id>),
+    Fun(Box<Type>, Box<Type>),
+}
 
 #[derive(Clone, Debug)]
 pub enum Term {
@@ -21,6 +26,22 @@ pub enum Decl {
     ConTypeDecl(Box<Type>, (Box<Id>, Box<Type>, Box<Term>))
 }
 
+impl Decl {
+    pub fn is_prop_decl(&self) -> bool {
+        match self {
+            Decl::PropertyDecl(_, _) => true,
+            _ => false
+        }
+    }
+
+    pub fn is_contype_decl(&self) -> bool {
+        match self {
+            Decl::ConTypeDecl(_, _) => true,
+            _ => false
+        }
+    }
+}
+
 pub type Spec = Vec<Decl>;
 pub type Code = String;
 
@@ -28,6 +49,22 @@ pub type Code = String;
 pub enum Block {
     SpecBlock(Box<Spec>, usize),
     CodeBlock(Box<Code>, usize)
+}
+
+impl Block {
+    pub fn is_spec_block(&self) -> bool {
+        match self {
+            Block::SpecBlock(_, _) => true,
+            _ => false
+        }
+    }
+
+    pub fn extract_spec(&self) -> Spec {
+        match self {
+            Block::SpecBlock(spec, _) => spec.to_vec(),
+            _ => Vec::new()
+        }
+    }
 }
 
 pub type Prog = Vec<Block>;
@@ -39,8 +76,12 @@ pub grammar spec() for str {
         { s.into() }
     
     pub rule ty() -> Type
-        = s:$([ 'a'..='z' | 'A'..='Z']['a'..='z' | 'A'..='Z' | '0'..='9' | '<' | '>' ]*) 
-        { s.into() }
+        = precedence! {
+            s:$("bool") { Type::Bool() }
+            --
+            s:$([ 'a'..='z' | 'A'..='Z']['a'..='z' | 'A'..='Z' | '0'..='9' | '<' | '>' ]*) 
+            { Type::Ty(Box::new(s.into())) }
+        }
   
     pub rule term() -> Term
         = precedence!{
@@ -112,7 +153,7 @@ mod tests {
 
     #[test]
     fn test_ty() {
-        assert_eq!(spec::ty("UniqueCon<T>"), Ok(Type::from("UniqueCon<T>")));
+        assert!(spec::ty("UniqueCon<T>").is_ok());
     }
 
     #[test]
