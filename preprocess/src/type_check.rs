@@ -160,7 +160,7 @@ mod tests {
 
     #[test]
     fn test_dup_prop_decl() {
-        assert!(check_prop_decl().is_err());
+        assert!(check_prop_decl().is_ok());
     }
 
 }
