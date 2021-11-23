@@ -5,12 +5,18 @@ use std::vec::Vec;
 
 pub type Id = String;
 
+// the description of how a property is used in type checking
+// TODO: this will be refined
+pub type Description = String;
+
 // this will need to be refined
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Type {
     Bool(),
     Ty(Box<Id>),
     Fun(Box<Vec<Type>>, Box<Type>), // arg types, return type
+    PropType(Box<Type>, Box<Description>),
+    ConType(Box<Type>, Box<Vec<Type>>) // Con<T> | Ps...
 }
 
 #[derive(Clone, Debug)]
@@ -23,7 +29,7 @@ pub enum Term {
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
-    ConTypeDecl(Box<Type>, (Box<Id>, Box<Type>, Box<Term>))
+    ConTypeDecl(Box<Id>, (Box<Id>, Box<Type>, Box<Term>))
 }
 
 impl Decl {
@@ -72,7 +78,7 @@ pub type Prog = Vec<Block>;
 parser!{
 pub grammar spec() for str {
     pub rule id() -> Id
-        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' ]*) 
+        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '<' | '>' ]*) 
         { s.into() }
     
     pub rule ty() -> Type
@@ -103,7 +109,7 @@ pub grammar spec() for str {
                 Decl::PropertyDecl(Box::new(p), Box::new(t))
             }
             --
-            _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:term() _ "}" _
+            _ "type" __ t1:id() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:term() _ "}" _
             {
                 Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(t2), Box::new(t)))
             }
