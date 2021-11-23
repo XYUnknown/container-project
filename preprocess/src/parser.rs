@@ -10,7 +10,7 @@ pub type Id = String;
 pub enum Type {
     Bool(),
     Ty(Box<Id>),
-    Fun(Box<Type>, Box<Type>),
+    Fun(Box<Vec<Type>>, Box<Type>), // arg types, return type
 }
 
 #[derive(Clone, Debug)]
