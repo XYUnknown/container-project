@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::collections::hash_map::Iter;
+
 use crate::parser::{Id, Type};
 
 #[derive(Clone, Debug)]
@@ -24,6 +26,10 @@ impl Ctx {
 
     pub fn get_id(&self, id: Id) -> Option<&Type> {
         self.ctx.get(&id)
+    }
+
+    pub fn iter(&self) -> Iter<'_, Id, Type> {
+        self.ctx.iter()
     }
 
     fn sz(&self) -> usize {
