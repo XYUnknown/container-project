@@ -19,6 +19,22 @@ pub enum Type {
     ConType(Box<Type>, Box<Vec<Type>>) // Con<T> | Ps...
 }
 
+impl Type {
+    pub fn is_prop_type(&self) -> bool {
+        match self {
+            Type::PropType(_, _) => true,
+            _ => false
+        }
+    }
+
+    pub fn extract_desc(&self) -> Description {
+        match self {
+            Type::PropType(_, desc) => desc.to_string(),
+            _ => String::new()
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Term {
     VarTerm(Box<Id>),
@@ -65,10 +81,24 @@ impl Block {
         }
     }
 
+    pub fn is_code_block(&self) -> bool {
+        match self {
+            Block::CodeBlock(_, _) => true,
+            _ => false
+        }
+    }
+
     pub fn extract_spec(&self) -> Spec {
         match self {
             Block::SpecBlock(spec, _) => spec.to_vec(),
             _ => Vec::new()
+        }
+    }
+
+    pub fn extract_code(&self) -> Code {
+        match self {
+            Block::CodeBlock(code, _) => code.to_string(),
+            _ => String::new()
         }
     }
 }
