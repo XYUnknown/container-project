@@ -2,16 +2,21 @@ use std::env;
 use std::fs;
 use std::io::{Write, BufReader, BufRead, Error};
 
-use crate::parser::{Block, Spec, spec};
+use crate::parser::{Block, Spec, Description, Type, spec};
+use crate::type_check::{TypeChecker};
+use crate::ctx::{Ctx};
+use crate::lib_specs::{construct_spec};
 
 const CODEGEN: &str = "/*CODEGEN*/\n";
-const CODEGENEND: &str = "\n/*ENDCODEGEN*/\n";
+const CODEGENEND: &str = "/*ENDCODEGEN*/\n";
 
 const CODE: &str = "/*CODE*/";
 const CODEEND: &str = "/*ENDCODE*/";
 
 const SPEC: &str = "/*SPEC*";
 const SPECEND: &str = "*ENDSPEC*/";
+
+type ErrorMessage = String;
 
 pub fn readfile(filename : String) -> String {
     let contents = fs::read_to_string(filename)
@@ -28,10 +33,10 @@ pub fn writefile(filename : String, contents: String) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn process_block(block: Block) -> String {
+pub fn process_block(block: &Block) -> String {
     match block {
-        Block::SpecBlock(spec, n) => {
-            process_spec(spec.to_vec())
+        Block::SpecBlock(_, _) => {
+            String::new()
         },
         Block::CodeBlock(code, n) => {
             code.to_string()
@@ -39,8 +44,7 @@ pub fn process_block(block: Block) -> String {
     }
 }
 
-pub fn process_spec(s: Spec) -> String {
-    println!("{:?}", s);
+pub fn process_con_decl(ctx: &Ctx) -> Result<String, ErrorMessage> {
     // select all properties
     // let env = s.filter( ... PropertyDecl )
 
@@ -53,20 +57,69 @@ pub fn process_spec(s: Spec) -> String {
     // let codes: Vec<str> = types.map( |t| -> generate_type(t, env) )
 
     // TODO : actually process the spec
-    let code: &str = "type UniqueCon<T> = std::collections::HashSet<T>;";
-    let result = CODEGEN.to_owned() + code + CODEGENEND;
-    result
+    let mut code = String::new();
+    for (id, ty) in ctx.iter() {
+        match ty {
+            Type::ConType(_, ptys) => {
+                let descs: Vec<Description> = 
+                    ptys.iter()
+                    .filter(| pty | pty.is_prop_type())
+                    .map(| pty | pty.extract_desc())
+                    .collect();
+                let struct_choices = library_spec_lookup(descs);
+                if struct_choices.is_empty() {
+                    return Err("Unable to find a struct which matches the specification in the library".to_string());
+                } else {
+                    // currently we choose the first struct choice
+                    code = code + "type " + id + " = " + &struct_choices[0]+ ";\n";
+                }
+            },
+            _ => continue
+        }
+    }
+    let result = CODEGEN.to_owned() + &code + CODEGENEND;
+    Ok(result)
+}
+
+fn library_spec_lookup(descs: Vec<Description>) -> Vec<String> {
+    let lib_spec = construct_spec(); // The specifications of library structs
+    let mut structs = Vec::new();
+    for (name, _) in lib_spec.iter() {
+        if lib_spec.contains_descs(&name, &descs) {
+            structs.push(name.to_string());
+        }
+    }
+    structs
 }
 
 pub fn process_src(filename : String) -> String {
     let f = readfile("./spec_code/example.rs".to_string());
     match spec::prog(&f) {
         Ok(blocks) => {
-            let mut result = String::new();
-            for block in blocks.iter() {
-                result = result + &process_block(block.to_owned());
+            let mut tc = TypeChecker::new();
+            match tc.check_prog(blocks.clone()) {// type checking
+                Ok(_) => {
+                    let mut result = String::new();
+                    // generate con types according to the infomation in con decl
+                    //result = result + &process_con_decl(tc.get_ctx());
+                    match process_con_decl(tc.get_ctx()) {
+                        Ok(code) => {
+                            result = result + &code;
+                            // generate rust source code
+                            let code_blocks: Vec<&Block> = 
+                                blocks.iter()
+                                .filter(| block | block.is_code_block())
+                                .collect();
+                            for block in code_blocks.iter() {
+                                result = result + &process_block(block.to_owned());
+                            }
+                            result
+                        },
+                        Err(e) => e.to_string()
+                    }
+                },
+                Err(e) => e.to_string()
             }
-            result
         },
         _ => "Error, invalid source code.".to_string()
     }
