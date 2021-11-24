@@ -55,6 +55,9 @@ impl LibSpec {
                 let mut result = true;
                 for decl in descs.iter() {
                     result = lib_descs.contains(decl);
+                    if !result {
+                        return result;
+                    }
                 }
                 result
             }
