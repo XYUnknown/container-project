@@ -165,7 +165,7 @@ fn mark_src_blocks(src : String) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::generator::{readfile, process_spec, mark_src_blocks};
+    use crate::generator::{readfile, mark_src_blocks};
     use crate::parser::{Decl, spec};
 
     #[test]
@@ -181,8 +181,4 @@ mod tests {
         assert!(spec::prog(&f).is_ok())
     }
 
-    #[test]
-    fn test_process_spec() {
-        assert!(process_spec(Vec::<Decl>::new()).len() != 0);
-    }
 }
