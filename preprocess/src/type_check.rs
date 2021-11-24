@@ -2,6 +2,8 @@ use crate::parser::{Prog, Block, Spec, Decl, Type, Term, spec};
 use crate::ctx::{Ctx};
 use crate::generator::{readfile};
 
+use std::ops::Deref;
+
 type TypeError = String;
 type TypeCheckResult<T> = Result<T, TypeError>;
 
@@ -27,6 +29,10 @@ impl TypeChecker {
         let args2 = vec![Type::Ty(Box::new("T".to_string())), Type::Ty(Box::new("T".to_string()))];
         let neq_fn = Type::Fun(Box::new(args2), Box::new(Type::Bool()));
         self.global_ctx.put("neq".to_string(), neq_fn);
+    }
+
+    pub fn get_ctx(&self) -> &Ctx {
+        &self.global_ctx
     }
 
     pub fn check_prog(&mut self, prog: Prog) -> Result<(), TypeError> {
@@ -67,7 +73,6 @@ impl TypeChecker {
     }
 
     pub fn check_prop_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
-        // No duplication
         match decl {
             Decl::PropertyDecl(id, term) => {
                 // Duplicate property decl checking
@@ -82,7 +87,9 @@ impl TypeChecker {
                             Ok(t) => {
                                 let desired_prop_type = Type::Fun(Box::new(vec![Type::Ty(Box::new("Con<T>".to_string()))]), Box::new(Type::Bool()));
                                 if t == &desired_prop_type {
-                                    self.global_ctx.put(id.to_string(), desired_prop_type);
+                                    // TODO: construct property prooerty type and description
+                                    let prop_type = Type::PropType(Box::new(desired_prop_type), Box::new(id.to_string()));
+                                    self.global_ctx.put(id.to_string(), prop_type);
                                     Ok(())
                                 } else {
                                     Err("Not a valid property type".to_string())
@@ -97,7 +104,7 @@ impl TypeChecker {
         }
     }
 
-    pub fn check_contype_decls(&self, decls: Vec<&Decl>) -> Result<(), TypeError> {
+    pub fn check_contype_decls(&mut self, decls: Vec<&Decl>) -> Result<(), TypeError> {
         let mut result = Ok(());
         for decl in decls.into_iter() {
             match self.check_contype_decl(decl) {
@@ -108,8 +115,72 @@ impl TypeChecker {
         result
     }
 
-    pub fn check_contype_decl(&self, decl: &Decl) -> Result<(), TypeError> {
-        Ok(())
+    pub fn check_contype_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
+        match decl {
+            Decl::ConTypeDecl(id, (vid, ty, term)) => {
+                // Duplicate container type decl checking
+                match self.global_ctx.get_id(id.to_string()) {
+                    Some(_) => Err("Duplicate container type declaration".to_string()),
+                    None => {
+                        // ty has to be Con<T>
+                        let con = Type::Ty(Box::new("Con<T>".to_string()));
+                        if ty.deref() == &con {
+                            // term has to be AppTerm
+                            match term.deref() {
+                                Term::AppTerm(term1, term2) => {
+                                    // TODO: term has to be evalued to Bool
+                                    let mut local_ctx = Ctx::new();
+                                    local_ctx.put(vid.to_string(), con);
+                                    // self.check_term(..)
+                                    // evaluate term and construct refined contype
+                                    match self.check_term_temp(&mut local_ctx, term1, term2) {
+                                        Ok(ty) => {
+                                            let con_type_ref = Type::ConType(Box::new( Type::Ty(Box::new("Con<T>".to_string()))), Box::new(vec![ty.clone()]));
+                                            self.global_ctx.put(id.to_string(), con_type_ref);
+                                            Ok(())
+                                        },
+                                        Err(e) => Err(e)
+                                    }
+                                },
+                                _ => Err("Not a valid term for refining the type Con<T>".to_string())
+                            }
+                        } else {
+                            Err("The base type should be a basic container Con<T>".to_string())
+                        }
+                    },
+                }
+            },
+            _ => Err("Not a valid container type declaration".to_string())
+        }
+    }
+
+    // temp function, remove when term type checking is finished
+    // purpose: if well-typed, obtaining the PropType for refining Con<T>
+    fn check_term_temp(&mut self, ctx: &mut Ctx, term1: &Term, term2: &Term) -> Result<&Type, TypeError> {
+        match term2 {
+            Term::VarTerm(id) => {
+                match ctx.get_id(id.to_string()) {
+                    Some(_) => {
+                        match term1 {
+                            Term::VarTerm(id) => {
+                                match self.global_ctx.get_id(id.to_string()) {
+                                    Some(ty) => {
+                                        match ty {
+                                            Type::PropType(_, _) => Ok(ty),
+                                            _ => Err(id.to_string() + " does not have a valid property type")
+                                        }
+                                    },
+                                    _ => Err("Undefined variable".to_string() + id)
+                                }
+                            },
+                            _ => Err("Should be a varible term".to_string())
+                        }
+                    },
+                    _ => Err("Undefined variable".to_string() + id)
+                }
+            },
+            _ => Err("Should be a varible term".to_string())
+        }
     }
 
     pub fn check_term<'a>(&mut self, ctx: &'a mut Ctx, term: &Term) -> Result<&'a Type, TypeError> {
