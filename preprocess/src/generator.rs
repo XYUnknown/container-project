@@ -1,6 +1,6 @@
 use std::env;
 use std::fs;
-use std::io::{Write, BufReader, BufRead, Error};
+use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 
 use crate::parser::{Block, Spec, Description, Type, spec};
 use crate::type_check::{TypeChecker};
@@ -92,7 +92,7 @@ fn library_spec_lookup(descs: Vec<Description>) -> Vec<String> {
     structs
 }
 
-pub fn process_src(filename : String) -> String {
+pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
     let f = readfile("./spec_code/example.rs".to_string());
     match spec::prog(&f) {
         Ok(blocks) => {
@@ -113,15 +113,22 @@ pub fn process_src(filename : String) -> String {
                             for block in code_blocks.iter() {
                                 result = result + &process_block(block.to_owned());
                             }
-                            result
+                            Ok(result)
                         },
-                        Err(e) => e.to_string()
+                        Err(e) => Err(e)
                     }
                 },
-                Err(e) => e.to_string()
+                Err(e) => Err(e)
             }
         },
-        _ => "Error, invalid source code.".to_string()
+        _ => Err("Error, invalid source code.".to_string())
+    }
+}
+
+pub fn run(input: String, output_file: String) -> Result<(), Error> {
+    match process_src(input) {
+        Ok(code) => writefile(output_file, code),
+        Err(e) => Err(Error::new(ErrorKind::Other, e.to_string()))
     }
 }
 
