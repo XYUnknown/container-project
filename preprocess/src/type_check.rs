@@ -170,13 +170,13 @@ impl TypeChecker {
                                             _ => Err(id.to_string() + " does not have a valid property type")
                                         }
                                     },
-                                    _ => Err("Undefined variable".to_string() + id)
+                                    _ => Err("Undefined variable: ".to_string() + id)
                                 }
                             },
                             _ => Err("Should be a varible term".to_string())
                         }
                     },
-                    _ => Err("Undefined variable".to_string() + id)
+                    _ => Err("Undefined variable: ".to_string() + id)
                 }
             },
             _ => Err("Should be a varible term".to_string())
