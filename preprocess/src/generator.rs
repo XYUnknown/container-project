@@ -101,7 +101,6 @@ pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
                 Ok(_) => {
                     let mut result = String::new();
                     // generate con types according to the infomation in con decl
-                    //result = result + &process_con_decl(tc.get_ctx());
                     match process_con_decl(tc.get_ctx()) {
                         Ok(code) => {
                             result = result + &code;
