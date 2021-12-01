@@ -11,7 +11,9 @@ type UniqueCon<T> = {c : Con<T> | (unique c) }
 property ascending {
     \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
 }
-type AscendingCon<T> = {c : Con<T> | (ascending c) }
+type AscendingCon<T> = {c : Con<T> | (ascending c)}
+
+type UniqueAscendingCon<T> = {c : Con<T> | ((unique c) and (ascending c)) }
 *ENDSPEC*/
 
 fn main () {
