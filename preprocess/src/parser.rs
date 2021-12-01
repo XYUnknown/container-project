@@ -15,7 +15,7 @@ pub enum Type {
     Bool(),
     Ty(Box<Id>),
     Fun(Box<Vec<Type>>, Box<Type>), // arg types, return type
-    PropType(Box<Type>, Box<Description>),
+    PropType(Box<Type>, Box<Description>), // Funtype, Description
     ConType(Box<Type>, Box<Vec<Type>>) // Con<T> | Ps...
 }
 
@@ -27,12 +27,24 @@ impl Type {
         }
     }
 
+    // pub fn foo(&self, f: (Box<Type>, Box<Description>) -> a) -> Maybe a {
+    //     match self {
+    //         Type::PropType(t, d) => Some f(t, d)
+    //         _ => None
+    //     }
+    // }
+
     pub fn extract_desc(&self) -> Description {
         match self {
             Type::PropType(_, desc) => desc.to_string(),
             _ => String::new()
         }
     }
+}
+
+pub enum Refinement {
+    Prop(Box<Term>),
+    AndProps(Box<Refinement>, Box<Refinement>),
 }
 
 #[derive(Clone, Debug)]
@@ -45,6 +57,7 @@ pub enum Term {
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
+    //ConTypeDecl(Box<Id>, (Box<Id>, Box<Type>, Box<Refinement>))
     ConTypeDecl(Box<Id>, (Box<Id>, Box<Type>, Box<Term>))
 }
 
@@ -121,15 +134,18 @@ pub grammar spec() for str {
   
     pub rule term() -> Term
         = precedence!{
-            _ v:id() _ { Term::VarTerm(Box::new(v)) }
+            v:id() { Term::VarTerm(Box::new(v)) }
             --
-            _ "\\" v:id() _ "->" _ t:term() _ { Term::LambdaTerm(Box::new(v), Box::new(t)) }
+            "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm(Box::new(v), Box::new(t)) }
             --
-            _ "\\" v:id() _ "->" _ "(" _ t:term() _ ")" _ { Term::LambdaTerm(Box::new(v), Box::new(t)) }
+            "(" _ t1:term() __ t2:term() _ ")" { Term::AppTerm(Box::new(t1), Box::new(t2)) }
+        }
+    
+    pub rule refinement() -> Refinement
+        = precedence!{
+            _ t:term() _ { Refinement::Prop(Box::new(t)) }
             --
-            _ "(" _ t1:term() _ ")" _ t2:id() _ { Term::AppTerm(Box::new(t1), Box::new(Term::VarTerm(Box::new(t2)))) }
-            --
-            _ "(" _ t1:term() _ ")" _ "(" _ t2:term() _ ")" _ { Term::AppTerm(Box::new(t1), Box::new(t2)) }
+            _ "(" _ p1:refinement() __ "and" __ p2:refinement() _ ")" _ { Refinement::AndProps(Box::new(p1), Box::new(p2)) }
         }
 
     pub rule decl() -> Decl
@@ -204,12 +220,7 @@ mod tests {
 
     #[test]
     fn test_appterm() {
-        assert!(spec::term("(f)(c)").is_ok());
-    }
-
-    #[test]
-    fn test_appterm_1() {
-        assert!(spec::term("(f) c").is_ok());
+        assert!(spec::term("(f c)").is_ok());
     }
 
     #[test]
@@ -225,7 +236,7 @@ mod tests {
     fn test_property_unique() {
         assert!(spec::decl(
             r#"property unique {
-                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }"#
             ).is_ok());
     }
@@ -233,7 +244,7 @@ mod tests {
     #[test]
     fn test_contype() {
         assert!(spec::decl(
-            "type UniqueCon<T> = {c : Con<T> | (unique) c}"
+            "type UniqueCon<T> = {c : Con<T> | (unique c)}"
             ).is_ok());
     }
 
@@ -242,9 +253,9 @@ mod tests {
         assert!(spec::spec( // raw string literal ????
             r#"/*SPEC*
             property unique {
-                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            type UniqueCon<T> = {c : Con<T> | (unique c)}
             *ENDSPEC*/"#
         ).is_ok())
     }
@@ -268,9 +279,9 @@ mod tests {
         assert!(spec::block(
             r#"/*SPEC*
             property unique {
-                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            type UniqueCon<T> = {c : Con<T> | (unique c)}
             *ENDSPEC*/"#
         ).is_ok())
     }
@@ -295,9 +306,9 @@ mod tests {
             r#"
             /*SPEC*
             property unique {
-                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            type UniqueCon<T> = {c : Con<T> | (unique c) }
             *ENDSPEC*/
 
             /*CODE*/
@@ -313,9 +324,9 @@ mod tests {
 
             /*SPEC*
             property unique {
-                \c -> ((for_all_unique_pairs) c) (\a -> (\b -> ((neq) a) b))
+                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique) c}
+            type UniqueCon<T> = {c : Con<T> | (unique c) }
             *ENDSPEC*/
             
             /*CODE*/
