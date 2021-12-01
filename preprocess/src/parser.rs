@@ -42,6 +42,7 @@ impl Type {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum Refinement {
     Prop(Box<Term>),
     AndProps(Box<Refinement>, Box<Refinement>),
@@ -57,8 +58,7 @@ pub enum Term {
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
-    //ConTypeDecl(Box<Id>, (Box<Id>, Box<Type>, Box<Refinement>))
-    ConTypeDecl(Box<Id>, (Box<Id>, Box<Type>, Box<Term>))
+    ConTypeDecl(Box<Id>, (Box<Id>, Box<Type>, Box<Refinement>))
 }
 
 impl Decl {
@@ -143,9 +143,9 @@ pub grammar spec() for str {
     
     pub rule refinement() -> Refinement
         = precedence!{
-            _ t:term() _ { Refinement::Prop(Box::new(t)) }
+            t:term() { Refinement::Prop(Box::new(t)) }
             --
-            _ "(" _ p1:refinement() __ "and" __ p2:refinement() _ ")" _ { Refinement::AndProps(Box::new(p1), Box::new(p2)) }
+            "(" _ p1:refinement() __ "and" __ p2:refinement() _ ")" { Refinement::AndProps(Box::new(p1), Box::new(p2)) }
         }
 
     pub rule decl() -> Decl
@@ -155,7 +155,7 @@ pub grammar spec() for str {
                 Decl::PropertyDecl(Box::new(p), Box::new(t))
             }
             --
-            _ "type" __ t1:id() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:term() _ "}" _
+            _ "type" __ t1:id() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:refinement() _ "}" _
             {
                 Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(t2), Box::new(t)))
             }

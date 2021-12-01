@@ -1,4 +1,4 @@
-use crate::parser::{Prog, Block, Spec, Decl, Type, Term, spec};
+use crate::parser::{Prog, Block, Spec, Decl, Type, Term, Refinement, Id, spec};
 use crate::ctx::{Ctx};
 use crate::generator::{readfile};
 
@@ -117,7 +117,7 @@ impl TypeChecker {
 
     pub fn check_contype_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::ConTypeDecl(id, (vid, ty, term)) => {
+            Decl::ConTypeDecl(id, (vid, ty, r)) => {
                 // Duplicate container type decl checking
                 match self.global_ctx.get_id(id.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
@@ -126,23 +126,13 @@ impl TypeChecker {
                         let con = Type::Ty(Box::new("Con<T>".to_string()));
                         if ty.deref() == &con {
                             // term has to be AppTerm
-                            match term.deref() {
-                                Term::AppTerm(term1, term2) => {
-                                    // TODO: term has to be evalued to Bool
-                                    let mut local_ctx = Ctx::new();
-                                    local_ctx.put(vid.to_string(), con);
-                                    // self.check_term(..)
-                                    // evaluate term and construct refined contype
-                                    match self.check_term_temp(&mut local_ctx, term1, term2) {
-                                        Ok(ty) => {
-                                            let con_type_ref = Type::ConType(Box::new( Type::Ty(Box::new("Con<T>".to_string()))), Box::new(vec![ty.clone()]));
-                                            self.global_ctx.put(id.to_string(), con_type_ref);
-                                            Ok(())
-                                        },
-                                        Err(e) => Err(e)
-                                    }
+                            match self.check_ref(r.deref(), vid, con) {
+                                Ok(types) => {
+                                    let con_type_ref = Type::ConType(Box::new( Type::Ty(Box::new("Con<T>".to_string()))), Box::new(types.to_vec()));
+                                    self.global_ctx.put(id.to_string(), con_type_ref);
+                                    Ok(())
                                 },
-                                _ => Err("Not a valid term for refining the type Con<T>".to_string())
+                                Err(e) => Err(e)
                             }
                         } else {
                             Err("The base type should be a basic container Con<T>".to_string())
@@ -154,9 +144,46 @@ impl TypeChecker {
         }
     }
 
+    fn check_ref<'a>(&self, r: &'a Refinement, vid: &'a Box<String>, con: Type) -> Result<Vec<Type>, TypeError> {
+        match r {
+            Refinement::Prop(term) => {
+                match term.deref() {
+                    Term::AppTerm(term1, term2) => {
+                        // TODO: term has to be evalued to Bool
+                        let mut local_ctx = Ctx::new();
+                        local_ctx.put(vid.to_string(), con);
+                        // self.check_term(..)
+                        // evaluate term and construct refined contype
+                        match self.check_term_temp(&mut local_ctx, term1, term2) {
+                            Ok(ty) => {
+                                let types = vec![ty.clone()];
+                                Ok(types)
+                            },
+                            Err(e) => Err(e)
+                        }
+                    },
+                    _ => Err("Not a valid term for refining the type Con<T>".to_string())
+                }
+            },
+            Refinement::AndProps(r1, r2) => {
+                match self.check_ref(r1, vid, con.clone()) {
+                    Ok(types1) => {
+                        match self.check_ref(r2, vid, con.clone()) {
+                            Ok(types2) => {
+                                Ok([types1, types2].concat())
+                            },
+                            Err(e) => Err(e)
+                        }
+                    },
+                    Err(e) => Err(e)
+                }
+            }
+        }
+    }
+
     // temp function, remove when term type checking is finished
     // purpose: if well-typed, obtaining the PropType for refining Con<T>
-    fn check_term_temp(&mut self, ctx: &mut Ctx, term1: &Term, term2: &Term) -> Result<&Type, TypeError> {
+    fn check_term_temp(&self, ctx: &Ctx, term1: &Term, term2: &Term) -> Result<&Type, TypeError> {
         match term2 {
             Term::VarTerm(id) => {
                 match ctx.get_id(id.to_string()) {
