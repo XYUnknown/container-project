@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::collections::hash_map::Iter;
 
-use crate::parser::{Id, Type};
+use crate::parser::{Id};
+use crate::types::{Type};
 
 #[derive(Clone, Debug)]
 pub struct Ctx {
@@ -40,19 +41,19 @@ impl Ctx {
 #[cfg(test)]
 mod tests {
     use crate::ctx::{Ctx};
-    use crate::parser::{Type};
+    use crate::types::{Type};
     #[test]
     fn test_table_insert() {
         let mut t = Ctx::new();
-        assert!(t.put("c".to_string(), Type::Ty(Box::new("Con<T>".to_string()))));
-        assert_eq!(t.put("c".to_string(), Type::Ty(Box::new("Con<T>".to_string()))), false);
+        assert!(t.put("c".to_string(), Type::T(Box::new("T".to_string()))));
+        assert_eq!(t.put("c".to_string(), Type::T(Box::new("T".to_string()))), false);
         assert_eq!(t.sz(), 1);
     }
 
     #[test]
     fn test_table_get() {
         let mut t = Ctx::new();
-        t.put("c".to_string(), Type::Ty(Box::new("Con<T>".to_string())));
-        assert_eq!(t.get_id("c".to_string()), Some(&Type::Ty(Box::new("Con<T>".to_string()))));
+        t.put("c".to_string(), Type::T(Box::new("T".to_string())));
+        assert_eq!(t.get_id("c".to_string()), Some(&Type::T(Box::new("T".to_string()))));
     }
 }

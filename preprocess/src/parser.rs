@@ -3,14 +3,11 @@ use peg::parser;
 
 use std::vec::Vec;
 
+use crate::types::{Name, Type};
+
 pub type Id = String;
-
-// the description of how a property is used in type checking
-// TODO: this will be refined
-pub type Description = String;
-
 // this will need to be refined
-#[derive(Eq, PartialEq, Clone, Debug)]
+/*#[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Type {
     Bool(),
     Ty(Box<Id>),
@@ -40,7 +37,7 @@ impl Type {
             _ => String::new()
         }
     }
-}
+}*/
 
 #[derive(Clone, Debug)]
 pub enum Refinement {
@@ -123,13 +120,18 @@ pub grammar spec() for str {
     pub rule id() -> Id
         = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '<' | '>' ]*) 
         { s.into() }
+
+    pub rule name() -> Name
+        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' ]*) 
+        { s.into() }
     
     pub rule ty() -> Type
         = precedence! {
-            s:$("bool") { Type::Bool() }
+            n:name() "<" _ t:ty() _ ">"
+            { Type::Con(Box::new(n), Box::new(t)) }
             --
-            s:$([ 'a'..='z' | 'A'..='Z']['a'..='z' | 'A'..='Z' | '0'..='9' | '<' | '>' ]*) 
-            { Type::Ty(Box::new(s.into())) }
+            n:name()
+            { Type::T(Box::new(n)) }
         }
   
     pub rule term() -> Term
@@ -206,6 +208,11 @@ mod tests {
     #[test]
     fn test_ty() {
         assert!(spec::ty("UniqueCon<T>").is_ok());
+    }
+
+    #[test]
+    fn test_ty_sim() {
+        assert!(spec::ty("T").is_ok());
     }
 
     #[test]

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::Iter;
 use std::vec::Vec;
 
-use crate::parser::{Description};
+use crate::description::{Description};
 
 /* A temporary lib specification*/
 const HASHSET: &str = "std::collections::HashSet<T>";

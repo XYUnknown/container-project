@@ -2,13 +2,13 @@ use std::env;
 use std::fs;
 use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 
-use crate::parser::{Block, Spec, Description, Type, spec};
+use crate::parser::{Block, Spec, spec};
 use crate::type_check::{TypeChecker};
 use crate::ctx::{Ctx};
 use crate::lib_specs::{construct_spec};
 
 use crate::analysis::{Analyser};
-use crate::description::{Tag, InforMap};
+use crate::description::{Tag, Description, InforMap};
 
 const CODEGEN: &str = "/*CODEGEN*/\n";
 const CODEGENEND: &str = "/*ENDCODEGEN*/\n";
