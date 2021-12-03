@@ -7,6 +7,9 @@ use crate::type_check::{TypeChecker};
 use crate::ctx::{Ctx};
 use crate::lib_specs::{construct_spec};
 
+use crate::analysis::{Analyser};
+use crate::description::{Tag, InforMap};
+
 const CODEGEN: &str = "/*CODEGEN*/\n";
 const CODEGENEND: &str = "/*ENDCODEGEN*/\n";
 
@@ -44,27 +47,15 @@ pub fn process_block(block: &Block) -> String {
     }
 }
 
-pub fn process_con_decl(ctx: &Ctx) -> Result<String, ErrorMessage> {
-    // select all properties
-    // let env = s.filter( ... PropertyDecl )
-
-    // select all type declarations
-    // let types = s.filter( ... ConTypeDecl )
-
-    // check well formdness
-    // check(types, env)
-
-    // let codes: Vec<str> = types.map( |t| -> generate_type(t, env) )
-
-    // TODO : actually process the spec
+pub fn process_con_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
     let mut code = String::new();
-    for (id, ty) in ctx.iter() {
-        match ty {
-            Type::ConType(_, ptys) => {
+    for (id, tag) in ctx.iter() {
+        match tag {
+            Tag::Con(tags) => {
                 let descs: Vec<Description> = 
-                    ptys.iter()
-                    .filter(| pty | pty.is_prop_type())
-                    .map(| pty | pty.extract_desc())
+                    tags.iter()
+                    .filter(| t | t.is_prop_tag())
+                    .map(| t | t.extract_desc())
                     .collect();
                 let struct_choices = library_spec_lookup(descs);
                 if struct_choices.is_empty() {
@@ -99,20 +90,28 @@ pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
             let mut tc = TypeChecker::new();
             match tc.check_prog(blocks.clone()) {// type checking
                 Ok(_) => {
-                    let mut result = String::new();
-                    // generate con types according to the infomation in con decl
-                    match process_con_decl(tc.get_ctx()) {
-                        Ok(code) => {
-                            result = result + &code;
-                            // generate rust source code
-                            let code_blocks: Vec<&Block> = 
-                                blocks.iter()
-                                .filter(| block | block.is_code_block())
-                                .collect();
-                            for block in code_blocks.iter() {
-                                result = result + &process_block(block.to_owned());
+                    // type checking ok
+                    // run analyser
+                    let mut analyser = Analyser::new();
+                    match analyser.analyse_prog(blocks.clone()) {
+                        Ok(_) => {
+                            let mut result = String::new();
+                            // generate con types according to the infomation in con decl
+                            match process_con_decl(analyser.get_ctx()) {
+                                Ok(code) => {
+                                    result = result + &code;
+                                    // generate rust source code
+                                    let code_blocks: Vec<&Block> = 
+                                        blocks.iter()
+                                        .filter(| block | block.is_code_block())
+                                        .collect();
+                                    for block in code_blocks.iter() {
+                                        result = result + &process_block(block.to_owned());
+                                    }
+                                    Ok(result)
+                                },
+                                Err(e) => Err(e)
                             }
-                            Ok(result)
                         },
                         Err(e) => Err(e)
                     }
