@@ -1,37 +1,57 @@
-use crate::parser::{Prog, Block, Spec, Decl, Type, Term, Refinement, Id, spec};
-use crate::ctx::{Ctx};
+use crate::parser::{Prog, Block, Spec, Decl, Term, Refinement, Id, spec};
+use crate::inference::{TypeEnv};
 use crate::generator::{readfile};
+use crate::types::{Type, TypeVar, TypeScheme, TypeVarGen};
 
 use std::ops::Deref;
 
 type TypeError = String;
-type TypeCheckResult<T> = Result<T, TypeError>;
 
 pub struct TypeChecker {
-    global_ctx : Ctx,
+    global_ctx : TypeEnv,
+    tvg: TypeVarGen
 }
 
 impl TypeChecker {
     pub fn new() -> TypeChecker {
         TypeChecker {
-            global_ctx: Ctx::new(),
+            global_ctx: TypeEnv::new(),
+            tvg: TypeVarGen::new()
         }
     }
 
     fn predefined(&mut self) {
         // put for_all_unique_pair into context
-        let args0 = vec![Type::Ty(Box::new("T".to_string())), Type::Ty(Box::new("T".to_string()))];
-        let binary_fn = Type::Fun(Box::new(args0), Box::new(Type::Bool()));
-        let args1 = vec![Type::Ty(Box::new("Con<T>".to_string())), binary_fn];
-        self.global_ctx.put("for_all_unique_pair".to_string(), Type::Fun(Box::new(args1), Box::new(Type::Bool())));
+        let binary_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        self.global_ctx.insert("for_all_unique_pairs".to_string(),
+            TypeScheme {
+                vars: Vec::new(),
+                ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
+                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Fun(Box::new(binary_fn), Box::new(Type::Bool()))))
+                }
+            );
 
         // put neq into context
-        let args2 = vec![Type::Ty(Box::new("T".to_string())), Type::Ty(Box::new("T".to_string()))];
-        let neq_fn = Type::Fun(Box::new(args2), Box::new(Type::Bool()));
-        self.global_ctx.put("neq".to_string(), neq_fn);
+        let neq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        self.global_ctx.insert("neq".to_string(), 
+            TypeScheme {
+                vars: Vec::new(),
+                ty: neq_fn
+            }
+        );
+
+        // put leq into context
+        let leq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        self.global_ctx.insert("leq".to_string(), 
+            TypeScheme {
+                vars: Vec::new(),
+                ty: leq_fn
+            }
+        );
     }
 
-    pub fn get_ctx(&self) -> &Ctx {
+    pub fn get_ctx(&self) -> &TypeEnv {
         &self.global_ctx
     }
 
@@ -76,25 +96,36 @@ impl TypeChecker {
         match decl {
             Decl::PropertyDecl(id, term) => {
                 // Duplicate property decl checking
-                match self.global_ctx.get_id(id.to_string()) {
+                match self.global_ctx.get(&id.to_string()) {
                     Some(_) => Err("Duplicate property declaration".to_string()),
                     None => {
                         // check well formedness
-                        // it should have type Con<T> -> Bool
-                        // otherwise error
-                        let mut ctx = Ctx::new();
-                        match self.check_term(&mut ctx, term) {
-                            Ok(t) => {
-                                let desired_prop_type = Type::Fun(Box::new(vec![Type::Ty(Box::new("Con<T>".to_string()))]), Box::new(Type::Bool()));
-                                if t == &desired_prop_type {
-                                    // TODO: construct property prooerty type and description
-                                    let prop_type = Type::PropType(Box::new(desired_prop_type), Box::new(id.to_string()));
-                                    self.global_ctx.put(id.to_string(), prop_type);
-                                    Ok(())
-                                } else {
-                                    Err("Not a valid property type".to_string())
+                        match self.global_ctx.type_inference(term, &mut self.tvg) {
+                            Ok(ty) => {
+                                // it should have type Con<T> -> Bool
+                                match ty {
+                                    Type::Fun(ref t1, ref t2) => {
+                                        match (t1.deref(), t2.deref()) {
+                                            (Type::Con(n, t), Type::Bool()) => {
+                                                if n.to_string() == "Con".to_string() {
+                                                    self.global_ctx.insert(
+                                                        id.to_string(),
+                                                        TypeScheme {
+                                                            vars: Vec::new(),
+                                                            ty: ty
+                                                        }
+                                                    );
+                                                    Ok(())
+                                                } else {
+                                                    Err("Not a valid property decl: input does not have basic container type Con<T>".to_string())
+                                                }
+                                            },
+                                            _ => Err("Not a valid property decl: should have type Con<T> -> Bool".to_string())
+                                        }
+                                    },
+                                    _ => Err("Not a valid property decl: should have type Con<T> -> Bool".to_string())
                                 }
-                            },
+                            }
                             Err(e) => Err(e)
                         }
                     },
@@ -119,17 +150,27 @@ impl TypeChecker {
         match decl {
             Decl::ConTypeDecl(id, (vid, ty, r)) => {
                 // Duplicate container type decl checking
-                match self.global_ctx.get_id(id.to_string()) {
+                match self.global_ctx.get(&id.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
                         // ty has to be Con<T>
-                        let con = Type::Ty(Box::new("Con<T>".to_string()));
+                        let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
                         if ty.deref() == &con {
-                            // term has to be AppTerm
-                            match self.check_ref(r.deref(), vid, con) {
-                                Ok(types) => {
-                                    let con_type_ref = Type::ConType(Box::new( Type::Ty(Box::new("Con<T>".to_string()))), Box::new(types.to_vec()));
-                                    self.global_ctx.put(id.to_string(), con_type_ref);
+                            let mut local_ctx = self.global_ctx.clone();
+                            local_ctx.insert(vid.to_string(),
+                                TypeScheme {
+                                    vars: Vec::new(),
+                                    ty: con
+                                }
+                            );
+                            match self.check_ref(&mut local_ctx, r) {
+                                Ok(_) => {
+                                    self.global_ctx.insert(id.to_string(), 
+                                        TypeScheme{
+                                            vars: Vec::new(),
+                                            ty: Type::Con(Box::new(id.to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))))
+                                        }
+                                    );
                                     Ok(())
                                 },
                                 Err(e) => Err(e)
@@ -144,96 +185,30 @@ impl TypeChecker {
         }
     }
 
-    fn check_ref<'a>(&self, r: &'a Refinement, vid: &'a Box<String>, con: Type) -> Result<Vec<Type>, TypeError> {
+    pub fn check_ref(&mut self, ctx: &mut TypeEnv, r: &Refinement) -> Result<(), TypeError> {
         match r {
-            Refinement::Prop(term) => {
-                match term.deref() {
-                    Term::AppTerm(term1, term2) => {
-                        // TODO: term has to be evalued to Bool
-                        let mut local_ctx = Ctx::new();
-                        local_ctx.put(vid.to_string(), con);
-                        // self.check_term(..)
-                        // evaluate term and construct refined contype
-                        match self.check_term_temp(&mut local_ctx, term1, term2) {
-                            Ok(ty) => {
-                                let types = vec![ty.clone()];
-                                Ok(types)
-                            },
-                            Err(e) => Err(e)
-                        }
-                    },
-                    _ => Err("Not a valid term for refining the type Con<T>".to_string())
-                }
-            },
-            Refinement::AndProps(r1, r2) => {
-                match self.check_ref(r1, vid, con.clone()) {
-                    Ok(types1) => {
-                        match self.check_ref(r2, vid, con.clone()) {
-                            Ok(types2) => {
-                                Ok([types1, types2].concat())
-                            },
-                            Err(e) => Err(e)
+            Refinement::Prop(t) => {
+                match ctx.type_inference(t.deref(), &mut self.tvg) {
+                    Ok(t) => {
+                        // t has to be boolean
+                        if t.is_bool() {
+                            Ok(())
+                        } else {
+                            Err("The refinement has evaluates to a Bool type.".to_string())
                         }
                     },
                     Err(e) => Err(e)
                 }
-            }
-        }
-    }
-
-    // temp function, remove when term type checking is finished
-    // purpose: if well-typed, obtaining the PropType for refining Con<T>
-    fn check_term_temp(&self, ctx: &Ctx, term1: &Term, term2: &Term) -> Result<&Type, TypeError> {
-        match term2 {
-            Term::VarTerm(id) => {
-                match ctx.get_id(id.to_string()) {
-                    Some(_) => {
-                        match term1 {
-                            Term::VarTerm(id) => {
-                                match self.global_ctx.get_id(id.to_string()) {
-                                    Some(ty) => {
-                                        match ty {
-                                            Type::PropType(_, _) => Ok(ty),
-                                            _ => Err(id.to_string() + " does not have a valid property type")
-                                        }
-                                    },
-                                    _ => Err("Undefined variable: ".to_string() + id)
-                                }
-                            },
-                            _ => Err("Should be a varible term".to_string())
+            },
+            Refinement::AndProps(r1, r2) => {
+                match self.check_ref(ctx, r1) {
+                    Ok(_) => {
+                        match self.check_ref(ctx, r2) {
+                            Ok(_) => Ok(()),
+                            Err(e) => Err(e)
                         }
                     },
-                    _ => Err("Undefined variable: ".to_string() + id)
-                }
-            },
-            _ => Err("Should be a varible term".to_string())
-        }
-    }
-
-    pub fn check_term<'a>(&mut self, ctx: &'a mut Ctx, term: &Term) -> Result<&'a Type, TypeError> {
-        // TODO: Add proper property type checking later
-        let placeholder_type = Type::Fun(Box::new(vec![Type::Ty(Box::new("Con<T>".to_string()))]), Box::new(Type::Bool()));
-        ctx.put("placeholder_type".to_string(), placeholder_type);
-        match term {
-            Term::VarTerm(id) => {
-                // Type checking placeholder
-                match ctx.get_id("placeholder_type".to_string()) {
-                    Some(t) => Ok(t),
-                    None => Err("Undefined variable".to_string())
-                }
-            },
-            Term::LambdaTerm(id, term) => {
-                // Type checking placeholder
-                match ctx.get_id("placeholder_type".to_string()) {
-                    Some(t) => Ok(t),
-                    None => Err("Undefined variable".to_string())
-                }
-            },
-            Term::AppTerm(term1, term2) => {
-                // Type checking placeholder
-                match ctx.get_id("placeholder_type".to_string()) {
-                    Some(t) => Ok(t),
-                    None => Err("Undefined variable".to_string())
+                    Err(e) => Err(e)
                 }
             }
         }

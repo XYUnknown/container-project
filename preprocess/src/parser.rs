@@ -3,41 +3,9 @@ use peg::parser;
 
 use std::vec::Vec;
 
-use crate::types::{Name, Type};
+use crate::types::{Name, Type, TypeVar};
 
 pub type Id = String;
-// this will need to be refined
-/*#[derive(Eq, PartialEq, Clone, Debug)]
-pub enum Type {
-    Bool(),
-    Ty(Box<Id>),
-    Fun(Box<Vec<Type>>, Box<Type>), // arg types, return type
-    PropType(Box<Type>, Box<Description>), // Funtype, Description
-    ConType(Box<Type>, Box<Vec<Type>>) // Con<T> | Ps...
-}
-
-impl Type {
-    pub fn is_prop_type(&self) -> bool {
-        match self {
-            Type::PropType(_, _) => true,
-            _ => false
-        }
-    }
-
-    // pub fn foo(&self, f: (Box<Type>, Box<Description>) -> a) -> Maybe a {
-    //     match self {
-    //         Type::PropType(t, d) => Some f(t, d)
-    //         _ => None
-    //     }
-    // }
-
-    pub fn extract_desc(&self) -> Description {
-        match self {
-            Type::PropType(_, desc) => desc.to_string(),
-            _ => String::new()
-        }
-    }
-}*/
 
 #[derive(Clone, Debug)]
 pub enum Refinement {
@@ -131,7 +99,7 @@ pub grammar spec() for str {
             { Type::Con(Box::new(n), Box::new(t)) }
             --
             n:name()
-            { Type::T(Box::new(n)) }
+            { Type::T(TypeVar::new(n)) }
         }
   
     pub rule term() -> Term
