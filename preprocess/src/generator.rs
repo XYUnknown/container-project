@@ -4,7 +4,6 @@ use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 
 use crate::parser::{Block, Spec, spec};
 use crate::type_check::{TypeChecker};
-use crate::ctx::{Ctx};
 use crate::lib_specs::{construct_spec};
 
 use crate::analysis::{Analyser};
