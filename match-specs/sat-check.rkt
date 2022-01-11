@@ -2,6 +2,7 @@
 (require "properties.rkt")
 (require "list.rkt")
 (require "unique-list.rkt")
+(require "ascending-list.rkt")
 (require "utils.rkt")
 
 (define (check-spec-length prop spec xs)
@@ -43,3 +44,11 @@
 
 ; (verify (check (lambda (x) (and (unique x) (ascending x))) (list spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique) elem ls))
 ; model found
+
+; (verify (check ascending (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls))
+; (unsat)
+
+; (verify (check unique (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls))
+; (model found)
+
+(verify (check (lambda (x) (and (unique x) (ascending x))) (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls))
