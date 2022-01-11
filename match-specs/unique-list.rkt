@@ -34,3 +34,6 @@
 (define (pre-remove-unique xs) (equal? xs (remove-duplicates xs)))
 (define (post-remove-unique x xs r)
   (equal? r (spec-remove-unique x xs)))
+
+
+(provide spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique)
