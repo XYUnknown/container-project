@@ -1,5 +1,4 @@
 #lang rosette
-(require "properties.rkt")
 ; The list model
 
 ; (spec-length lst) -> pair?
