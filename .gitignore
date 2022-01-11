@@ -68,3 +68,6 @@ matrix/
 
 # jupyter notebook
 .ipynb_checkpoints/
+
+# Racket
+compiled/
