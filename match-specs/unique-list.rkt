@@ -19,7 +19,7 @@
 (define (post-contains-unique x xs r)
   (equal? r (spec-contains-unique x xs)))
 
-; (spec-insert-unique elem lst) -> lst
+; (spec-insert-unique elem lst) -> list?
 (define (spec-insert-unique x xs)
   (remove-duplicates (append (list x) xs)))
 
@@ -27,7 +27,7 @@
 (define (post-insert-unique x xs r)
   (equal? r (spec-insert-unique x xs)))
 
-; (spec-remove-unique elem lst) -> lst
+; (spec-remove-unique elem lst) -> list?
 (define (spec-remove-unique x xs)
   (remove x xs))
 
@@ -36,4 +36,4 @@
   (equal? r (spec-remove-unique x xs)))
 
 
-(provide spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique)
+(provide pre-length-unique pre-contains-unique pre-insert-unique pre-remove-unique spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique)

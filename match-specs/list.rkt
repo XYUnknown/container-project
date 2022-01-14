@@ -53,4 +53,4 @@
 (define (post-remove x xs ys)
   (equal? ys (spec-remove x xs)))
 
-(provide spec-length spec-contains spec-insert spec-remove)
+(provide pre-length pre-contains pre-insert pre-remove spec-length spec-contains spec-insert spec-remove)

@@ -19,7 +19,7 @@
 (define (post-contains-ascending x xs r)
   (equal? r (spec-contains-ascending x xs)))
 
-; (spec-insert-ascending elem lst) -> lst
+; (spec-insert-ascending elem lst) -> list?
 (define (spec-insert-ascending x xs)
   (sort (append (list x) xs) <))
 
@@ -27,7 +27,7 @@
 (define (post-insert-ascending x xs r)
   (equal? r (spec-insert-ascending x xs)))
 
-; (spec-remove-ascending elem lst) -> lst
+; (spec-remove-ascending elem lst) -> list?
 (define (spec-remove-ascending x xs)
   (remove x xs))
 
@@ -36,4 +36,4 @@
   (equal? r (spec-remove-ascending x xs)))
 
 
-(provide spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending)
+(provide pre-length-ascending pre-contains-ascending pre-insert-ascending pre-remove-ascending spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending)
