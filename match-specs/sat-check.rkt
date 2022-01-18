@@ -36,34 +36,34 @@
 
 ; Uncomment to run
 ; (check unique (list pre-length pre-contains pre-insert pre-remove) (list spec-length spec-contains spec-insert spec-remove) elem ls)
-; model found
+; #f
 
 ; (check ascending (list pre-length pre-contains pre-insert pre-remove) (list spec-length spec-contains spec-insert spec-remove) elem ls)
-; model found
+; #f
 
 ; (check unique (list pre-length-unique pre-contains-unique pre-insert-unique pre-remove-unique) (list spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique) elem ls)
-; (unsat)
+; #t
 
 ; (check ascending (list pre-length-unique pre-contains-unique pre-insert-unique pre-remove-unique) (list spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique) elem ls)
-; model found
+; #f
 
-(check (lambda (x) (and (unique x) (ascending x))) (list pre-length-unique pre-contains-unique pre-insert-unique pre-remove-unique) (list spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique) elem ls)
-; model found
+; (check (lambda (x) (and (unique x) (ascending x))) (list pre-length-unique pre-contains-unique pre-insert-unique pre-remove-unique) (list spec-length-unique spec-contains-unique spec-insert-unique spec-remove-unique) elem ls)
+; #f
 
 ; (check ascending (list pre-length-ascending pre-contains-ascending pre-insert-ascending pre-remove-ascending) (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls)
-; (unsat)
+; #t
 
 ; (check unique (list pre-length-ascending pre-contains-ascending pre-insert-ascending pre-remove-ascending) (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls)
-; model found
+; #f
 
 ; (check (lambda (x) (and (unique x) (ascending x))) (list pre-length-ascending pre-contains-ascending pre-insert-ascending pre-remove-ascending) (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls)
-; model found
+; #f
 
 ; (check (lambda (x) (and (unique x) (ascending x))) (list pre-length-strict-ascending pre-contains-strict-ascending pre-insert-strict-ascending pre-remove-strict-ascending) (list spec-length-strict-ascending spec-contains-strict-ascending spec-insert-strict-ascending spec-remove-strict-ascending) elem ls)
-; (unsat)
+; #t
 
 ; (check unique (list pre-length-strict-ascending pre-contains-strict-ascending pre-insert-strict-ascending pre-remove-strict-ascending) (list spec-length-strict-ascending spec-contains-strict-ascending spec-insert-strict-ascending spec-remove-strict-ascending) elem ls)
-; (unsat)
+; #t
 
 ; (check ascending (list pre-length-strict-ascending pre-contains-strict-ascending pre-insert-strict-ascending pre-remove-strict-ascending) (list spec-length-strict-ascending spec-contains-strict-ascending spec-insert-strict-ascending spec-remove-strict-ascending) elem ls)
-; (unsat)
+; #t
