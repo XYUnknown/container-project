@@ -44,18 +44,21 @@ fn test(exp: Term) -> Result<Type, InferenceError> {
 }
 
 fn main() {
-    let f = readfile("./spec_code/example.rs".to_string());
-    println!("{:?}", spec::prog(&f));
+    //let f = readfile("./spec_code/example.rs".to_string());
+    //let f = readfile("./spec_code/example_unique.rs".to_string());
+    //println!("{:?}", spec::prog(&f));
 
-    match spec::term(r#"\c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))"#) {
+    
+    /*match spec::term(r#"\c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))"#) {
         Ok(t) => {
             println!("{:?}", test(t));
         },
         Err(e) => println!{"{}", e}
-    }
+    }*/
     
     //println!("{}", type_of(spec::prog(&f)));
     //println!("{}", process_spec(Vec::<Decl>::new()));
     //process_src("./spec_code/example.rs".to_string());
-    println!("{:?}", run("./spec_code/example.rs".to_string(), "example_output.rs".to_string()));
+    //println!("{:?}", run("./spec_code/example.rs".to_string(), "example_output.rs".to_string()));
+    println!("{:?}", run("./spec_code/example_unique.rs".to_string(), "example_unique_output.rs".to_string()));
 }
