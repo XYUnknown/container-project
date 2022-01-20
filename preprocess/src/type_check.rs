@@ -31,6 +31,16 @@ impl TypeChecker {
                     Box::new(Type::Fun(Box::new(binary_fn), Box::new(Type::Bool()))))
                 }
             );
+        
+        let unary_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()));
+        self.global_ctx.insert("for_all_elems".to_string(),
+            TypeScheme {
+                vars: Vec::new(),
+                ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
+                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Fun(Box::new(unary_fn), Box::new(Type::Bool()))))
+                }
+            );
 
         // put neq into context
         let neq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
@@ -47,6 +57,16 @@ impl TypeChecker {
             TypeScheme {
                 vars: Vec::new(),
                 ty: leq_fn
+            }
+        );
+
+        let unique_count_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), 
+                                Box::new(Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
+                                Box::new(Type::T(TypeVar::new("T".to_string()))))), Box::new(Type::Bool()))));
+        self.global_ctx.insert("unique_count".to_string(), 
+            TypeScheme {
+                vars: Vec::new(),
+                ty: unique_count_fn
             }
         );
     }
