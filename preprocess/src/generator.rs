@@ -83,7 +83,7 @@ fn library_spec_lookup(descs: Vec<Description>) -> Vec<String> {
 }
 
 pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
-    let f = readfile("./spec_code/example.rs".to_string());
+    let f = readfile(filename);
     match spec::prog(&f) {
         Ok(blocks) => {
             let mut tc = TypeChecker::new();
