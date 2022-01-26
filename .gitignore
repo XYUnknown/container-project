@@ -10,7 +10,7 @@ MAlonzo/**
 */target
 # Rust parser code gen testing dir.
 */gen_code/
-
+*/gen_lib_spec/
 # Others
 drafts/*
 
