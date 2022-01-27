@@ -11,6 +11,7 @@ MAlonzo/**
 # Rust parser code gen testing dir.
 */gen_code/
 */gen_lib_spec/
+*/gen_prop_spec/
 # Others
 drafts/*
 
