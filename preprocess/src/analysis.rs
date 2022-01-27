@@ -1,8 +1,12 @@
 use crate::description::{Tag, InforMap};
 use crate::parser::{Prog, Block, Spec, Decl, Term, Refinement, Id, spec};
 use std::ops::Deref;
+use std::env;
+use std::fs;
+use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 
 type AnalyserError = String;
+const LANGDECL: &str = "#lang rosette\n";
 
 pub struct Analyser {
     ctx: InforMap,
@@ -60,14 +64,12 @@ impl Analyser {
         match decl {
             Decl::PropertyDecl(id, term) => {
                 // TODO: actually analyse term
-                match self.analyse_term(term) {
-                    Ok(_) => {
-                        let prop_tag = Tag::Prop(Box::new(id.to_string()));
-                        self.ctx.put(id.to_string(), prop_tag);
-                        Ok(())
-                    },
-                    Err(e) => Err(e)
-                }
+                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")";
+                let filename = id.to_string() + ".rkt";
+                self.write_prop_spec_file(filename, code);
+                let prop_tag = Tag::Prop(Box::new(id.to_string()));
+                self.ctx.put(id.to_string(), prop_tag);
+                Ok(())
             },
             _ => Err("Not a valid property declaration".to_string())
         }
@@ -148,11 +150,26 @@ impl Analyser {
             _ => Err("Should be a varible term".to_string())
         }
     }
-    
-    // TODO: implement this
-    pub fn analyse_term(&self, term: &Term) -> Result<Tag, AnalyserError> {
-        Ok(Tag::Prop(Box::new("placeholder".to_string())))
+
+    pub fn analyse_term(&self, term: &Term) -> String {
+        match term {
+            Term::VarTerm(id) => {
+                id.to_string()
+            },
+            Term::LambdaTerm(id, t) => {
+                "(lambda (".to_string() + id + ") (" + &self.analyse_term(t) + "))"
+            },
+            Term::AppTerm(t1, t2) => {
+                self.analyse_term(t1) + " " + &self.analyse_term(t2)
+            }
+        }
     }
 
+    fn write_prop_spec_file(&self, filename : String, contents: String) -> Result<(), Error> {
+        let path = "./gen_prop_spec/";
+        let mut output = fs::File::create(path.to_owned() + &filename)?;
+        write!(output, "{}", LANGDECL.to_string())?;
+        write!(output, "{}", contents)?;
+        Ok(())
+    }
 }
-

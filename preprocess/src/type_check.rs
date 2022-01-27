@@ -23,7 +23,7 @@ impl TypeChecker {
     fn predefined(&mut self) {
         // put for_all_unique_pair into context
         let binary_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
-        self.global_ctx.insert("for_all_unique_pairs".to_string(),
+        self.global_ctx.insert("for-all-unique-pairs".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
@@ -33,7 +33,7 @@ impl TypeChecker {
             );
         
         let unary_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()));
-        self.global_ctx.insert("for_all_elems".to_string(),
+        self.global_ctx.insert("for-all-elems".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
@@ -63,7 +63,7 @@ impl TypeChecker {
         let unique_count_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), 
                                 Box::new(Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
                                 Box::new(Type::T(TypeVar::new("T".to_string()))))), Box::new(Type::Bool()))));
-        self.global_ctx.insert("unique_count".to_string(), 
+        self.global_ctx.insert("unique-count".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
                 ty: unique_count_fn
