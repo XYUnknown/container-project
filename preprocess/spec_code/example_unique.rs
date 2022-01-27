@@ -2,7 +2,7 @@
 
 /*SPEC*
 property unique {
-    \c -> ((for_all_elems c) \a -> ((unique_count a) c))
+    \c -> ((for-all-elems c) \a -> ((unique-count a) c))
 }
 type UniqueCon<T> = {c : Con<T> | (unique c) }
 *ENDSPEC*/
