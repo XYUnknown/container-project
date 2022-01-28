@@ -7,6 +7,7 @@ const LIBSPECNAMEEND: &str = "*ENDLIBSPEC-NAME*/";
 const LIBSPEC: &str = "/*LIBSPEC*";
 const LIBSPECEND: &str = "*ENDLIBSPEC*/";
 const LANGDECL: &str = "#lang rosette\n";
+const GENPATH: &str = "./racket_specs/gen_lib_spec/";
 
 type ErrorMessage = String;
 
@@ -63,7 +64,7 @@ pub fn extract_lib_specs(src: String) -> Result<Vec<String>, ErrorMessage> {
 }
 
 pub fn write_lib_file(filename : String, contents: Vec<String>) -> Result<(), Error> {
-    let path = "./gen_lib_spec/";
+    let path = GENPATH;
 
     let mut output = fs::File::create(path.to_owned() + &filename)?;
     write!(output, "{}", LANGDECL.to_string())?;
