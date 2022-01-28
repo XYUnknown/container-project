@@ -7,6 +7,8 @@ use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 
 type AnalyserError = String;
 const LANGDECL: &str = "#lang rosette\n";
+const REQUIRE: &str = "(require \"../combinators.rkt\")\n";
+const GENPATH: &str = "./racket_specs/gen_prop_spec/";
 
 pub struct Analyser {
     ctx: InforMap,
@@ -63,7 +65,6 @@ impl Analyser {
     pub fn analyse_prop_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
             Decl::PropertyDecl(id, term) => {
-                // TODO: actually analyse term
                 let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")";
                 let filename = id.to_string() + ".rkt";
                 self.write_prop_spec_file(filename, code);
@@ -166,9 +167,10 @@ impl Analyser {
     }
 
     fn write_prop_spec_file(&self, filename : String, contents: String) -> Result<(), Error> {
-        let path = "./gen_prop_spec/";
+        let path = GENPATH;
         let mut output = fs::File::create(path.to_owned() + &filename)?;
         write!(output, "{}", LANGDECL.to_string())?;
+        write!(output, "{}", REQUIRE.to_string())?;
         write!(output, "{}", contents)?;
         Ok(())
     }
