@@ -63,7 +63,7 @@ impl TypeChecker {
         let unique_count_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), 
                                 Box::new(Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
                                 Box::new(Type::T(TypeVar::new("T".to_string()))))), Box::new(Type::Bool()))));
-        self.global_ctx.insert("unique-count".to_string(), 
+        self.global_ctx.insert("unique-count?".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
                 ty: unique_count_fn

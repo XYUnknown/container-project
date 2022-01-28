@@ -86,7 +86,7 @@ pub type Prog = Vec<Block>;
 parser!{
 pub grammar spec() for str {
     pub rule id() -> Id
-        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-' | '<' | '>' ]*) 
+        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-' | '?' | '<' | '>' ]*) 
         { s.into() }
 
     pub rule name() -> Name
