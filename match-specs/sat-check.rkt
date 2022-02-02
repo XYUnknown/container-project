@@ -18,15 +18,23 @@
   (assume (and (prop xs) (pre xs)))
   (assert (prop (spec x xs))))
 
+(define (check-not-contradict prop pre xs)
+  (assert (and (prop xs) (pre xs) (> (length xs) 1))))
+
 (define (check-spec-remove prop pre spec x xs)
   (assume (and (prop xs) (pre xs)))
   (assert (prop (spec x xs))))
 
 (define (check prop pres specs x xs)
-  (and (unsat? (verify (check-spec-length prop (first pres) (first specs) xs)))
-       (unsat? (verify (check-spec-contains prop (second pres) (second specs) x xs)))
-       (unsat? (verify (check-spec-insert prop (third pres) (third specs) x xs)))
-       (unsat? (verify (check-spec-remove prop (fourth pres) (fourth specs) x xs)))))
+  (cond 
+    [(or (unsat? (solve (check-not-contradict prop (first pres) xs)))
+          (unsat? (solve (check-not-contradict prop (second pres) xs)))
+          (unsat? (solve (check-not-contradict prop (third pres) xs)))
+          (unsat? (solve (check-not-contradict prop (fourth pres) xs)))) #f]
+    [else (and (unsat? (verify (check-spec-length prop (first pres) (first specs) xs)))
+               (unsat? (verify (check-spec-contains prop (second pres) (second specs) x xs)))
+               (unsat? (verify (check-spec-insert prop (third pres) (third specs) x xs)))
+               (unsat? (verify (check-spec-remove prop (fourth pres) (fourth specs) x xs))))]))
 
 
 ; The list
@@ -67,3 +75,6 @@
 
 ; (check ascending (list pre-length-strict-ascending pre-contains-strict-ascending pre-insert-strict-ascending pre-remove-strict-ascending) (list spec-length-strict-ascending spec-contains-strict-ascending spec-insert-strict-ascending spec-remove-strict-ascending) elem ls)
 ; #t
+
+; (check (lambda (x) (not (unique x))) (list pre-length-strict-ascending pre-contains-strict-ascending pre-insert-strict-ascending pre-remove-strict-ascending) (list spec-length-strict-ascending spec-contains-strict-ascending spec-insert-strict-ascending spec-remove-strict-ascending) elem ls)
+; #f
