@@ -16,6 +16,7 @@ type AscendingCon<T> = {c : Con<T> | (ascending c)}
 type UniqueAscendingCon<T> = {c : Con<T> | ((unique c) and (ascending c)) }
 *ENDSPEC*/
 
+// The Con<T> is the Container trait
 fn main () {
     let mut c = UniqueCon::<u32>::new();
     for x in 0..10 {
