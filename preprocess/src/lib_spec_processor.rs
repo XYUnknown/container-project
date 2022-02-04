@@ -3,6 +3,7 @@ use std::fs;
 use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 use std::collections::BTreeMap;
 use std::collections::btree_map::Iter;
+use crate::lib_spec_map::{LibSpecs};
 
 const LIBSPECNAME: &str = "/*LIBSPEC-NAME*";
 const LIBSPECNAMEEND: &str = "*ENDLIBSPEC-NAME*/";
@@ -10,22 +11,22 @@ const LIBSPEC: &str = "/*LIBSPEC*";
 const LIBSPECEND: &str = "*ENDLIBSPEC*/";
 const LANGDECL: &str = "#lang rosette\n";
 const GENPATH: &str = "./racket_specs/gen_lib_spec/";
-const OPNAME: &str = "; op-name";
-const OPNAMEEND: &str = "; end-op-name";
+const OPNAME: &str = "/*OPNAME*";
+const OPNAMEEND: &str = "*ENDOPNAME*/";
 
 type ErrorMessage = String;
 
-pub fn read_lib_file(filename : String) -> Result<(String, Vec<String>, String), ErrorMessage> {
+pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String), ErrorMessage> {
     let contents = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
     let trimed_contents = contents.trim().to_string();
 
     let name_pragmas: Vec<&str> = trimed_contents.matches(LIBSPECNAME).collect();
-    let name_end_pragmas : Vec<&str> = trimed_contents.matches(LIBSPECNAMEEND).collect();
+    let name_end_pragmas: Vec<&str> = trimed_contents.matches(LIBSPECNAMEEND).collect();
     let spec_pragmas: Vec<&str> = trimed_contents.matches(LIBSPEC).collect();
     let spec_end_pragmas : Vec<&str> = trimed_contents.matches(LIBSPECEND).collect();
     if ((name_pragmas.len() != 1) || (name_end_pragmas.len() != 1)) {
-        Err("Error, invalid declaration of library specification name.".to_string())
+        return Err("Error, invalid declaration of library specification name**.".to_string());
     } else if (spec_pragmas.len() != spec_end_pragmas.len()) {
         return Err("Error, invalid declaration of library specification.".to_string());
     } else {
@@ -33,7 +34,10 @@ pub fn read_lib_file(filename : String) -> Result<(String, Vec<String>, String),
         let v1: Vec<&str> = trimed_contents.split(LIBSPECNAME).collect();
         let s = v1.get(1).expect("Error, invalid declaration of library specification name.");
         let v2: Vec<&str> = s.split(LIBSPECNAMEEND).collect();
-        let spec_name = v2.get(0).unwrap().trim().to_string();
+        let s3 = v2.get(0).unwrap().trim().to_string();
+        let v3: Vec<&str> = s3.split(" ").collect();
+        let spec_name = v3.get(0).unwrap().trim().to_string();
+        let struct_name = v3.get(1).unwrap().trim().to_string();
         let s1 = v1.get(0).expect("Unexpected error.");
         let s2 = v2.get(1).expect("Unexpected error.");
         let mut trimed_contents = String::new();
@@ -43,7 +47,7 @@ pub fn read_lib_file(filename : String) -> Result<(String, Vec<String>, String),
         match lib_specs {
             Ok((v, infos)) => {
                 let provide = generate_provide(infos); 
-                Ok((spec_name, v, provide))
+                Ok((spec_name, struct_name, v, provide))
             },
             Err(e) => Err(e)
         }
@@ -90,7 +94,7 @@ pub fn extract_lib_specs(src: String) -> Result<(Vec<String>, BTreeMap<String, (
 pub fn extract_op_info(spec: String) -> Result<(String, String, String, String), ErrorMessage> {
     let op_name_pragmas: Vec<&str> = spec.matches(OPNAME).collect();
     let op_name_end_pragmas : Vec<&str> = spec.matches(OPNAMEEND).collect();
-    if (spec.chars().nth(0).unwrap() == ';' && op_name_pragmas.len()==1 && op_name_end_pragmas.len() == 1) {
+    if (spec.chars().nth(0).unwrap() == '/' && op_name_pragmas.len()==1 && op_name_end_pragmas.len() == 1) {
         let v1: Vec<&str> = spec.split(OPNAME).collect();
         let s = v1.get(1).expect("Error, invaild operation information declaration.");
         let v2: Vec<&str> = s.split(OPNAMEEND).collect();
@@ -122,37 +126,39 @@ pub fn write_lib_file(filename : String, contents: Vec<String>, provide: String)
     Ok(())
 }
 
-pub fn process_lib_spec(filename: String) -> Result<(), ErrorMessage> {
+pub fn process_lib_spec(filename: String) -> Result<(String, String), ErrorMessage> {
     let result = read_lib_file(filename);
     match result {
-        Ok((name, specs, provide)) => {
+        Ok((name, struct_name, specs, provide)) => {
             let spec_name = name + ".rkt";
-            let state = write_lib_file(spec_name, specs, provide);
+            let state = write_lib_file(spec_name.clone(), specs, provide);
             if (!state.is_ok()) {
                 return Err("Unable to create lib specification file".to_string());
             }
-            Ok(())
+            Ok((spec_name, struct_name))
         },
         Err(e) => Err(e)
     }
 }
 
-pub fn process_lib_specs(dirname: String) -> Result<(), ErrorMessage> {
+pub fn process_lib_specs(dirname: String) -> Result<LibSpecs, ErrorMessage> {
     let paths = fs::read_dir(dirname).unwrap();
     let files : Vec<String> = paths.into_iter()
                                         .map(|path| path.unwrap().path().to_str().unwrap().to_string())
                                         .filter(|path| !path.contains("/mod.rs"))
                                         .collect();
-
+    let mut lib_specs = LibSpecs::new();
     for path in files {
         match process_lib_spec(path) {
-            Ok(_) => continue,
+            Ok((spec_name, struct_name)) => {
+                lib_specs.insert(struct_name, spec_name);
+            },
             Err(e) => {
                 return Err(e);
             }
         }
     }
-    Ok(())
+    Ok(lib_specs)
 }
 
 #[cfg(test)]
