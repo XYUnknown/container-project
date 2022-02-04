@@ -65,7 +65,7 @@ impl Analyser {
     pub fn analyse_prop_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
             Decl::PropertyDecl(id, term) => {
-                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")";
+                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
                 self.write_prop_spec_file(filename, code);
                 let prop_tag = Tag::Prop(Box::new(id.to_string()));
