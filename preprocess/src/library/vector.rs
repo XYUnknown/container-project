@@ -17,16 +17,16 @@ impl<T> Vector<T> {
     
     /*LIBSPEC*
     ; op-name
-    ; len
+    len spec-len pre-len post-len
     ; end-op-name
     ; spec
-    (define (spec-length xs) (cons xs (length xs)))
+    (define (spec-len xs) (cons xs (length xs)))
     ; end-spec
     ; pre
-    (define (pre-length xs) #t)
+    (define (pre-len xs) #t)
     ; end-pre
     ; post
-    (define (post-length xs r) (equal? r (spec-length xs)))
+    (define (post-len xs r) (equal? r (spec-len xs)))
     ; end-post 
     *ENDLIBSPEC*/
     pub fn len(&self) -> usize {
@@ -35,7 +35,7 @@ impl<T> Vector<T> {
 
     /*LIBSPEC*
     ; op-name
-    ; contains
+    contains spec-contains pre-contains post-contains
     ; end-op-name
     ; spec
     (define (spec-contains xs x)
@@ -59,7 +59,7 @@ impl<T> Vector<T> {
 
     /*LIBSPEC*
     ; op-name
-    ; is-empty
+    is-empty spec-is-empty pre-is-empty post-is-empty
     ; end-op-name
     ; spec
     (define (spec-is-empty xs) (cons xs (null? xs)))
@@ -77,25 +77,25 @@ impl<T> Vector<T> {
 
     /*LIBSPEC*
     ; op-name
-    ; push
+    insert spec-insert pre-insert post-insert
     ; end-op-name
     ; spec
-    (define (spec-push xs x) (append xs (list x)))
+    (define (spec-insert xs x) (append xs (list x)))
     ; end-spec
     ; pre
-    (define (pre-push xs) #t)
+    (define (pre-insert xs) #t)
     ; end-pre
     ; post
-    (define (post-push xs x ys) (equal? ys (spec-push xs x)))
+    (define (post-insert xs x ys) (equal? ys (spec-insert xs x)))
     ; end-post 
     *ENDLIBSPEC*/
-    pub fn push(&mut self, elt: T) {
+    pub fn insert(&mut self, elt: T) {
         self.v.push(elt);
     }
 
     /*LIBSPEC*
     ; op-name
-    ; pop
+    pop spec-pop pre-pop post-pop
     ; end-op-name
     ; spec
     (define (spec-pop xs)
@@ -116,7 +116,7 @@ impl<T> Vector<T> {
 
     /*LIBSPEC*
     ; op-name
-    ; clear
+    clear spec-clear pre-clear post-clear 
     ; end-op-name
     ; spec
     (define (spec-clear xs) null)
@@ -134,7 +134,7 @@ impl<T> Vector<T> {
 
     /*LIBSPEC*
     ; op-name
-    ; first
+    first spec-first pre-first post-first
     ; end-op-name
     ; spec
     (define (spec-first xs)
@@ -155,7 +155,7 @@ impl<T> Vector<T> {
 
     /*LIBSPEC*
     ; op-name
-    ; last
+    last spec-last pre-last post-last
     ; end-op-name
     ; spec
     (define (spec-last xs)
