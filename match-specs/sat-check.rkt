@@ -61,6 +61,9 @@
 ; (check ascending (list pre-length-ascending pre-contains-ascending pre-insert-ascending pre-remove-ascending) (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls)
 ; #t
 
+; (check descending (list pre-length-ascending pre-contains-ascending pre-insert-ascending pre-remove-ascending) (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls)
+; #f
+
 ; (check unique (list pre-length-ascending pre-contains-ascending pre-insert-ascending pre-remove-ascending) (list spec-length-ascending spec-contains-ascending spec-insert-ascending spec-remove-ascending) elem ls)
 ; #f
 

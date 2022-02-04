@@ -23,6 +23,8 @@
 
 (define ascending (lambda (l) (for-all-consecutive-pairs l leq?)))
 
+(define descending (lambda (l) (for-all-consecutive-pairs l geq?)))
+
 (define even (lambda (l) (for-all-elems l even?)))
 
 ; Helpers
@@ -40,6 +42,12 @@
   (cond [(andmap string? args) (apply string<=? args)]
         [(andmap char? args) (apply char<=? args)]
         [else (apply <= args)]))
+
+; (geq? a b) -> boolean?
+(define (geq? . args)
+  (cond [(andmap string? args) (apply string>=? args)]
+        [(andmap char? args) (apply char>=? args)]
+        [else (apply >= args)]))
 
 ; (contains? elem lst) -> boolean?
 (define (contains x l)
@@ -76,4 +84,4 @@
     [else (append (list (take l 2)) (consecutive-pairs (drop l 1)))]))
 
 ; Export procedures
-(provide unique ascending)
+(provide unique ascending descending)
