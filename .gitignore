@@ -12,6 +12,7 @@ MAlonzo/**
 */gen_code/
 */racket_specs/gen_lib_spec/
 */racket_specs/gen_prop_spec/
+*/racket_specs/gen_match/
 # Others
 drafts/*
 
