@@ -1,5 +1,5 @@
 /*LIBSPEC-NAME*
-rust-list-spec
+rust-list-spec List
 *ENDLIBSPEC-NAME*/
 
 use std::collections::LinkedList;
@@ -17,9 +17,9 @@ impl<T> List<T> {
     }
     
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     len spec-len pre-len post-len
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-len xs) (cons xs (length xs)))
     ; end-spec
@@ -35,9 +35,9 @@ impl<T> List<T> {
     }
 
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     contains spec-contains pre-contains post-contains
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-contains xs x)
       (cond
@@ -59,9 +59,9 @@ impl<T> List<T> {
     }
 
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     is-empty spec-is-empty pre-is-empty post-is-empty
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-is-empty xs) (cons xs (null? xs)))
     ; end-spec
@@ -77,9 +77,9 @@ impl<T> List<T> {
     }
 
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     insert spec-insert pre-insert post-insert
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-insert xs x) (append xs (list x)))
     ; end-spec
@@ -95,9 +95,9 @@ impl<T> List<T> {
     }
 
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     pop spec-pop pre-pop post-pop
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-pop xs)
       (cond
@@ -116,9 +116,9 @@ impl<T> List<T> {
     }
 
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     clear spec-clear pre-clear post-clear 
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-clear xs) null)
     ; end-spec
@@ -134,9 +134,9 @@ impl<T> List<T> {
     }
 
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     first spec-first pre-first post-first
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-first xs)
       (cond
@@ -155,9 +155,9 @@ impl<T> List<T> {
     }
 
     /*LIBSPEC*
-    ; op-name
+    /*OPNAME*
     last spec-last pre-last post-last
-    ; end-op-name
+    *ENDOPNAME*/
     ; spec
     (define (spec-last xs)
       (cond
