@@ -1,4 +1,4 @@
-
+use preprocess::library::*;
 
 /*SPEC*
 property unique {
@@ -9,7 +9,7 @@ type UniqueCon<T> = {c : Con<T> | (unique c) }
 
 /*SPEC*
 property ascending {
-    \c -> ((for-all-consecutive-pairs c) \a -> \b -> ((leq a) b))
+    \c -> ((for-all-consecutive-pairs c) leq?)
 }
 type AscendingCon<T> = {c : Con<T> | (ascending c)}
 

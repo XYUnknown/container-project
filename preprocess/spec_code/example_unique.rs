@@ -1,4 +1,4 @@
-
+use preprocess::library::*;
 
 /*SPEC*
 property unique {
