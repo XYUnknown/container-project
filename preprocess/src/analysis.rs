@@ -1,5 +1,7 @@
 use crate::description::{Tag, InforMap};
 use crate::parser::{Prog, Block, Spec, Decl, Term, Refinement, Id, spec};
+use crate::spec_map::{PropSpecs};
+
 use std::ops::Deref;
 use std::env;
 use std::fs;
@@ -12,17 +14,23 @@ const GENPATH: &str = "./racket_specs/gen_prop_spec/";
 
 pub struct Analyser {
     ctx: InforMap,
+    prop_specs: PropSpecs,
 }
 
 impl Analyser {
     pub fn new() -> Analyser {
         Analyser {
             ctx: InforMap::new(),
+            prop_specs: PropSpecs::new()
         }
     }
 
     pub fn get_ctx(&self) -> &InforMap {
         &self.ctx
+    }
+
+    pub fn get_prop_specs(&self) -> &PropSpecs {
+        &self.prop_specs
     }
 
 
@@ -67,9 +75,10 @@ impl Analyser {
             Decl::PropertyDecl(id, term) => {
                 let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
-                self.write_prop_spec_file(filename, code);
+                self.write_prop_spec_file(filename.clone(), code);
                 let prop_tag = Tag::Prop(Box::new(id.to_string()));
                 self.ctx.put(id.to_string(), prop_tag);
+                self.prop_specs.insert(id.to_string(), filename);
                 Ok(())
             },
             _ => Err("Not a valid property declaration".to_string())
@@ -167,8 +176,7 @@ impl Analyser {
     }
 
     fn write_prop_spec_file(&self, filename : String, contents: String) -> Result<(), Error> {
-        let path = GENPATH;
-        let mut output = fs::File::create(path.to_owned() + &filename)?;
+        let mut output = fs::File::create(GENPATH.to_owned() + &filename)?;
         write!(output, "{}", LANGDECL.to_string())?;
         write!(output, "{}", REQUIRE.to_string())?;
         write!(output, "{}", contents)?;

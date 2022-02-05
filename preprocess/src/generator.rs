@@ -8,6 +8,9 @@ use crate::lib_specs::{construct_spec};
 
 use crate::analysis::{Analyser};
 use crate::description::{Tag, Description, InforMap};
+use crate::lib_spec_processor::{process_lib_specs};
+use crate::spec_map::{PropSpecs};
+use crate::run_matching::{gen_match_script, run_matching};
 
 const CODEGEN: &str = "/*CODEGEN*/\n";
 const CODEGENEND: &str = "/*ENDCODEGEN*/\n";
@@ -17,6 +20,9 @@ const CODEEND: &str = "/*ENDCODE*/";
 
 const SPEC: &str = "/*SPEC*";
 const SPECEND: &str = "*ENDSPEC*/";
+
+const LIB: &str = "./src/library/";
+const MATCHSCRIPT: &str = "./racket_specs/gen_match/match-script.rkt";
 
 type ErrorMessage = String;
 
@@ -46,7 +52,7 @@ pub fn process_block(block: &Block) -> String {
     }
 }
 
-pub fn process_con_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
+pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String, ErrorMessage> {
     let mut code = String::new();
     for (id, tag) in ctx.iter() {
         match tag {
@@ -56,12 +62,19 @@ pub fn process_con_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
                     .filter(| t | t.is_prop_tag())
                     .map(| t | t.extract_desc())
                     .collect();
-                let struct_choices = library_spec_lookup(descs);
-                if struct_choices.is_empty() {
-                    return Err("Unable to find a struct which matches the specification in the library".to_string());
-                } else {
-                    // currently we choose the first struct choice
-                    code = code + "type " + id + " = " + &struct_choices[0]+ ";\n";
+                let lookup_result = library_spec_lookup(descs, prop_specs);
+                match lookup_result {
+                    Ok(struct_choices) => {
+                        if struct_choices.is_empty() {
+                            return Err("Unable to find a struct which matches the specification in the library".to_string());
+                        } else {
+                            // currently we choose the first struct choice
+                            code = code + "type " + id + " = " + &struct_choices[0]+ ";\n";
+                        }
+                    },
+                    Err(e) => {
+                        return Err(e);
+                    }
                 }
             },
             _ => continue
@@ -71,15 +84,37 @@ pub fn process_con_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
     Ok(result)
 }
 
-fn library_spec_lookup(descs: Vec<Description>) -> Vec<String> {
-    let lib_spec = construct_spec(); // The specifications of library structs
+fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Result<Vec<String>, ErrorMessage> {
+    //let lib_spec = construct_spec();
+    let lib_spec = process_lib_specs(LIB.to_string()).expect("Error: Unable to process library files"); // The specifications of library structs
     let mut structs = Vec::new();
-    for (name, _) in lib_spec.iter() {
-        if lib_spec.contains_descs(&name, &descs) {
+    for (name, lib_file) in lib_spec.iter() {
+        /*if lib_spec.contains_descs(&name, &descs) {
             structs.push(name.to_string());
+        }*/
+        for desc in &descs {
+            let prop_file = prop_specs.get(desc).expect(&("Error: No property specification found for: ".to_string() + &desc));
+            match gen_match_script(desc.to_string(), prop_file.to_string(), lib_file.to_string()) {
+                Ok(_) => {
+                    let result = run_matching(MATCHSCRIPT.to_string());
+                    match result {
+                        Ok(r) => { // true - match; false - not match
+                            if (r) {
+                                structs.push(name.to_string());
+                            }
+                        },
+                        Err(e) => {
+                            return Err(e);
+                        }
+                    }
+                },
+                Err(e) => {
+                    return Err(e.to_string());
+                }
+            }
         }
     }
-    structs
+    Ok(structs)
 }
 
 pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
@@ -96,7 +131,7 @@ pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
                         Ok(_) => {
                             let mut result = String::new();
                             // generate con types according to the infomation in con decl
-                            match process_con_decl(analyser.get_ctx()) {
+                            match process_con_decl(analyser.get_ctx(), analyser.get_prop_specs()) {
                                 Ok(code) => {
                                     result = result + &code;
                                     // generate rust source code
