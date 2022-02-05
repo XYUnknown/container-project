@@ -25,7 +25,7 @@ pub fn gen_match_script(prop: String, prop_spec_file: String, lib_spec_file: Str
     Ok(GENNAME.to_string())
 }
 
-pub fn run(filename: String) -> Result<bool, ExecutionError> {
+pub fn run_matching(filename: String) -> Result<bool, ExecutionError> {
     let output = Command::new("sh")
                 .arg("-c")
                 .arg("racket ".to_owned() + &filename)
