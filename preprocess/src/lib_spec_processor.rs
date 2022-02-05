@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 use std::collections::BTreeMap;
 use std::collections::btree_map::Iter;
-use crate::lib_spec_map::{LibSpecs};
+use crate::spec_map::{LibSpecs};
 
 const LIBSPECNAME: &str = "/*LIBSPEC-NAME*";
 const LIBSPECNAMEEND: &str = "*ENDLIBSPEC-NAME*/";
