@@ -11,6 +11,9 @@ const GENNAME: &str = "./racket_specs/gen_match/match-script.rkt";
 const LIBSPECPATH: &str = "../gen_lib_spec/";
 const PROPSPECPATH: &str = "../gen_prop_spec/";
 const SETUP: &str = "(require \"../match-setup.rkt\")\n";
+const LIBDIR: &str =  "./racket_specs/gen_lib_spec/";
+const PROPDIR: &str =  "./racket_specs/gen_prop_spec/";
+const MATCHDIR: &str =  "./racket_specs/gen_match/";
 
 pub fn gen_match_script(prop: String, prop_spec_file: String, lib_spec_file: String) -> Result<String, Error>  {
     let mut output = fs::File::create(GENNAME.to_owned())?;
@@ -41,4 +44,32 @@ pub fn run_matching(filename: String) -> Result<bool, ExecutionError> {
     } else {
         Err("Error: Not a valid output.".to_string())
     }
+}
+
+pub fn cleanup_script() {
+    Command::new("sh")
+        .arg("-c")
+        .arg("rm -f ".to_owned() + GENNAME)
+        .output()
+        .expect("Fail to clean up");
+}
+
+pub fn setup_dirs() {
+    Command::new("sh")
+        .arg("-c")
+        .arg("mkdir -p ".to_owned() + PROPDIR)
+        .output()
+        .expect("Fail to create the property specification directory");
+
+    Command::new("sh")
+        .arg("-c")
+        .arg("mkdir -p ".to_owned() + LIBDIR)
+        .output()
+        .expect("Fail to create the library specification directory");
+    
+    Command::new("sh")
+        .arg("-c")
+        .arg("mkdir -p ".to_owned() + MATCHDIR)
+        .output()
+        .expect("Fail to create the matching script directory");
 }
