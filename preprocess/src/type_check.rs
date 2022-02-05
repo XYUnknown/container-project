@@ -64,7 +64,7 @@ impl TypeChecker {
 
         // put leq into context
         let leq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
-        self.global_ctx.insert("leq".to_string(), 
+        self.global_ctx.insert("leq?".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
                 ty: leq_fn
