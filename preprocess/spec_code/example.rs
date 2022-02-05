@@ -2,14 +2,14 @@
 
 /*SPEC*
 property unique {
-    \c -> ((for-all-unique-pairs c) \a -> \b -> ((neq a) b))
+    \c -> ((for-all-elems c) \a -> ((unique-count? a) c))
 }
 type UniqueCon<T> = {c : Con<T> | (unique c) }
 *ENDSPEC*/
 
 /*SPEC*
 property ascending {
-    \c -> ((for-all-unique-pairs c) \a -> \b -> ((leq a) b))
+    \c -> ((for-all-consecutive-pairs c) \a -> \b -> ((leq a) b))
 }
 type AscendingCon<T> = {c : Con<T> | (ascending c)}
 

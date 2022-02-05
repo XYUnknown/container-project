@@ -22,13 +22,24 @@ impl TypeChecker {
 
     fn predefined(&mut self) {
         // put for_all_unique_pair into context
-        let binary_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let binary_fn1 = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("for-all-unique-pairs".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
                     Box::new(Type::T(TypeVar::new("T".to_string()))))), 
-                    Box::new(Type::Fun(Box::new(binary_fn), Box::new(Type::Bool()))))
+                    Box::new(Type::Fun(Box::new(binary_fn1), Box::new(Type::Bool()))))
+                }
+            );
+
+        // put for_all_unique_pair into context
+        let binary_fn2 = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        self.global_ctx.insert("for-all-consecutive-pairs".to_string(),
+            TypeScheme {
+                vars: Vec::new(),
+                ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
+                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Fun(Box::new(binary_fn2), Box::new(Type::Bool()))))
                 }
             );
         
