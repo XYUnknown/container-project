@@ -10,7 +10,7 @@ use crate::analysis::{Analyser};
 use crate::description::{Tag, Description, InforMap};
 use crate::lib_spec_processor::{process_lib_specs};
 use crate::spec_map::{PropSpecs};
-use crate::run_matching::{gen_match_script, run_matching};
+use crate::run_matching::{gen_match_script, run_matching, cleanup_script, setup_dirs};
 
 const CODEGEN: &str = "/*CODEGEN*/\n";
 const CODEGENEND: &str = "/*ENDCODEGEN*/\n";
@@ -23,6 +23,8 @@ const SPECEND: &str = "*ENDSPEC*/";
 
 const LIB: &str = "./src/library/";
 const MATCHSCRIPT: &str = "./racket_specs/gen_match/match-script.rkt";
+
+const LIBMODULE: &str = "preprocess::library::";
 
 type ErrorMessage = String;
 
@@ -85,13 +87,9 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
 }
 
 fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Result<Vec<String>, ErrorMessage> {
-    //let lib_spec = construct_spec();
     let lib_spec = process_lib_specs(LIB.to_string()).expect("Error: Unable to process library files"); // The specifications of library structs
     let mut structs = Vec::new();
     for (name, lib_file) in lib_spec.iter() {
-        /*if lib_spec.contains_descs(&name, &descs) {
-            structs.push(name.to_string());
-        }*/
         for desc in &descs {
             let prop_file = prop_specs.get(desc).expect(&("Error: No property specification found for: ".to_string() + &desc));
             match gen_match_script(desc.to_string(), prop_file.to_string(), lib_file.to_string()) {
@@ -100,7 +98,7 @@ fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Resul
                     match result {
                         Ok(r) => { // true - match; false - not match
                             if (r) {
-                                structs.push(name.to_string());
+                                structs.push(LIBMODULE.to_string() + name);
                             }
                         },
                         Err(e) => {
@@ -114,10 +112,12 @@ fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Resul
             }
         }
     }
+    cleanup_script();
     Ok(structs)
 }
 
 pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
+    setup_dirs();
     let f = readfile(filename);
     match spec::prog(&f) {
         Ok(blocks) => {
