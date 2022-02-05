@@ -1,5 +1,3 @@
-use preprocess::library::*;
-
 /*SPEC*
 property unique {
     \c -> ((for-all-elems c) \a -> ((unique-count? a) c))
