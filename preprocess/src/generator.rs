@@ -65,7 +65,7 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
                     .filter(| t | t.is_prop_tag())
                     .map(| t | t.extract_desc())
                     .collect();
-                let lookup_result = library_spec_lookup(descs, prop_specs);
+                let lookup_result = library_spec_lookup(id.to_string(), descs, prop_specs);
                 match lookup_result {
                     Ok(struct_choices) => {
                         if struct_choices.is_empty() {
@@ -87,7 +87,7 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
     Ok(result)
 }
 
-fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Result<Vec<String>, ErrorMessage> {
+fn library_spec_lookup(id: String, descs: Vec<Description>, prop_specs: &PropSpecs) -> Result<Vec<String>, ErrorMessage> {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(200);
     pb.set_style(
@@ -105,10 +105,11 @@ fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Resul
             ])
             .template("{spinner:.magenta} {msg}"),
     );
-    pb.set_message("Finding...");
+    pb.set_message("Finding library implementations for ".to_owned() + &id + "...");
     let lib_spec = process_lib_specs(LIB.to_string()).expect("Error: Unable to process library files"); // The specifications of library structs
     let mut structs = Vec::new();
     for (name, lib_file) in lib_spec.iter() {
+        let mut is_match = false;
         for desc in &descs {
             let prop_file = prop_specs.get(desc).expect(&("Error: No property specification found for: ".to_string() + &desc));
             match gen_match_script(desc.to_string(), prop_file.to_string(), lib_file.to_string()) {
@@ -117,7 +118,7 @@ fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Resul
                     match result {
                         Ok(r) => { // true - match; false - not match
                             if (r) {
-                                structs.push(LIBMODULE.to_string() + name);
+                                is_match = true;
                             }
                         },
                         Err(e) => {
@@ -130,8 +131,11 @@ fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Resul
                 }
             }
         }
+        if (is_match) {
+            structs.push(LIBMODULE.to_string() + name);
+        }
     }
-    pb.finish_with_message("Done.");
+    pb.finish_with_message("Done. ".to_owned() + &structs.len().to_string() + " implementation(s) for " + &id + " found.");
     cleanup_script();
     Ok(structs)
 }
@@ -151,7 +155,7 @@ pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
                     match analyser.analyse_prog(blocks.clone()) {
                         Ok(_) => {
                             let mut result = String::new();
-                            // generate con types according to the infomation in con decl
+                            // generate con types according to the information in con decl
                             match process_con_decl(analyser.get_ctx(), analyser.get_prop_specs()) {
                                 Ok(code) => {
                                     result = result + &code;
