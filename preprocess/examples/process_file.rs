@@ -59,6 +59,6 @@ fn main() {
     //println!("{}", type_of(spec::prog(&f)));
     //println!("{}", process_spec(Vec::<Decl>::new()));
     //process_src("./spec_code/example.rs".to_string());
-    //println!("{:?}", run("./spec_code/example.rs".to_string(), "example_output.rs".to_string()));
-    println!("{:?}", run("./spec_code/example_unique.rs".to_string(), "example_unique_output.rs".to_string()));
+    println!("{:?}", run("./spec_code/example.rs".to_string(), "example_output.rs".to_string()));
+    //println!("{:?}", run("./spec_code/example_unique.rs".to_string(), "example_unique_output.rs".to_string()));
 }
