@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
+use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::parser::{Block, Spec, spec};
 use crate::type_check::{TypeChecker};
@@ -87,6 +88,24 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
 }
 
 fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Result<Vec<String>, ErrorMessage> {
+    let pb = ProgressBar::new_spinner();
+    pb.enable_steady_tick(200);
+    pb.set_style(
+        ProgressStyle::default_spinner()
+            .tick_strings(&[
+                "(>'w')>",
+                " ('w') ",
+                "^('w')^",
+                " ('w') ",
+                "<('w'<)",
+                " ('w') ",
+                "^('w')^",
+                " ('w') ",
+                "Y('w')Y",
+            ])
+            .template("{spinner:.magenta} {msg}"),
+    );
+    pb.set_message("Finding...");
     let lib_spec = process_lib_specs(LIB.to_string()).expect("Error: Unable to process library files"); // The specifications of library structs
     let mut structs = Vec::new();
     for (name, lib_file) in lib_spec.iter() {
@@ -112,12 +131,14 @@ fn library_spec_lookup(descs: Vec<Description>, prop_specs: &PropSpecs) -> Resul
             }
         }
     }
+    pb.finish_with_message("Done.");
     cleanup_script();
     Ok(structs)
 }
 
 pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
     setup_dirs();
+    println!("{}", "Ready...");
     let f = readfile(filename);
     match spec::prog(&f) {
         Ok(blocks) => {
