@@ -5,7 +5,6 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::parser::{Block, Spec, spec};
 use crate::type_check::{TypeChecker};
-use crate::lib_specs::{construct_spec};
 
 use crate::analysis::{Analyser};
 use crate::description::{Tag, Description, InforMap};
