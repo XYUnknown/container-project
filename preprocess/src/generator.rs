@@ -92,15 +92,15 @@ fn library_spec_lookup(id: String, descs: Vec<Description>, prop_specs: &PropSpe
     pb.set_style(
         ProgressStyle::default_spinner()
             .tick_strings(&[
-                "(>'w')>",
-                " ('w') ",
-                "^('w')^",
-                " ('w') ",
-                "<('w'<)",
-                " ('w') ",
-                "^('w')^",
-                " ('w') ",
-                "Y('w')Y",
+                "(>'-')>",
+                " ('-') ",
+                "<('-'<)",
+                " ('-') ",
+                "^('-')^",
+                " ('-') ",
+                "v('-')v",
+                " ('-') ",
+                " (^-^) ",
             ])
             .template("{spinner:.magenta} {msg}"),
     );
