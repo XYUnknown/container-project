@@ -15,6 +15,7 @@ MAlonzo/**
 */racket_specs/gen_match/
 # Others
 drafts/*
+*/drafts/*
 
 # Scala
 *.class
