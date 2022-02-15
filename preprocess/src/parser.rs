@@ -7,6 +7,9 @@ use crate::types::{Name, Type, TypeVar};
 
 pub type Id = String;
 
+// traits
+pub type Interface = Vec<Id>;
+
 #[derive(Clone, Debug)]
 pub enum Refinement {
     Prop(Box<Term>),
@@ -23,7 +26,7 @@ pub enum Term {
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
-    ConTypeDecl(Box<Id>, (Box<Id>, Box<Type>, Box<Refinement>))
+    ConTypeDecl(Box<Id>, (Box<Id>, Box<Interface>, Box<Refinement>))
 }
 
 impl Decl {
@@ -118,6 +121,13 @@ pub grammar spec() for str {
             "(" _ p1:refinement() __ "and" __ p2:refinement() _ ")" { Refinement::AndProps(Box::new(p1), Box::new(p2)) }
         }
 
+    pub rule interface() -> Interface
+        = precedence!{
+            i:id() {vec![i]}
+            --
+            "(" l: ((_ i:id() _ {i}) ++ "," ) ")" { l }
+        }
+
     pub rule decl() -> Decl
         = precedence! {
             _ "property" __ p:id() _ "{" _ t:term() _ "}" _ 
@@ -125,9 +135,9 @@ pub grammar spec() for str {
                 Decl::PropertyDecl(Box::new(p), Box::new(t))
             }
             --
-            _ "type" __ t1:id() _ "=" _ "{" _ c:id() _ ":" _ t2:ty() _ "|" _ t:refinement() _ "}" _
+            _ "type" __ t1:id() _ "=" _ "{" _ c:id() _ "impl" __ i:interface() _ "|" _ t:refinement() _ "}" _
             {
-                Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(t2), Box::new(t)))
+                Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(i), Box::new(t)))
             }
         }
 
@@ -219,7 +229,21 @@ mod tests {
     #[test]
     fn test_contype() {
         assert!(spec::decl(
-            "type UniqueCon<T> = {c : Con<T> | (unique c)}"
+            "type UniqueCon<T> = {c impl (Container) | (unique c)}"
+            ).is_ok());
+    }
+
+    #[test]
+    fn test_contype_no_par() {
+        assert!(spec::decl(
+            "type UniqueCon<T> = {c impl Container | (unique c)}"
+            ).is_ok());
+    }
+
+    #[test]
+    fn test_contype_multi() {
+        assert!(spec::decl(
+            "type UniqueCon<T> = {c impl (Container, Stack) | (unique c)}"
             ).is_ok());
     }
 
@@ -230,7 +254,7 @@ mod tests {
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique c)}
+            type UniqueCon<T> = {c impl (Container) | (unique c)}
             *ENDSPEC*/"#
         ).is_ok())
     }
@@ -256,7 +280,7 @@ mod tests {
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique c)}
+            type UniqueCon<T> = {c impl (Container) | (unique c)}
             *ENDSPEC*/"#
         ).is_ok())
     }
@@ -283,7 +307,7 @@ mod tests {
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique c) }
+            type UniqueCon<T> = {c impl (Container) | (unique c) }
             *ENDSPEC*/
 
             /*CODE*/
@@ -301,7 +325,7 @@ mod tests {
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c : Con<T> | (unique c) }
+            type UniqueCon<T> = {c impl (Container) | (unique c) }
             *ENDSPEC*/
             
             /*CODE*/

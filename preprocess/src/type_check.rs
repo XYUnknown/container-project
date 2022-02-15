@@ -186,28 +186,24 @@ impl TypeChecker {
                     None => {
                         // ty has to be Con<T>
                         let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
-                        if ty.deref() == &con {
-                            let mut local_ctx = self.global_ctx.clone();
-                            local_ctx.insert(vid.to_string(),
-                                TypeScheme {
-                                    vars: Vec::new(),
-                                    ty: con
-                                }
-                            );
-                            match self.check_ref(&mut local_ctx, r) {
-                                Ok(_) => {
-                                    self.global_ctx.insert(id.to_string(), 
-                                        TypeScheme{
-                                            vars: Vec::new(),
-                                            ty: Type::Con(Box::new(id.to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))))
-                                        }
-                                    );
-                                    Ok(())
-                                },
-                                Err(e) => Err(e)
+                        let mut local_ctx = self.global_ctx.clone();
+                        local_ctx.insert(vid.to_string(),
+                            TypeScheme {
+                                vars: Vec::new(),
+                                ty: con
                             }
-                        } else {
-                            Err("The base type should be a basic container Con<T>".to_string())
+                        );
+                        match self.check_ref(&mut local_ctx, r) {
+                            Ok(_) => {
+                                self.global_ctx.insert(id.to_string(), 
+                                    TypeScheme{
+                                        vars: Vec::new(),
+                                        ty: Type::Con(Box::new(id.to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))))
+                                    }
+                                );
+                                Ok(())
+                            },
+                            Err(e) => Err(e)
                         }
                     },
                 }
