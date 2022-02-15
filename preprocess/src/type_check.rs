@@ -106,9 +106,56 @@ impl TypeChecker {
             concat_specs.iter()
             .filter(| decl | decl.is_contype_decl())
             .collect();
+        let interface_decls: Vec<&Decl> =
+            concat_specs.iter()
+            .filter(| decl | decl.is_interface_decl())
+            .collect();
         match self.check_prop_decls(prop_decls) {
-            Ok(_) => self.check_contype_decls(contype_decls),
+            Ok(_) => {
+                //self.check_contype_decls(contype_decls)
+                match self.check_interface_decls(interface_decls) {
+                    Ok(_) => self.check_contype_decls(contype_decls),
+                    Err(e) => Err(e)
+                }
+            }
             Err(e) => Err(e)
+        }
+    }
+
+    pub fn check_interface_decls(&mut self, decls: Vec<&Decl>) -> Result<(), TypeError> {
+        let mut result = Ok(());
+        for decl in decls.into_iter() {
+            match self.check_interface_decl(decl) {
+                Ok(_) => continue,
+                Err(e) => {
+                    result = Err(e);
+                    break;
+                }
+            }
+        }
+        result
+    }
+
+    pub fn check_interface_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
+        println!("{}", "here");
+        match decl {
+            Decl::InterfaceDecl(id, term) => {
+                // Duplicate interface decl checking
+                match self.global_ctx.get(&id.to_string()) {
+                    Some(_) => Err("Duplicate interface declaration".to_string()),
+                    None => {
+                        self.global_ctx.insert(
+                            id.to_string(),
+                            TypeScheme {
+                                vars: Vec::new(),
+                                ty: Type::T(TypeVar::new(id.to_string()))
+                            }
+                        );
+                        Ok(()) // TODO: check each interface is a valid rust trait
+                    },
+                }
+            },
+            _ => Err("Not a valid interface declaration".to_string())
         }
     }
 
@@ -117,7 +164,10 @@ impl TypeChecker {
         for decl in decls.into_iter() {
             match self.check_prop_decl(decl) {
                 Ok(_) => continue,
-                Err(e) => result = Err(e)
+                Err(e) => {
+                    result = Err(e);
+                    break;
+                }
             }
         }
         result
@@ -171,7 +221,10 @@ impl TypeChecker {
         for decl in decls.into_iter() {
             match self.check_contype_decl(decl) {
                 Ok(_) => continue,
-                Err(e) => result = Err(e)
+                Err(e) => {
+                    result = Err(e);
+                    break;
+                }
             }
         }
         result
