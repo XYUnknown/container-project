@@ -26,7 +26,7 @@ pub enum Term {
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
-    ConTypeDecl(Box<Id>, (Box<Id>, Box<Interface>, Box<Refinement>))
+    ConTypeDecl(Box<Type>, (Box<Id>, Box<Interface>, Box<Refinement>))
 }
 
 impl Decl {
@@ -89,7 +89,7 @@ pub type Prog = Vec<Block>;
 parser!{
 pub grammar spec() for str {
     pub rule id() -> Id
-        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-' | '?' | '<' | '>' ]*) 
+        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-' | '?' ]*) 
         { s.into() }
 
     pub rule name() -> Name
@@ -135,7 +135,7 @@ pub grammar spec() for str {
                 Decl::PropertyDecl(Box::new(p), Box::new(t))
             }
             --
-            _ "type" __ t1:id() _ "=" _ "{" _ c:id() _ "impl" __ i:interface() _ "|" _ t:refinement() _ "}" _
+            _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ "impl" __ i:interface() _ "|" _ t:refinement() _ "}" _
             {
                 Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(i), Box::new(t)))
             }

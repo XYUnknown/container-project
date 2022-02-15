@@ -184,7 +184,6 @@ impl TypeChecker {
                 match self.global_ctx.get(&id.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
-                        // ty has to be Con<T>
                         let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
                         let mut local_ctx = self.global_ctx.clone();
                         local_ctx.insert(vid.to_string(),

@@ -31,6 +31,18 @@ impl Type {
     }
 }
 
+impl ToString for Type {
+    fn to_string(&self) -> String {
+        match self {
+            Type::Bool() => "bool".to_string(),
+            Type::Int() => "int".to_string(),
+            Type::T(tv) => tv.to_string(),
+            Type::Con(n, t) => n.to_string() + "<" + &t.to_string() + ">",
+            Type::Fun(t1, t2) => t1.to_string() + "->" + &t2.to_string(),
+        }
+    }
+}
+
 pub type UnificationError = String;
 
 trait Union {
@@ -158,6 +170,13 @@ impl TypeVar {
         let mut s = Subst::new();
         s.insert(self.clone(), ty.clone());
         Ok(s)
+    }
+}
+
+
+impl ToString for TypeVar {
+    fn to_string(&self) -> String {
+        self.name.to_string()
     }
 }
 
