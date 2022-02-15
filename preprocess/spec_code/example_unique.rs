@@ -2,7 +2,7 @@
 property unique {
     \c -> ((for-all-elems c) \a -> ((unique-count? a) c))
 }
-type UniqueCon<T> = {c : Con<T> | (unique c) }
+type UniqueCon<T> = {c impl Container | (unique c) }
 *ENDSPEC*/
 
 fn main () {
