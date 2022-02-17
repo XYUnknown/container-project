@@ -6,8 +6,8 @@ use std::collections::BTreeSet;
 use crate::traits::container::Container;
 
 /*IMPL*
-container::Container
-*END-IMPL*/
+Container
+*ENDIMPL*/
 impl<T: Ord> Container<T> for BTreeSet<T> {
 
     /*LIBSPEC*

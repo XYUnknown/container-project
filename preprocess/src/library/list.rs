@@ -11,8 +11,8 @@ use crate::traits::container::Container;
 use crate::traits::stack::Stack;
 
 /*IMPL*
-container::Container
-*END-IMPL*/
+Container
+*ENDIMPL*/
 impl<T: Ord> Container<T> for LinkedList<T> {
 
     /*LIBSPEC*
@@ -110,8 +110,8 @@ impl<T: Ord> Container<T> for LinkedList<T> {
 }
 
 /*IMPL*
-container::Stack
-*END-IMPL*/
+Stack
+*ENDIMPL*/
 impl<T> Stack<T> for LinkedList<T> {
     /*LIBSPEC*
     /*OPNAME*

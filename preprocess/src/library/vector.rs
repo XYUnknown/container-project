@@ -7,8 +7,8 @@ use crate::traits::container::Container;
 use crate::traits::stack::Stack;
 
 /*IMPL*
-container::Container
-*END-IMPL*/
+Container
+*ENDIMPL*/
 impl<T: PartialEq> Container<T> for Vec<T> {
 
     /*LIBSPEC*
@@ -96,8 +96,8 @@ impl<T: PartialEq> Container<T> for Vec<T> {
 }
 
 /*IMPL*
-container::Stack
-*END-IMPL*/
+Stack
+*ENDIMPL*/
 impl<T> Stack<T> for Vec<T> {
     /*LIBSPEC*
     /*OPNAME*
