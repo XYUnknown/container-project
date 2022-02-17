@@ -3,9 +3,9 @@ property unique {
     \c -> ((for-all-elems c) \a -> ((unique-count? a) c))
 }
 
-interface Container = {Container}
+interface MyCon = {Container}
 
-type UniqueCon<T> = {c impl Container | (unique c) }
+type UniqueCon<T> = {c impl MyCon | (unique c) }
 *ENDSPEC*/
 
 fn main () {
