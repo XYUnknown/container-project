@@ -1,6 +1,3 @@
 pub mod container;
 pub mod stack;
-
-pub mod list;
-pub mod vector;
-pub mod treeset;
+pub mod container_constructor;
