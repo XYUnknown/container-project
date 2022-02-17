@@ -3,6 +3,9 @@ use std::fs;
 use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 use std::collections::BTreeMap;
 use std::collections::btree_map::Iter;
+//use std::collections::hash_map::Iter;
+use std::collections::HashMap;
+
 use crate::spec_map::{LibSpecs};
 
 const LIBSPECNAME: &str = "/*LIBSPEC-NAME*";
@@ -13,8 +16,32 @@ const LANGDECL: &str = "#lang rosette\n";
 const GENPATH: &str = "./racket_specs/gen_lib_spec/";
 const OPNAME: &str = "/*OPNAME*";
 const OPNAMEEND: &str = "*ENDOPNAME*/";
+const IMPL: &str = "/*IMPL*";
+const IMPLEND: &str = "*ENDIMPL*/";
 
 type ErrorMessage = String;
+
+fn is_next_pragma_impl(src: &String) -> bool {
+    match src.find(IMPL) {
+        Some(impl_pos) => {
+            match src.find(LIBSPEC) {
+                Some(spec_pos) => {
+                    impl_pos < spec_pos
+                },
+                None => true
+            }
+        },
+        None => false
+    }
+}
+
+fn has_pragma_impl(src: &String) -> bool {
+    src.contains(IMPL)
+}
+
+fn has_pragma_spec(src: &String) -> bool {
+    src.contains(LIBSPEC)
+}
 
 pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String), ErrorMessage> {
     let contents = fs::read_to_string(filename)
@@ -40,39 +67,70 @@ pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, 
         let struct_name = v3.get(1).unwrap().trim().to_string();
         let s1 = v1.get(0).expect("Unexpected error.");
         let s2 = v2.get(1).expect("Unexpected error.");
+        // process interface blocks
         let mut trimed_contents = String::new();
         trimed_contents.push_str(&s1);
         trimed_contents.push_str(&s2);
-        let lib_specs = extract_lib_specs(trimed_contents);
-        match lib_specs {
-            Ok((v, infos)) => {
-                let provide = generate_provide(infos); 
-                Ok((spec_name, struct_name, v, provide))
-            },
-            Err(e) => Err(e)
+        if (!is_next_pragma_impl(&trimed_contents) && has_pragma_spec(&trimed_contents)) {
+            return Err("Specification without declared interface is not allowed".to_string());
+        } else {
+            let mut interfaces = Vec::<String>::new();
+            let mut interface_info = HashMap::<String, BTreeMap<String, (String, String, String)>>::new();
+            let mut code = Vec::<String>::new();
+            while (has_pragma_impl(&trimed_contents)) {
+                let v4: Vec<&str> = trimed_contents.splitn(2, IMPL).collect();
+                let s4 = v4.get(1).expect("Error, invalid interface declaration.");
+                let v5: Vec<&str> = s4.splitn(2, IMPLEND).collect();
+                let mut interface_name = v5.get(0).unwrap().trim().to_string();
+                trimed_contents = v5.get(1).unwrap().trim().to_string();
+                let lib_specs = extract_lib_specs(trimed_contents);
+                match lib_specs {
+                    Ok((rest, mut v, infos)) => {
+                        code.append(&mut v);
+                        interface_info.insert(interface_name.clone(), infos);
+                        interfaces.push(interface_name.clone());
+                        trimed_contents = rest;
+                    },
+                    Err(e) => {
+                        return Err(e);
+                    }
+                }
+            }
+            let provide = generate_provide(interface_info); 
+            Ok((spec_name, struct_name, code, provide))
         }
     }
 }
 
-pub fn generate_provide(infos: BTreeMap<String, (String, String, String)>) -> String {
-    let mut specs = Vec::<String>::new();
-    let mut pres = Vec::<String>::new();
-    for (key, value) in infos.iter() {
-        specs.push(value.0.clone());
-        pres.push(value.1.clone());
+pub fn generate_provide(interface_info: HashMap<String, BTreeMap<String, (String, String, String)>>) -> String {
+    let mut interfaces = Vec::<String>::new();
+    let mut provide = String::new();
+    for (interface, infos) in interface_info.iter() {
+        let mut specs = Vec::<String>::new();
+        let mut pres = Vec::<String>::new();
+        for (key, value) in infos.iter() {
+            specs.push(value.0.clone());
+            pres.push(value.1.clone());
+        }
+        let specs_name = interface.to_lowercase() + "-specs";
+        let pres_name = interface.to_lowercase() + "-pres";
+        let specs_str = "\n(define ".to_string() + &specs_name + " (list " + &specs.join(" ") + "))\n";
+        let pres_str = "(define ".to_string()  + &pres_name + " (list " + &pres.join(" ") + "))\n";
+        let interface_str = "(define ".to_string() + &interface.to_lowercase() + " (cons " + &specs_name + " " + &pres_name + "))\n";
+        provide = provide + &specs_str + &pres_str + &interface_str;
+        interfaces.push(interface.to_lowercase());
     }
-    let specs_str = "\n(define specs (list ".to_string() + &specs.join(" ") + "))\n";
-    let pres_str = "(define pres (list ".to_string() + &pres.join(" ") + "))\n";
-    let provide_str = "(provide specs pres)".to_string();
-    let provide = specs_str + &pres_str + &provide_str;
+    let provide_str = "(provide ".to_string() + &interfaces.join(" ") + ")";
+
+    provide = provide + &provide_str;
     provide
 }
 
-pub fn extract_lib_specs(src: String) -> Result<(Vec<String>, BTreeMap<String, (String, String, String)>), ErrorMessage> {
+pub fn extract_lib_specs(src: String) -> Result<(String, Vec<String>, BTreeMap<String, (String, String, String)>), ErrorMessage> {
     let mut result = Vec::<String>::new();
     let mut contents = src.trim();
     let mut op_infos = BTreeMap::<String, (String, String, String)>::new();
-    while (contents.len() > 0) {
+    while (contents.len() > 0 && !is_next_pragma_impl(&contents.to_string())) {
         if (contents.contains(LIBSPEC) && contents.contains(LIBSPECEND)) {
             let v1: Vec<&str> = contents.splitn(2, LIBSPEC).collect();
             let s = v1.get(1).expect("Error, invalid specification.");
@@ -88,7 +146,7 @@ pub fn extract_lib_specs(src: String) -> Result<(Vec<String>, BTreeMap<String, (
             break;
         }
     }
-    Ok((result, op_infos))
+    Ok((contents.to_string(), result, op_infos))
 }
 
 pub fn extract_op_info(spec: String) -> Result<(String, String, String, String), ErrorMessage> {
