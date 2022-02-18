@@ -1,5 +1,5 @@
 /*LIBSPEC-NAME*
-rust-treeset-spec treeset::TreeSet
+rust-btreeset-spec std::collections::BTreeSet
 *ENDLIBSPEC-NAME*/
 
 use std::collections::BTreeSet;

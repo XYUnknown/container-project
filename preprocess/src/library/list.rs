@@ -1,5 +1,5 @@
 /*LIBSPEC-NAME*
-rust-linked-list-spec LinkedList
+rust-linked-list-spec std::collections::LinkedList
 *ENDLIBSPEC-NAME*/
 
 use std::collections::LinkedList;

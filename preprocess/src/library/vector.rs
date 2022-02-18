@@ -1,5 +1,5 @@
 /*LIBSPEC-NAME*
-rust-vector-spec vector::Vector
+rust-vec-spec std::vec::Vec
 *ENDLIBSPEC-NAME*/
 
 use std::vec::Vec;
