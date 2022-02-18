@@ -9,8 +9,8 @@ use crate::type_check::{TypeChecker};
 use crate::analysis::{Analyser};
 use crate::description::{Tag, Description, InforMap};
 use crate::lib_spec_processor::{process_lib_specs};
-use crate::spec_map::{PropSpecs};
-use crate::run_matching::{gen_match_script, run_matching, cleanup_script, setup_dirs};
+use crate::spec_map::{PropSpecs, MatchSetup};
+use crate::run_matching::{initialise_match_setup, gen_match_script, run_matching, cleanup_script, setup_dirs};
 
 const CODEGEN: &str = "/*CODEGEN*/\n";
 const CODEGENEND: &str = "/*ENDCODEGEN*/\n";
@@ -23,8 +23,6 @@ const SPECEND: &str = "*ENDSPEC*/";
 
 const LIB: &str = "./src/library/";
 const MATCHSCRIPT: &str = "./racket_specs/gen_match/match-script.rkt";
-
-const LIBMODULE: &str = "preprocess::library::";
 
 type ErrorMessage = String;
 
@@ -56,22 +54,29 @@ pub fn process_block(block: &Block) -> String {
 
 pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String, ErrorMessage> {
     let mut code = String::new();
+    let match_setup = initialise_match_setup();
     for (id, tag) in ctx.iter() {
         match tag {
-            Tag::Con(tags) => {
-                let descs: Vec<Description> = 
+            Tag::Con(elem_ty, tags) => {
+                let prop_descs: Vec<Description> = 
                     tags.iter()
                     .filter(| t | t.is_prop_tag())
                     .map(| t | t.extract_desc())
                     .collect();
-                let lookup_result = library_spec_lookup(id.to_string(), descs, prop_specs);
+                let interfaces: Vec<Description> =
+                    tags.iter()
+                    .filter(| t | t.is_interface_tag())
+                    .flat_map(| t | t.extract_descs())
+                    .collect();
+                let lookup_result = library_spec_lookup(id.to_string(), prop_descs, interfaces, prop_specs, &match_setup);
                 match lookup_result {
                     Ok(struct_choices) => {
                         if struct_choices.is_empty() {
                             return Err("Unable to find a struct which matches the specification in the library".to_string());
                         } else {
                             // currently we choose the first struct choice
-                            code = code + "type " + id + " = " + &struct_choices[0]+ ";\n";
+                            //code = code + "type " + id + " = " + &struct_choices[0]+ ";\n";
+                            code = code + &gen_output_code(id, elem_ty, &struct_choices[0], "trait UniqueConTrait<T> : preprocess::traits::container::Container<T>", "UniqueConTrait<T>", "none")
                         }
                     },
                     Err(e) => {
@@ -86,7 +91,7 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
     Ok(result)
 }
 
-fn library_spec_lookup(id: String, descs: Vec<Description>, prop_specs: &PropSpecs) -> Result<Vec<String>, ErrorMessage> {
+fn library_spec_lookup(id: String, properties: Vec<Description>, interfaces: Vec<Description>, prop_specs: &PropSpecs, match_setup: &MatchSetup) -> Result<Vec<String>, ErrorMessage> {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(200);
     pb.set_style(
@@ -107,31 +112,49 @@ fn library_spec_lookup(id: String, descs: Vec<Description>, prop_specs: &PropSpe
     pb.set_message("Finding library implementations for ".to_owned() + &id + "...");
     let lib_spec = process_lib_specs(LIB.to_string()).expect("Error: Unable to process library files"); // The specifications of library structs
     let mut structs = Vec::new();
-    for (name, lib_file) in lib_spec.iter() {
+    // select library structs implement interfaces decl in contype
+    let mut lib_spec_impls = lib_spec.clone();
+    for (name, (_, impls)) in lib_spec.iter() {
+        if (!interfaces.iter().all(|i| impls.keys().cloned().collect::<String>().contains(i))) {
+            lib_spec_impls.remove(name);
+        }
+    }
+    println!("{:?}", lib_spec_impls);
+    for (name, (lib_spec_dir, interface_ctx)) in lib_spec_impls.iter() {
         let mut is_match = false;
-        for desc in &descs {
-            let prop_file = prop_specs.get(desc).expect(&("Error: No property specification found for: ".to_string() + &desc));
-            match gen_match_script(desc.to_string(), prop_file.to_string(), lib_file.to_string()) {
-                Ok(_) => {
-                    let result = run_matching(MATCHSCRIPT.to_string());
-                    match result {
-                        Ok(r) => { // true - match; false - not match
-                            if (r) {
-                                is_match = true;
+        for p in &properties {
+            let mut is_partial_match = false;
+            for i in &interfaces {
+                let prop_file = prop_specs.get(p).expect(&("Error: No property specification found for: ".to_string() + &p));
+                match gen_match_script(p.to_string(), match_setup.get(i).unwrap().to_string(), prop_file.to_string(), lib_spec_dir.to_string(), interface_ctx.get(i).unwrap().to_string()) {
+                    Ok(_) => {
+                        let result = run_matching(MATCHSCRIPT.to_string());
+                        match result {
+                            Ok(r) => { // true - match; false - not match
+                                if (r) {
+                                    is_partial_match = true;
+                                } else {
+                                    is_partial_match = false;
+                                    break;
+                                }
+                            },
+                            Err(e) => {
+                                return Err(e);
                             }
-                        },
-                        Err(e) => {
-                            return Err(e);
                         }
+                    },
+                    Err(e) => {
+                        return Err(e.to_string());
                     }
-                },
-                Err(e) => {
-                    return Err(e.to_string());
                 }
+            }
+            is_match = is_partial_match;
+            if (!is_match) {
+                break;
             }
         }
         if (is_match) {
-            structs.push(LIBMODULE.to_string() + name);
+            structs.push(name.to_string());
         }
     }
     pb.finish_with_message("Done. ".to_owned() + &structs.len().to_string() + " implementation(s) for " + &id + " found.");
@@ -217,6 +240,26 @@ fn mark_src_blocks(src : String) -> String {
         }
     }
     result
+}
+
+pub fn gen_output_code(s: &str, elem_type: &str, chosen: &str, trait_decl: &str, trait_name: &str, alt: &str) -> String {
+    format!(
+r#"use preprocess::traits::container_constructor::ContainerConstructor;
+struct {s} {{
+    elem_t: core::marker::PhantomData<{elem_type}>,
+}}
+
+{trait_decl} {{}}
+impl<{elem_type}: 'static + Ord> {trait_name} for {s} as ContainerConstructor>::Impl {{}}
+
+impl<{elem_type}: 'static + Ord> ContainerConstructor for {s} {{
+    type Impl = {chosen}; // Other possible choices: {alt}
+    type Interface = dyn {trait_name};
+    fn new() -> Box<Self::Interface> {{
+        Box::new(Self::Impl::new())
+    }}
+}}
+"#)
 }
 
 #[cfg(test)]
