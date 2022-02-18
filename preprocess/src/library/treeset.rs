@@ -15,7 +15,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     len spec-len pre-len post-len
     *ENDOPNAME*/
     (define (spec-len xs) (cons xs (length xs)))
-    (define (pre-len xs) #t)
+    (define (pre-len xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-len xs r) (equal? r (spec-len xs)))
     *ENDLIBSPEC*/
     fn len(&self) -> usize {
@@ -30,7 +30,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
       (cond
         [(list? (member x xs)) (cons xs #t)]
         [else (cons xs #f)]))
-    (define (pre-contains xs) #t)
+    (define (pre-contains xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-contains xs x r) (equal? r (spec-contains xs x)))
     *ENDLIBSPEC*/
     fn contains(&self, x: &T) -> bool {
@@ -42,7 +42,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     is-empty spec-is-empty pre-is-empty post-is-empty
     *ENDOPNAME*/
     (define (spec-is-empty xs) (cons xs (null? xs)))
-    (define (pre-is-empty xs) #t)
+    (define (pre-is-empty xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-is-empty xs r) (equal? r (spec-is-empty xs)))
     *ENDLIBSPEC*/
     fn is_empty(&self) -> bool {
@@ -54,7 +54,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     clear spec-clear pre-clear post-clear 
     *ENDOPNAME*/
     (define (spec-clear xs) null)
-    (define (pre-clear xs) #t)
+    (define (pre-clear xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-clear xs r) (equal? r (spec-clear xs)))
     *ENDLIBSPEC*/
     fn clear(&mut self) {
@@ -65,8 +65,8 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     /*OPNAME*
     insert spec-insert pre-insert post-insert
     *ENDOPNAME*/
-    (define (spec-insert xs x) (append xs (list x)))
-    (define (pre-insert xs) #t)
+    (define (spec-insert xs x) (remove-duplicates (sort (append xs (list x)) <)))
+    (define (pre-insert xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-insert xs x ys) (equal? ys (spec-insert xs x)))
     *ENDLIBSPEC*/
     fn insert(&mut self, elt: T) {
@@ -81,7 +81,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
       (cond
         [(list? (member x xs)) (cons (remove x xs) x)]
         [else (cons xs null)]))
-    (define (pre-remove xs) #t)
+    (define (pre-remove xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-remove xs r) (equal? r (spec-remove xs)))
     *ENDLIBSPEC*/
     fn remove(&mut self, elt: T) -> Option<T> {

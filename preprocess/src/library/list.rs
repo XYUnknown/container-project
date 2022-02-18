@@ -1,5 +1,5 @@
 /*LIBSPEC-NAME*
-rust-list-spec list::List
+rust-linked-list-spec LinkedList
 *ENDLIBSPEC-NAME*/
 
 use std::collections::LinkedList;
@@ -194,7 +194,7 @@ mod tests {
 
     #[test]
     fn test_list_combo_trait() {
-        trait ContainerStack<T>: Container<T> + Stack<T> {}
+        trait ContainerStack<T> : Container<T> + Stack<T> {}
         impl<T: Ord> ContainerStack<T> for LinkedList<T> {}
         let list : &mut dyn ContainerStack<u32> = &mut LinkedList::<u32>::new();
         assert_eq!(list.len(), 0);
