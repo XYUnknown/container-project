@@ -9,6 +9,7 @@ pub type Description = String;
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Tag {
     Prop(Box<Description>), // analysis of a property
+    Interface(Box<Vec<Description>>),
     Con(Box<Vec<Tag>>) // analysis of a container type with refinements
 }
 
@@ -20,10 +21,24 @@ impl Tag {
         }
     }
 
+    pub fn is_interface_tag(&self) -> bool {
+        match self {
+            Tag::Interface(_) => true,
+            _ => false
+        }
+    }
+
     pub fn extract_desc(&self) -> Description {
         match self {
             Tag::Prop(desc) => desc.to_string(),
             _ => String::new()
+        }
+    }
+
+    pub fn extract_descs(&self) -> Vec<Description> {
+        match self {
+            Tag::Interface(descs) => descs.to_vec(),
+            _ => Vec::new()
         }
     }
 }

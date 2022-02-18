@@ -112,7 +112,6 @@ impl TypeChecker {
             .collect();
         match self.check_prop_decls(prop_decls) {
             Ok(_) => {
-                //self.check_contype_decls(contype_decls)
                 match self.check_interface_decls(interface_decls) {
                     Ok(_) => self.check_contype_decls(contype_decls),
                     Err(e) => Err(e)
@@ -137,7 +136,6 @@ impl TypeChecker {
     }
 
     pub fn check_interface_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
-        println!("{}", "here");
         match decl {
             Decl::InterfaceDecl(id, term) => {
                 // Duplicate interface decl checking
@@ -232,30 +230,35 @@ impl TypeChecker {
 
     pub fn check_contype_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::ConTypeDecl(id, (vid, ty, r)) => {
+            Decl::ConTypeDecl(id, (vid, inid, r)) => {
                 // Duplicate container type decl checking
                 match self.global_ctx.get(&id.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
-                        let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
-                        let mut local_ctx = self.global_ctx.clone();
-                        local_ctx.insert(vid.to_string(),
-                            TypeScheme {
-                                vars: Vec::new(),
-                                ty: con
-                            }
-                        );
-                        match self.check_ref(&mut local_ctx, r) {
-                            Ok(_) => {
-                                self.global_ctx.insert(id.to_string(), 
-                                    TypeScheme{
+                        match self.global_ctx.get(&inid.to_string()) {
+                            Some(_) => {
+                                let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
+                                let mut local_ctx = self.global_ctx.clone();
+                                local_ctx.insert(vid.to_string(),
+                                    TypeScheme {
                                         vars: Vec::new(),
-                                        ty: Type::Con(Box::new(id.to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))))
+                                        ty: con
                                     }
                                 );
-                                Ok(())
+                                match self.check_ref(&mut local_ctx, r) {
+                                    Ok(_) => {
+                                        self.global_ctx.insert(id.to_string(), 
+                                            TypeScheme{
+                                                vars: Vec::new(),
+                                                ty: Type::Con(Box::new(id.to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))))
+                                            }
+                                        );
+                                        Ok(())
+                                    },
+                                    Err(e) => Err(e)
+                                }
                             },
-                            Err(e) => Err(e)
+                            None => Err("Interface ".to_string() + inid + " is not declared.")
                         }
                     },
                 }
@@ -273,7 +276,7 @@ impl TypeChecker {
                         if t.is_bool() {
                             Ok(())
                         } else {
-                            Err("The refinement has evaluates to a Bool type.".to_string())
+                            Err("The refinement has to be evaluated to a Bool type.".to_string())
                         }
                     },
                     Err(e) => Err(e)

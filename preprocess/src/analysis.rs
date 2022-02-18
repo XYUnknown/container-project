@@ -53,8 +53,15 @@ impl Analyser {
             concat_specs.iter()
             .filter(| decl | decl.is_contype_decl())
             .collect();
+        let interface_decls: Vec<&Decl> =
+            concat_specs.iter()
+            .filter(| decl | decl.is_interface_decl())
+            .collect();
         match self.analyse_prop_decls(prop_decls) {
-            Ok(_) => self.analyse_contype_decls(contype_decls),
+            Ok(_) => match self.analyse_interface_decls(interface_decls) {
+                Ok(_) => self.analyse_contype_decls(contype_decls),
+                Err(e) => Err(e)
+            }
             Err(e) => Err(e)
         }
     }
@@ -85,6 +92,28 @@ impl Analyser {
         }
     }
 
+    pub fn analyse_interface_decls(&mut self, decls: Vec<&Decl>) -> Result<(), AnalyserError> {
+        let mut result = Ok(());
+        for decl in decls.into_iter() {
+            match self.analyse_interface_decl(decl) {
+                Ok(_) => continue,
+                Err(e) => result = Err(e)
+            }
+        }
+        result
+    }
+
+    pub fn analyse_interface_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
+        match decl {
+            Decl::InterfaceDecl(id, interfaces) => {
+                let interface_tag = Tag::Interface(Box::new(interfaces.to_vec()));
+                self.ctx.put(id.to_string(), interface_tag);
+                Ok(())
+            },
+            _ => Err("Not a valid interface declaration".to_string())
+        }
+    }
+
     pub fn analyse_contype_decls(&mut self, decls: Vec<&Decl>) -> Result<(), AnalyserError> {
         let mut result = Ok(());
         for decl in decls.into_iter() {
@@ -97,15 +126,24 @@ impl Analyser {
     }
 
     pub fn analyse_contype_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
+        let mut tags = Vec::<Tag>::new();
         match decl {
-            Decl::ConTypeDecl(id, (vid, ty, r)) => {
-                match self.analyse_ref(r.deref(), vid) {
-                    Ok(tags) => {
-                        let con_tag = Tag::Con(Box::new(tags.to_vec()));
-                        self.ctx.put(id.to_string(), con_tag);
-                        Ok(())
+            Decl::ConTypeDecl(id, (vid, inid, r)) => {
+                match self.ctx.get_id(inid.to_string()) {
+                    Some(tag) => {
+                        tags.push(tag.clone());
+                        match self.analyse_ref(r.deref(), vid) {
+                            Ok(prop_tags) => {
+                                let mut prop_tags_mut = prop_tags.clone();
+                                tags.append(&mut prop_tags_mut);
+                                let con_tag = Tag::Con(Box::new(tags));
+                                self.ctx.put(id.to_string(), con_tag);
+                                Ok(())
+                            },
+                            Err(e) => Err(e)
+                        }
                     },
-                    Err(e) => Err(e)
+                    None => Err("Interface ".to_string() + inid + " is not defined.")
                 }
             },
             _ => Err("Not a valid container type declaration".to_string())
