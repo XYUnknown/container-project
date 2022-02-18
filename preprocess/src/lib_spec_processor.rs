@@ -6,7 +6,7 @@ use std::collections::btree_map::Iter;
 //use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 
-use crate::spec_map::{LibSpecs};
+use crate::spec_map::{LibSpecs, Interfaces};
 
 const LIBSPECNAME: &str = "/*LIBSPEC-NAME*";
 const LIBSPECNAMEEND: &str = "*ENDLIBSPEC-NAME*/";
@@ -43,7 +43,7 @@ fn has_pragma_spec(src: &String) -> bool {
     src.contains(LIBSPEC)
 }
 
-pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String), ErrorMessage> {
+pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String, Interfaces), ErrorMessage> {
     let contents = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
     let trimed_contents = contents.trim().to_string();
@@ -96,15 +96,16 @@ pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, 
                     }
                 }
             }
-            let provide = generate_provide(interface_info); 
-            Ok((spec_name, struct_name, code, provide))
+            let (provide, interface_provide_map) = generate_provide(interface_info); 
+            Ok((spec_name, struct_name, code, provide, interface_provide_map))
         }
     }
 }
 
-pub fn generate_provide(interface_info: HashMap<String, BTreeMap<String, (String, String, String)>>) -> String {
+pub fn generate_provide(interface_info: HashMap<String, BTreeMap<String, (String, String, String)>>) -> (String, Interfaces) {
     let mut interfaces = Vec::<String>::new();
     let mut provide = String::new();
+    let mut interface_provide_map = Interfaces::new();
     for (interface, infos) in interface_info.iter() {
         let mut specs = Vec::<String>::new();
         let mut pres = Vec::<String>::new();
@@ -114,16 +115,18 @@ pub fn generate_provide(interface_info: HashMap<String, BTreeMap<String, (String
         }
         let specs_name = interface.to_lowercase() + "-specs";
         let pres_name = interface.to_lowercase() + "-pres";
+        let interface_name = interface.to_lowercase();
         let specs_str = "\n(define ".to_string() + &specs_name + " (list " + &specs.join(" ") + "))\n";
         let pres_str = "(define ".to_string()  + &pres_name + " (list " + &pres.join(" ") + "))\n";
-        let interface_str = "(define ".to_string() + &interface.to_lowercase() + " (cons " + &specs_name + " " + &pres_name + "))\n";
+        let interface_str = "(define ".to_string() + &interface_name + " (cons " + &specs_name + " " + &pres_name + "))\n";
         provide = provide + &specs_str + &pres_str + &interface_str;
         interfaces.push(interface.to_lowercase());
+        interface_provide_map.insert(interface.to_string(), interface_name);
     }
     let provide_str = "(provide ".to_string() + &interfaces.join(" ") + ")";
 
     provide = provide + &provide_str;
-    provide
+    (provide, interface_provide_map)
 }
 
 pub fn extract_lib_specs(src: String) -> Result<(String, Vec<String>, BTreeMap<String, (String, String, String)>), ErrorMessage> {
@@ -184,16 +187,16 @@ pub fn write_lib_file(filename : String, contents: Vec<String>, provide: String)
     Ok(())
 }
 
-pub fn process_lib_spec(filename: String) -> Result<(String, String), ErrorMessage> {
+pub fn process_lib_spec(filename: String) -> Result<(String, String, Interfaces), ErrorMessage> {
     let result = read_lib_file(filename);
     match result {
-        Ok((name, struct_name, specs, provide)) => {
+        Ok((name, struct_name, specs, provide, interface_provide_map)) => {
             let spec_name = name + ".rkt";
             let state = write_lib_file(spec_name.clone(), specs, provide);
             if (!state.is_ok()) {
                 return Err("Unable to create lib specification file".to_string());
             }
-            Ok((spec_name, struct_name))
+            Ok((spec_name, struct_name, interface_provide_map))
         },
         Err(e) => Err(e)
     }
@@ -208,8 +211,8 @@ pub fn process_lib_specs(dirname: String) -> Result<LibSpecs, ErrorMessage> {
     let mut lib_specs = LibSpecs::new();
     for path in files {
         match process_lib_spec(path) {
-            Ok((spec_name, struct_name)) => {
-                lib_specs.insert(struct_name, spec_name);
+            Ok((spec_name, struct_name, interface_provide_map)) => {
+                lib_specs.insert(struct_name, (spec_name, interface_provide_map));
             },
             Err(e) => {
                 return Err(e);
