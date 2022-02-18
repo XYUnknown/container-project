@@ -230,9 +230,9 @@ impl TypeChecker {
 
     pub fn check_contype_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::ConTypeDecl(id, (vid, inid, r)) => {
+            Decl::ConTypeDecl(con_ty, (vid, inid, r)) => {
                 // Duplicate container type decl checking
-                match self.global_ctx.get(&id.to_string()) {
+                match self.global_ctx.get(&con_ty.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
                         match self.global_ctx.get(&inid.to_string()) {
@@ -247,10 +247,10 @@ impl TypeChecker {
                                 );
                                 match self.check_ref(&mut local_ctx, r) {
                                     Ok(_) => {
-                                        self.global_ctx.insert(id.to_string(), 
+                                        self.global_ctx.insert(con_ty.to_string(), 
                                             TypeScheme{
                                                 vars: Vec::new(),
-                                                ty: Type::Con(Box::new(id.to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))))
+                                                ty: *con_ty.clone()
                                             }
                                         );
                                         Ok(())

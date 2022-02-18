@@ -128,7 +128,7 @@ impl Analyser {
     pub fn analyse_contype_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         let mut tags = Vec::<Tag>::new();
         match decl {
-            Decl::ConTypeDecl(id, (vid, inid, r)) => {
+            Decl::ConTypeDecl(con_ty, (vid, inid, r)) => {
                 match self.ctx.get_id(inid.to_string()) {
                     Some(tag) => {
                         tags.push(tag.clone());
@@ -136,8 +136,9 @@ impl Analyser {
                             Ok(prop_tags) => {
                                 let mut prop_tags_mut = prop_tags.clone();
                                 tags.append(&mut prop_tags_mut);
-                                let con_tag = Tag::Con(Box::new(tags));
-                                self.ctx.put(id.to_string(), con_tag);
+                                let (c, t) = con_ty.get_con_elem().unwrap();
+                                let con_tag = Tag::Con(t, Box::new(tags));
+                                self.ctx.put(con_ty.to_string(), con_tag);
                                 Ok(())
                             },
                             Err(e) => Err(e)

@@ -2,15 +2,15 @@ use std::collections::HashMap;
 use std::collections::hash_map::Iter;
 
 use crate::parser::{Id};
-use crate::types::{Type};
 
 pub type Description = String;
+type ElemTypeName = String;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Tag {
     Prop(Box<Description>), // analysis of a property
     Interface(Box<Vec<Description>>),
-    Con(Box<Vec<Tag>>) // analysis of a container type with refinements
+    Con(ElemTypeName, Box<Vec<Tag>>) // analysis of a container type with refinements
 }
 
 impl Tag {

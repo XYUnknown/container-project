@@ -25,8 +25,15 @@ impl Type {
 
     pub fn is_bool(&self) -> bool {
         match self {
-            Type::Bool()=> true,
+            Type::Bool() => true,
             _ => false
+        }
+    }
+
+    pub fn get_con_elem(&self) -> Option<(String, String)> {
+        match self {
+            Type::Con(n, t) => Some((n.to_string(), t.to_string())),
+            _ => None
         }
     }
 }
