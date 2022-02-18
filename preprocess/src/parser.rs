@@ -8,7 +8,7 @@ use crate::types::{Name, Type, TypeVar};
 pub type Id = String;
 
 // traits
-pub type Interface = Vec<Id>;
+pub type Interfaces = Vec<Id>;
 
 #[derive(Clone, Debug)]
 pub enum Refinement {
@@ -26,7 +26,7 @@ pub enum Term {
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
-    InterfaceDecl(Box<Id>, Box<Interface>),
+    InterfaceDecl(Box<Id>, Box<Interfaces>),
     ConTypeDecl(Box<Type>, (Box<Id>, Box<Id>, Box<Refinement>))
 }
 
@@ -129,7 +129,7 @@ pub grammar spec() for str {
             "(" _ p1:refinement() __ "and" __ p2:refinement() _ ")" { Refinement::AndProps(Box::new(p1), Box::new(p2)) }
         }
 
-    pub rule interface() -> Interface
+    pub rule interface() -> Interfaces
         = l: ((_ i:id() _ {i}) ++ "," ) { l }
 
     pub rule decl() -> Decl
