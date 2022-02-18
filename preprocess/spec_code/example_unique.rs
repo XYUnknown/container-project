@@ -3,9 +3,9 @@ property unique {
     \c -> ((for-all-elems c) \a -> ((unique-count? a) c))
 }
 
-interface MyCon = {Container}
+interface UniqueConTrait = {Container}
 
-type UniqueCon<T> = {c impl MyCon | (unique c) }
+type UniqueCon<T> = {c impl UniqueConTrait | (unique c) }
 *ENDSPEC*/
 
 fn main () {
@@ -13,6 +13,7 @@ fn main () {
     for x in 0..10 {
         c.insert(x);
         c.insert(x);
+        //c.first();
     }
     assert_eq!(c.len(), 10);
 }
