@@ -71,7 +71,6 @@ pub fn process_interface_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
             _ => continue
         }
     }
-    //let result = CODEGEN.to_owned() + &code + CODEGENEND;
     Ok(code)
 }
 
@@ -97,9 +96,11 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
                         if struct_choices.is_empty() {
                             return Err("Unable to find a struct which matches the specification in the library".to_string());
                         } else {
-                            // currently we choose the first struct choice
-                            //code = code + "type " + id + " = " + &struct_choices[0]+ ";\n";
-                            code = code + &gen_output_code(id, elem_ty, &struct_choices[0], i_name, "none")
+                            let mut opt = "none".to_string();
+                            if struct_choices.len() > 1 {
+                                opt = struct_choices.join(", ");
+                            }
+                            code = code + &gen_output_code(id, elem_ty, &struct_choices[0], i_name, &opt)
                         }
                     },
                     Err(e) => {
@@ -110,7 +111,6 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
             _ => continue
         }
     }
-    //let result = CODEGEN.to_owned() + &code + CODEGENEND;
     Ok(code)
 }
 
