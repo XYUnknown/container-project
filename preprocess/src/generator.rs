@@ -25,6 +25,7 @@ const LIB: &str = "./src/library/";
 const MATCHSCRIPT: &str = "./racket_specs/gen_match/match-script.rkt";
 
 const IMPORT: &str = "use preprocess::traits::container_constructor::ContainerConstructor;\n";
+const TRAITCRATE: &str = "preprocess::traits::";
 
 type ErrorMessage = String;
 
@@ -55,7 +56,7 @@ pub fn process_block(block: &Block) -> String {
 }
 
 fn process_interface_elem_ty(t: &str, elem_ty: &str) -> String {
-    return t.to_string() + "<" + elem_ty + ">";
+    return TRAITCRATE.to_string() + t + "<" + elem_ty + ">";
 }
 
 pub fn process_interface_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
@@ -141,7 +142,6 @@ fn library_spec_lookup(id: String, properties: Vec<Description>, interfaces: Vec
             lib_spec_impls.remove(name);
         }
     }
-    println!("{:?}", lib_spec_impls);
     for (name, (lib_spec_dir, interface_ctx)) in lib_spec_impls.iter() {
         let mut is_match = false;
         for p in &properties {
@@ -277,7 +277,7 @@ r#"struct {s}<{elem_type}> {{
 }}
 
 impl<{elem_type}: 'static + Ord> ContainerConstructor for {s}<{elem_type}> {{
-    type Impl = {chosen}; // Other possible choices: {alt}
+    type Impl = {chosen}<{elem_type}>; // Other possible choices: {alt}
     type Interface = dyn {trait_name}<{elem_type}>;
     fn new() -> Box<Self::Interface> {{
         Box::new(Self::Impl::new())
@@ -290,7 +290,7 @@ pub fn gen_trait_code(trait_name: &str, s: &str, elem_type: &str, traits: &str) 
     format!(
 r#"
 trait {trait_name}<{elem_type}> : {traits} {{}}
-impl<{elem_type}: 'static + Ord> {trait_name} for <{s}<{elem_type}> as ContainerConstructor>::Impl {{}}
+impl<{elem_type}: 'static + Ord> {trait_name}<{elem_type}> for <{s}<{elem_type}> as ContainerConstructor>::Impl {{}}
 "#)
 }
 
