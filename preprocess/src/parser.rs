@@ -26,8 +26,7 @@ pub enum Term {
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl(Box<Id>, Box<Term>),
-    InterfaceDecl(Box<Id>, Box<Interfaces>),
-    ConTypeDecl(Box<Type>, (Box<Id>, Box<Id>, Box<Refinement>))
+    ConTypeDecl(Box<Type>, (Box<Id>, Box<Interfaces>, Box<Refinement>))
 }
 
 impl Decl {
@@ -38,17 +37,20 @@ impl Decl {
         }
     }
 
-    pub fn is_interface_decl(&self) -> bool {
-        match self {
-            Decl::InterfaceDecl(_, _) => true,
-            _ => false
-        }
-    }
-
     pub fn is_contype_decl(&self) -> bool {
         match self {
             Decl::ConTypeDecl(_, _) => true,
             _ => false
+        }
+    }
+
+    pub fn get_name(&self) -> String {
+        match self {
+            Decl::ConTypeDecl(con_ty, _) => {
+                let (con, _) = con_ty.get_con_elem().unwrap();
+                con 
+            },
+            Decl::PropertyDecl(id, _) => id.to_string()
         }
     }
 }
@@ -139,12 +141,7 @@ pub grammar spec() for str {
                 Decl::PropertyDecl(Box::new(p), Box::new(t))
             }
             --
-            _ "interface" __ n:id() _ "=" _ "{" _ i:interface() _ "}" _
-            {
-                Decl::InterfaceDecl(Box::new(n), Box::new(i))
-            }
-            --
-            _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ "impl" __ i:id() _ "|" _ t:refinement() _ "}" _
+            _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ "impl" __ "(" _ i:interface() _ ")" _ "|" _ t:refinement() _ "}" _
             {
                 Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(i), Box::new(t)))
             }
@@ -236,35 +233,20 @@ mod tests {
     }
 
     #[test]
-    fn test_interface_decl() {
-        assert!(spec::decl(
-            r#"interface Container = {Container}"#
-            ).is_ok());
-    }
-
-    #[test]
-    fn test_interface_multi_decl() {
-        assert!(spec::decl(
-            r#"interface StackContainer = {Container, Stack}"#
-            ).is_ok());
-    }
-
-    #[test]
     fn test_contype() {
         assert!(spec::decl(
-            "type UniqueCon<T> = {c impl Container | (unique c)}"
+            "type UniqueCon<T> = {c impl (Container) | (unique c)}"
             ).is_ok());
     }
 
     #[test]
     fn test_spec() {
-        assert!(spec::spec( // raw string literal ????
+        assert!(spec::spec( // raw string literal
             r#"/*SPEC*
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            interface Container = {Container}
-            type UniqueCon<T> = {c impl Container | (unique c)}
+            type UniqueCon<T> = {c impl (Container) | (unique c)}
             *ENDSPEC*/"#
         ).is_ok())
     }
@@ -290,7 +272,7 @@ mod tests {
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c impl Container | (unique c)}
+            type UniqueCon<T> = {c impl (Container) | (unique c)}
             *ENDSPEC*/"#
         ).is_ok())
     }
@@ -317,7 +299,7 @@ mod tests {
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c impl Container | (unique c) }
+            type UniqueCon<T> = {c impl (Container) | (unique c) }
             *ENDSPEC*/
 
             /*CODE*/
@@ -335,7 +317,7 @@ mod tests {
             property unique {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
-            type UniqueCon<T> = {c impl Container | (unique c) }
+            type UniqueCon<T> = {c impl (Container) | (unique c) }
             *ENDSPEC*/
             
             /*CODE*/

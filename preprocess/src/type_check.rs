@@ -106,14 +106,10 @@ impl TypeChecker {
             concat_specs.iter()
             .filter(| decl | decl.is_contype_decl())
             .collect();
-        let interface_decls: Vec<&Decl> =
-            concat_specs.iter()
-            .filter(| decl | decl.is_interface_decl())
-            .collect();
         match self.check_prop_decls(prop_decls) {
             Ok(_) => {
-                match self.check_interface_decls(interface_decls) {
-                    Ok(_) => self.check_contype_decls(contype_decls),
+                match self.check_contype_decls(contype_decls.clone()) {
+                    Ok(_) => self.check_interface_decls(contype_decls),
                     Err(e) => Err(e)
                 }
             }
@@ -137,21 +133,17 @@ impl TypeChecker {
 
     pub fn check_interface_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::InterfaceDecl(id, term) => {
+            Decl::ConTypeDecl(_, (_, ins, _)) => {
                 // Duplicate interface decl checking
-                match self.global_ctx.get(&id.to_string()) {
-                    Some(_) => Err("Duplicate interface declaration".to_string()),
-                    None => {
-                        self.global_ctx.insert(
-                            id.to_string(),
-                            TypeScheme {
-                                vars: Vec::new(),
-                                ty: Type::T(TypeVar::new(id.to_string()))
-                            }
-                        );
-                        Ok(()) // TODO: check each interface is a valid rust trait
-                    },
+                for i in ins.iter() {
+                    match self.global_ctx.get(&i.to_string()) {
+                        Some(_) => {
+                            return Err("Duplicate interface declaration".to_string());
+                        },
+                        None => continue, // TODO: check each interface is a valid rust trait
+                    }
                 }
+                Ok(())
             },
             _ => Err("Not a valid interface declaration".to_string())
         }
@@ -230,37 +222,32 @@ impl TypeChecker {
 
     pub fn check_contype_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::ConTypeDecl(con_ty, (vid, inid, r)) => {
+            Decl::ConTypeDecl(con_ty, (vid, ins, r)) => {
                 // Duplicate container type decl checking
                 match self.global_ctx.get(&con_ty.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
-                        match self.global_ctx.get(&inid.to_string()) {
-                            Some(_) => {
-                                let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
-                                let mut local_ctx = self.global_ctx.clone();
-                                local_ctx.insert(vid.to_string(),
-                                    TypeScheme {
+                        let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
+                        let mut local_ctx = self.global_ctx.clone();
+                        local_ctx.insert(vid.to_string(),
+                            TypeScheme {
+                                vars: Vec::new(),
+                                ty: con
+                            }
+                        );
+                        match self.check_ref(&mut local_ctx, r) {
+                            Ok(_) => {
+                                self.global_ctx.insert(decl.get_name(), 
+                                    TypeScheme{
                                         vars: Vec::new(),
-                                        ty: con
+                                        ty: *con_ty.clone()
                                     }
                                 );
-                                match self.check_ref(&mut local_ctx, r) {
-                                    Ok(_) => {
-                                        self.global_ctx.insert(con_ty.to_string(), 
-                                            TypeScheme{
-                                                vars: Vec::new(),
-                                                ty: *con_ty.clone()
-                                            }
-                                        );
-                                        Ok(())
-                                    },
-                                    Err(e) => Err(e)
-                                }
+                                Ok(())
                             },
-                            None => Err("Interface ".to_string() + inid + " is not declared.")
+                            Err(e) => Err(e)
                         }
-                    },
+                    }
                 }
             },
             _ => Err("Not a valid container type declaration".to_string())

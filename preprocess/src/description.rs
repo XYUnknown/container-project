@@ -5,12 +5,14 @@ use crate::parser::{Id};
 
 pub type Description = String;
 type ElemTypeName = String;
+type ConName = String;
+type InterfaceName = String;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Tag {
     Prop(Box<Description>), // analysis of a property
-    Interface(Box<Vec<Description>>),
-    Con(ElemTypeName, Box<Vec<Tag>>) // analysis of a container type with refinements
+    Interface((ConName, ElemTypeName), Box<Vec<Description>>),
+    Con(ElemTypeName, InterfaceName, Box<Vec<Tag>>) // analysis of a container type with refinements
 }
 
 impl Tag {
@@ -23,21 +25,21 @@ impl Tag {
 
     pub fn is_interface_tag(&self) -> bool {
         match self {
-            Tag::Interface(_) => true,
+            Tag::Interface(_, _) => true,
             _ => false
         }
     }
 
-    pub fn extract_desc(&self) -> Description {
+    pub fn extract_prop_desc(&self) -> Description {
         match self {
             Tag::Prop(desc) => desc.to_string(),
             _ => String::new()
         }
     }
 
-    pub fn extract_descs(&self) -> Vec<Description> {
+    pub fn extract_interface_descs(&self) -> Vec<Description> {
         match self {
-            Tag::Interface(descs) => descs.to_vec(),
+            Tag::Interface(_, descs) => descs.to_vec(),
             _ => Vec::new()
         }
     }
@@ -62,6 +64,10 @@ impl InforMap {
             self.infor_map.insert(id, tag);
             true
         }
+    }
+
+    pub fn update(&mut self, id: Id, tag: Tag) {
+        self.infor_map.insert(id, tag);
     }
 
     pub fn get_id(&self, id: Id) -> Option<&Tag> {
