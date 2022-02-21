@@ -3,8 +3,8 @@ rust-vec-spec std::vec::Vec
 *ENDLIBSPEC-NAME*/
 
 use std::vec::Vec;
-use crate::traits::container::Container;
-use crate::traits::stack::Stack;
+use crate::traits::Container;
+use crate::traits::Stack;
 
 /*IMPL*
 Container

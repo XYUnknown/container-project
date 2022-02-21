@@ -3,7 +3,7 @@ rust-btreeset-spec std::collections::BTreeSet
 *ENDLIBSPEC-NAME*/
 
 use std::collections::BTreeSet;
-use crate::traits::container::Container;
+use crate::traits::Container;
 
 /*IMPL*
 Container

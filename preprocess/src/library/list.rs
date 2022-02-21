@@ -7,8 +7,8 @@ use std::cmp::Ordering;
 use std::marker::PhantomData;
 // nightly features
 use std::collections::linked_list::CursorMut;
-use crate::traits::container::Container;
-use crate::traits::stack::Stack;
+use crate::traits::Container;
+use crate::traits::Stack;
 
 /*IMPL*
 Container
