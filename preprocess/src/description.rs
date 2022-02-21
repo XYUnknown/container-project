@@ -78,6 +78,10 @@ impl InforMap {
         self.infor_map.iter()
     }
 
+    pub fn contains(&self, id: &Id) -> bool {
+        self.infor_map.contains_key(id)
+    }
+
     fn sz(&self) -> usize {
         self.infor_map.len()
     }

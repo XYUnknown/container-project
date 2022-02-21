@@ -103,9 +103,15 @@ impl Analyser {
         match decl {
             Decl::ConTypeDecl(con_ty, (_, ins, tags)) => {
                 let (c, t) = con_ty.get_con_elem().unwrap();
-                let name = c.clone() + "Trait";
+                let mut name = c.clone() + "Trait";
                 let interface_tag = Tag::Interface((c.clone(), t), Box::new(ins.to_vec()));
                 let immut_ctx = self.ctx.clone();
+                // prevent generating existing name
+                let mut i: usize = 0;
+                while immut_ctx.contains(&name) {
+                    name = name + &i.to_string();
+                    i = i+1;
+                }
                 let con_tag = immut_ctx.get_id(c.clone()).unwrap();
                 match con_tag {
                     Tag::Con(elem_ty, _, tags) => {
