@@ -5,7 +5,7 @@ struct UniqueCon<T> {
     elem_t: core::marker::PhantomData<T>,
 }
 
-trait UniqueConTrait<T>: preprocess::traits::container::Container<T>{}
+trait UniqueConTrait<T>: preprocess::traits::Container<T>{}
 impl<T: 'static + Ord> UniqueConTrait<T> for <UniqueCon<T> as ContainerConstructor>::Impl {}
 
 impl<T: 'static + Ord> ContainerConstructor for UniqueCon<T> {
