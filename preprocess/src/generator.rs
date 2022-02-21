@@ -24,6 +24,8 @@ const SPECEND: &str = "*ENDSPEC*/";
 const LIB: &str = "./src/library/";
 const MATCHSCRIPT: &str = "./racket_specs/gen_match/match-script.rkt";
 
+const IMPORT: &str = "use preprocess::traits::container_constructor::ContainerConstructor;\n";
+
 type ErrorMessage = String;
 
 pub fn readfile(filename : String) -> String {
@@ -52,21 +54,41 @@ pub fn process_block(block: &Block) -> String {
     }
 }
 
+fn process_interface_elem_ty(t: &str, elem_ty: &str) -> String {
+    return t.to_string() + "<" + elem_ty + ">";
+}
+
+pub fn process_interface_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
+    let mut code = String::new();
+    let match_setup = initialise_match_setup();
+    for (id, tag) in ctx.iter() {
+        match tag {
+            Tag::Interface((c, t), decs) => {
+                let traits = decs.iter().map(|name| process_interface_elem_ty(name, t)).collect::<Vec<String>>().join(" + ");
+                code = code + &gen_trait_code(id, c, t, &traits);
+            },
+            _ => continue
+        }
+    }
+    //let result = CODEGEN.to_owned() + &code + CODEGENEND;
+    Ok(code)
+}
+
 pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String, ErrorMessage> {
     let mut code = String::new();
     let match_setup = initialise_match_setup();
     for (id, tag) in ctx.iter() {
         match tag {
-            Tag::Con(elem_ty, tags) => {
+            Tag::Con(elem_ty, i_name, tags) => {
                 let prop_descs: Vec<Description> = 
                     tags.iter()
                     .filter(| t | t.is_prop_tag())
-                    .map(| t | t.extract_desc())
+                    .map(| t | t.extract_prop_desc())
                     .collect();
                 let interfaces: Vec<Description> =
                     tags.iter()
                     .filter(| t | t.is_interface_tag())
-                    .flat_map(| t | t.extract_descs())
+                    .flat_map(| t | t.extract_interface_descs())
                     .collect();
                 let lookup_result = library_spec_lookup(id.to_string(), prop_descs, interfaces, prop_specs, &match_setup);
                 match lookup_result {
@@ -76,7 +98,7 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
                         } else {
                             // currently we choose the first struct choice
                             //code = code + "type " + id + " = " + &struct_choices[0]+ ";\n";
-                            code = code + &gen_output_code(id, elem_ty, &struct_choices[0], "trait UniqueConTrait<T> : preprocess::traits::container::Container<T>", "UniqueConTrait<T>", "none")
+                            code = code + &gen_output_code(id, elem_ty, &struct_choices[0], i_name, "none")
                         }
                     },
                     Err(e) => {
@@ -87,8 +109,8 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
             _ => continue
         }
     }
-    let result = CODEGEN.to_owned() + &code + CODEGENEND;
-    Ok(result)
+    //let result = CODEGEN.to_owned() + &code + CODEGENEND;
+    Ok(code)
 }
 
 fn library_spec_lookup(id: String, properties: Vec<Description>, interfaces: Vec<Description>, prop_specs: &PropSpecs, match_setup: &MatchSetup) -> Result<Vec<String>, ErrorMessage> {
@@ -178,18 +200,24 @@ pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
                         Ok(_) => {
                             let mut result = String::new();
                             // generate con types according to the information in con decl
-                            match process_con_decl(analyser.get_ctx(), analyser.get_prop_specs()) {
+                            match process_interface_decl(analyser.get_ctx()) {
                                 Ok(code) => {
                                     result = result + &code;
-                                    // generate rust source code
-                                    let code_blocks: Vec<&Block> = 
-                                        blocks.iter()
-                                        .filter(| block | block.is_code_block())
-                                        .collect();
-                                    for block in code_blocks.iter() {
-                                        result = result + &process_block(block.to_owned());
+                                    match process_con_decl(analyser.get_ctx(), analyser.get_prop_specs()) {
+                                        Ok(code) => {
+                                            result = CODEGEN.to_string() + IMPORT + &result + &code + CODEGENEND;
+                                            // generate rust source code
+                                            let code_blocks: Vec<&Block> = 
+                                                blocks.iter()
+                                                .filter(| block | block.is_code_block())
+                                                .collect();
+                                            for block in code_blocks.iter() {
+                                                result = result + &process_block(block.to_owned());
+                                            }
+                                            Ok(result)
+                                        },
+                                        Err(e) => Err(e)
                                     }
-                                    Ok(result)
                                 },
                                 Err(e) => Err(e)
                             }
@@ -242,23 +270,27 @@ fn mark_src_blocks(src : String) -> String {
     result
 }
 
-pub fn gen_output_code(s: &str, elem_type: &str, chosen: &str, trait_decl: &str, trait_name: &str, alt: &str) -> String {
+pub fn gen_output_code(s: &str, elem_type: &str, chosen: &str, trait_name: &str, alt: &str) -> String {
     format!(
-r#"use preprocess::traits::container_constructor::ContainerConstructor;
-struct {s} {{
+r#"struct {s}<{elem_type}> {{
     elem_t: core::marker::PhantomData<{elem_type}>,
 }}
 
-{trait_decl} {{}}
-impl<{elem_type}: 'static + Ord> {trait_name} for {s} as ContainerConstructor>::Impl {{}}
-
-impl<{elem_type}: 'static + Ord> ContainerConstructor for {s} {{
+impl<{elem_type}: 'static + Ord> ContainerConstructor for {s}<{elem_type}> {{
     type Impl = {chosen}; // Other possible choices: {alt}
-    type Interface = dyn {trait_name};
+    type Interface = dyn {trait_name}<{elem_type}>;
     fn new() -> Box<Self::Interface> {{
         Box::new(Self::Impl::new())
     }}
 }}
+"#)
+}
+
+pub fn gen_trait_code(trait_name: &str, s: &str, elem_type: &str, traits: &str) -> String {
+    format!(
+r#"
+trait {trait_name}<{elem_type}> : {traits} {{}}
+impl<{elem_type}: 'static + Ord> {trait_name} for <{s}<{elem_type}> as ContainerConstructor>::Impl {{}}
 "#)
 }
 
