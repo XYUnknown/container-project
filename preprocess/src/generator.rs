@@ -96,10 +96,7 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
                         if struct_choices.is_empty() {
                             return Err("Unable to find a struct which matches the specification in the library".to_string());
                         } else {
-                            let mut opt = "none".to_string();
-                            if struct_choices.len() > 1 {
-                                opt = struct_choices.join(", ");
-                            }
+                            let opt = struct_choices.join(", ");
                             code = code + &gen_output_code(id, elem_ty, &struct_choices[0], i_name, &opt)
                         }
                     },
@@ -270,14 +267,14 @@ fn mark_src_blocks(src : String) -> String {
     result
 }
 
-pub fn gen_output_code(s: &str, elem_type: &str, chosen: &str, trait_name: &str, alt: &str) -> String {
+pub fn gen_output_code(s: &str, elem_type: &str, chosen: &str, trait_name: &str, choices: &str) -> String {
     format!(
 r#"struct {s}<{elem_type}> {{
     elem_t: core::marker::PhantomData<{elem_type}>,
 }}
 
-impl<{elem_type}: 'static + Ord> ContainerConstructor for {s}<{elem_type}> {{
-    type Impl = {chosen}<{elem_type}>; // Other possible choices: {alt}
+impl<{elem_type}: 'static + Ord + std::hash::Hash> ContainerConstructor for {s}<{elem_type}> {{
+    type Impl = {chosen}<{elem_type}>; // All possible choices: {choices}
     type Interface = dyn {trait_name}<{elem_type}>;
     fn new() -> Box<Self::Interface> {{
         Box::new(Self::Impl::new())
@@ -290,7 +287,7 @@ pub fn gen_trait_code(trait_name: &str, s: &str, elem_type: &str, traits: &str) 
     format!(
 r#"
 trait {trait_name}<{elem_type}> : {traits} {{}}
-impl<{elem_type}: 'static + Ord> {trait_name}<{elem_type}> for <{s}<{elem_type}> as ContainerConstructor>::Impl {{}}
+impl<{elem_type}: 'static + Ord + std::hash::Hash> {trait_name}<{elem_type}> for <{s}<{elem_type}> as ContainerConstructor>::Impl {{}}
 "#)
 }
 

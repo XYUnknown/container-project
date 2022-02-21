@@ -129,7 +129,7 @@ impl<T> Stack<T> for Vec<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::container::Container;
+    use crate::traits::Container;
     use std::vec::Vec;
 
     #[test]

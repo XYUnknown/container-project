@@ -161,8 +161,8 @@ impl<T: 'static + Ord> Constructor for Con<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::container::Container;
-    use crate::traits::stack::Stack;
+    use crate::traits::Container;
+    use crate::traits::Stack;
     use crate::library::list::{Constructor, Con};
     use std::collections::LinkedList;
 
