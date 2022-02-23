@@ -3,8 +3,7 @@ rust-vec-spec std::vec::Vec
 *ENDLIBSPEC-NAME*/
 
 use std::vec::Vec;
-use crate::traits::Container;
-use crate::traits::Stack;
+use crate::traits::{Container, Stack, WithPosition};
 
 /*IMPL*
 Container
@@ -127,13 +126,64 @@ impl<T> Stack<T> for Vec<T> {
     }
 }
 
+/*IMPL*
+WithPosition
+*ENDIMPL*/
+impl<T> WithPosition<T> for Vec<T> {
+    /*LIBSPEC*
+    /*OPNAME*
+    first spec-first pre-first post-first
+    *ENDOPNAME*/
+    (define (spec-first xs)
+      (cond
+        [(null? xs) (cons xs null)]
+        [else (cons xs (first xs))]))
+    (define (pre-first xs) #t)
+    (define (post-first xs r) (equal? r (spec-first xs)))
+    *ENDLIBSPEC*/
+    fn first(&self) -> Option<&T> {
+        <[T]>::first(self)
+    }
+
+    /*LIBSPEC*
+    /*OPNAME*
+    last spec-last pre-last post-last
+    *ENDOPNAME*/
+    (define (spec-last xs)
+      (cond
+        [(null? xs) (cons xs null)]
+        [else (cons xs (last xs))]))
+    (define (pre-last xs) #t)
+    (define (post-last xs r) (equal? r (spec-last xs)))
+    *ENDLIBSPEC*/
+    fn last(&self) -> Option<&T> {
+        <[T]>::last(self)
+    }
+
+    /*LIBSPEC*
+    /*OPNAME*
+    nth spec-nth pre-nth post-nth
+    *ENDOPNAME*/
+    (define (spec-nth xs n)
+      (cond
+        [(>= n (length xs)) (cons xs null)]
+        [(< n 0) (cons xs null)]
+        [else (cons xs (list-ref xs n))]))
+    (define (pre-nth xs) #t)
+    (define (post-nth xs n r) (equal? r (spec-nth xs n)))
+    *ENDLIBSPEC*/
+    fn nth(&self, n: usize) -> Option<&T> {
+        <[T]>::iter(self).nth(n)
+    }                                      
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::traits::Container;
+    use crate::traits::{Container, WithPosition};
     use std::vec::Vec;
 
     #[test]
-    fn test_vector_container_trait() {
+    fn test_vec_container_trait() {
         let vec : &mut dyn Container<u32> = &mut Vec::<u32>::new();
         assert_eq!(vec.len(), 0);
         vec.insert(1);
@@ -146,5 +196,18 @@ mod tests {
         vec.clear();
         assert_eq!(vec.len(), 0);
         //assert_eq!(vec.pop(), None); // error
+    }
+
+    #[test]
+    fn test_vec_with_position() {
+        trait ContainerWithPosition<T> : Container<T> + WithPosition<T> {}
+        impl<T: Ord> ContainerWithPosition<T> for Vec<T> {}
+        let vec : &mut dyn ContainerWithPosition<u32> = &mut Vec::<u32>::new();
+        vec.insert(1);
+        vec.insert(4);
+        vec.insert(2);
+        assert_eq!(vec.first(), Some(&1));
+        assert_eq!(vec.last(), Some(&2));
+        assert_eq!(vec.nth(1), Some(&4));
     }
 }

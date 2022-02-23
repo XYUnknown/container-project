@@ -7,8 +7,7 @@ use std::cmp::Ordering;
 use std::marker::PhantomData;
 // nightly features
 use std::collections::linked_list::CursorMut;
-use crate::traits::Container;
-use crate::traits::Stack;
+use crate::traits::{Container, Stack, WithPosition};
 
 /*IMPL*
 Container
@@ -141,6 +140,57 @@ impl<T> Stack<T> for LinkedList<T> {
     }
 }
 
+/*IMPL*
+WithPosition
+*ENDIMPL*/
+impl<T> WithPosition<T> for LinkedList<T> {
+    /*LIBSPEC*
+    /*OPNAME*
+    first spec-first pre-first post-first
+    *ENDOPNAME*/
+    (define (spec-first xs)
+      (cond
+        [(null? xs) (cons xs null)]
+        [else (cons xs (first xs))]))
+    (define (pre-first xs) #t)
+    (define (post-first xs r) (equal? r (spec-first xs)))
+    *ENDLIBSPEC*/
+    fn first(&self) -> Option<&T> {
+        LinkedList::front(self)
+    }
+
+    /*LIBSPEC*
+    /*OPNAME*
+    last spec-last pre-last post-last
+    *ENDOPNAME*/
+    (define (spec-last xs)
+      (cond
+        [(null? xs) (cons xs null)]
+        [else (cons xs (last xs))]))
+    (define (pre-last xs) #t)
+    (define (post-last xs r) (equal? r (spec-last xs)))
+    *ENDLIBSPEC*/
+    fn last(&self) -> Option<&T> {
+        LinkedList::back(self)
+    }
+
+    /*LIBSPEC*
+    /*OPNAME*
+    nth spec-nth pre-nth post-nth
+    *ENDOPNAME*/
+    (define (spec-nth xs n)
+      (cond
+        [(>= n (length xs)) (cons xs null)]
+        [(< n 0) (cons xs null)]
+        [else (cons xs (list-ref xs n))]))
+    (define (pre-nth xs) #t)
+    (define (post-nth xs n r) (equal? r (spec-nth xs n)))
+    *ENDLIBSPEC*/
+    fn nth(&self, n: usize) -> Option<&T> {
+        LinkedList::iter(self).nth(n)
+    }                                      
+}
+
 struct Con<T> {
     elem_t: PhantomData<T>
 }
@@ -161,8 +211,7 @@ impl<T: 'static + Ord> Constructor for Con<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::Container;
-    use crate::traits::Stack;
+    use crate::traits::{Container, Stack, WithPosition};
     use crate::library::list::{Constructor, Con};
     use std::collections::LinkedList;
 
@@ -208,5 +257,18 @@ mod tests {
         list.clear();
         assert_eq!(list.len(), 0);
         //assert_eq!(list.pop_back(), None); // error
+    }
+
+    #[test]
+    fn test_list_with_position() {
+        trait ContainerWithPosition<T> : Container<T> + WithPosition<T> {}
+        impl<T: Ord> ContainerWithPosition<T> for LinkedList<T> {}
+        let list : &mut dyn ContainerWithPosition<u32> = &mut LinkedList::<u32>::new();
+        list.insert(1);
+        list.insert(4);
+        list.insert(2);
+        assert_eq!(list.first(), Some(&1));
+        assert_eq!(list.last(), Some(&2));
+        assert_eq!(list.nth(1), Some(&4));
     }
 }
