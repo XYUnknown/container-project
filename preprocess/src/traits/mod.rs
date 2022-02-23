@@ -11,5 +11,11 @@ pub trait Container<T> {
 
 pub trait Stack<T> {
     fn push(&mut self, elt: T);
-    fn pop(&mut self) -> Option<T>; // remove first occurance
+    fn pop(&mut self) -> Option<T>;
+}
+
+pub trait WithPosition<T> {
+    fn first(&self) -> Option<&T>;
+    fn last(&self) -> Option<&T>;
+    fn nth(&self, n: usize) -> Option<&T>;
 }

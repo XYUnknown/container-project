@@ -18,7 +18,8 @@ const MATCHDIR: &str =  "./racket_specs/gen_match/";
 
 pub fn initialise_match_setup() -> MatchSetup {
     let mut match_setup = MatchSetup::new();
-    match_setup.insert("Container".to_string(), "../match-setup.rkt".to_string());
+    match_setup.insert("Container".to_string(), "../container-setup.rkt".to_string());
+    match_setup.insert("WithPosition".to_string(), "../withposition-setup.rkt".to_string());
     match_setup
 }
 
@@ -31,7 +32,7 @@ pub fn gen_match_script(prop: String, match_setup: String, prop_spec_file: Strin
     let require_lib = "(require \"".to_string() + LIBSPECPATH + &lib_spec_file + "\")\n";
     write!(output, "{}", require_lib)?;
     write!(output, "{}", "(require \"".to_string() + &match_setup + "\")\n")?;
-    let code = "(check ".to_string() + &prop + " (cdr " + &interface_spec +") (car " + &interface_spec + ") ls elem)\n";
+    let code = "(check ".to_string() + &prop + " (cdr " + &interface_spec +") (car " + &interface_spec + ") ls n)\n";
     write!(output, "{}", code)?;
     Ok(GENNAME.to_string())
 }
