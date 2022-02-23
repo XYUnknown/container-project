@@ -7,6 +7,8 @@ use crate::types::{Name, Type, TypeVar};
 
 pub type Id = String;
 
+pub type Literal = String;
+
 // traits
 pub type Interfaces = Vec<Id>;
 
@@ -18,6 +20,7 @@ pub enum Refinement {
 
 #[derive(Clone, Debug)]
 pub enum Term {
+    LitTerm(Box<Literal>),
     VarTerm(Box<Id>),
     LambdaTerm(Box<Id>, Box<Term>),
     AppTerm(Box<Term>, Box<Term>),
@@ -99,11 +102,20 @@ pub type Prog = Vec<Block>;
 parser!{
 pub grammar spec() for str {
     pub rule id() -> Id
-        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-' | '?' ]*) 
+        = s:$(!keyword() ([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-' | '?' ]*))
         { s.into() }
 
     pub rule name() -> Name
-        = s:$([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' ]*) 
+        = s:$(!keyword() ([ 'a'..='z' | 'A'..='Z' | '_' ]['a'..='z' | 'A'..='Z' | '0'..='9' ]*))
+        { s.into() }
+    
+    pub rule keyword() -> ()
+        = ("crate" / "super" / "self" / "Self" / "const" / "mut" / "true" / "false" / "pub" / "in" / "from" / "with" 
+            / "f32"/ "i32" / "u32" / "bool" / "let" / "if" / "else" / "for" / "while" / "fn" / "do")
+            ![ 'a'..='z' | 'A'..='Z' | '0'..='9' | '_' | '-' | '?' ]
+
+    pub rule literal() -> Literal
+        = s:$("true" / "false")
         { s.into() }
     
     pub rule ty() -> Type
@@ -117,6 +129,8 @@ pub grammar spec() for str {
   
     pub rule term() -> Term
         = precedence!{
+            lit: literal() { Term::LitTerm(Box::new(lit)) }
+            --
             v:id() { Term::VarTerm(Box::new(v)) }
             --
             "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm(Box::new(v), Box::new(t)) }
@@ -190,6 +204,11 @@ mod tests {
     }
 
     #[test]
+    fn test_lit() {
+        assert_eq!(spec::literal("true"), Ok(Id::from("true")));
+    }
+
+    #[test]
     fn test_ty() {
         assert!(spec::ty("UniqueCon<T>").is_ok());
     }
@@ -197,6 +216,11 @@ mod tests {
     #[test]
     fn test_ty_sim() {
         assert!(spec::ty("T").is_ok());
+    }
+
+    #[test]
+    fn test_litterm() {
+        assert!(spec::term("true").is_ok());
     }
 
     #[test]
@@ -220,6 +244,16 @@ mod tests {
             r#"property id {
                  \c -> c 
                 }"#
+            ).is_ok());
+    }
+
+    #[test]
+    fn test_property_true() {
+        
+        assert!(spec::decl(
+            r#"property default {
+                \c -> true
+            }"#
             ).is_ok());
     }
 

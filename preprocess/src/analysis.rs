@@ -212,11 +212,26 @@ impl Analyser {
 
     pub fn analyse_term(&self, term: &Term) -> String {
         match term {
+            Term::LitTerm(lit) => {
+                if (lit.to_string() == "true".to_string()) {
+                    "#t".to_string()
+                } else {
+                    "#f".to_string()
+                }
+            },
             Term::VarTerm(id) => {
                 id.to_string()
             },
             Term::LambdaTerm(id, t) => {
-                "(lambda (".to_string() + id + ") (" + &self.analyse_term(t) + "))"
+                match **t {
+                    Term::AppTerm(_, _) => {
+                        "(lambda (".to_string() + id + ") (" + &self.analyse_term(t) + "))"
+                    }
+                    _ => {
+                        "(lambda (".to_string() + id + ") " + &self.analyse_term(t) + ")"
+                    }
+                }
+                
             },
             Term::AppTerm(t1, t2) => {
                 self.analyse_term(t1) + " " + &self.analyse_term(t2)

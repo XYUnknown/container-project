@@ -191,7 +191,17 @@ impl TypeChecker {
                                                     Err("Not a valid property decl: input does not have basic container type Con<T>".to_string())
                                                 }
                                             },
-                                            _ => Err("Not a valid property decl: should have type Con<T> -> Bool".to_string())
+                                            (_, Type::Bool()) => {
+                                                self.global_ctx.insert(
+                                                    id.to_string(),
+                                                    TypeScheme {
+                                                        vars: Vec::new(),
+                                                        ty: ty
+                                                    }
+                                                );
+                                                Ok(())
+                                            },
+                                            _ => Err("Not a valid property decl: return type should be Bool".to_string())
                                         }
                                     },
                                     _ => Err("Not a valid property decl: should have type Con<T> -> Bool".to_string())

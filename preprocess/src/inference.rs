@@ -50,6 +50,10 @@ impl TypeEnv {
     // Main type inference algorithm
     fn ti(&self, term: &Term, tvg: &mut TypeVarGen) -> Result<(Subst, Type), InferenceError> {
         let (s, t) = (match &*term {
+            // Inter literal: currently only boolean
+            Term::LitTerm(_) => {
+                Ok((Subst::new(), Type::Bool()))
+            }
             // Infer variable
             Term::VarTerm(v) => {
                 match self.get(&v.to_string()) {
