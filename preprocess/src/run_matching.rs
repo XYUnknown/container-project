@@ -3,6 +3,7 @@ use std::env;
 use std::fs;
 use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 
+use crate::spec_map::{MatchSetup};
 
 type ExecutionError = String;
 
@@ -10,20 +11,28 @@ const LANGDECL: &str = "#lang rosette\n";
 const GENNAME: &str = "./racket_specs/gen_match/match-script.rkt";
 const LIBSPECPATH: &str = "../gen_lib_spec/";
 const PROPSPECPATH: &str = "../gen_prop_spec/";
-const SETUP: &str = "(require \"../match-setup.rkt\")\n";
+//const SETUP: &str = "(require \"../match-setup.rkt\")\n";
 const LIBDIR: &str =  "./racket_specs/gen_lib_spec/";
 const PROPDIR: &str =  "./racket_specs/gen_prop_spec/";
 const MATCHDIR: &str =  "./racket_specs/gen_match/";
 
-pub fn gen_match_script(prop: String, prop_spec_file: String, lib_spec_file: String) -> Result<String, Error>  {
+pub fn initialise_match_setup() -> MatchSetup {
+    let mut match_setup = MatchSetup::new();
+    match_setup.insert("Container".to_string(), "../container-setup.rkt".to_string());
+    match_setup.insert("WithPosition".to_string(), "../withposition-setup.rkt".to_string());
+    match_setup
+}
+
+
+pub fn gen_match_script(prop: String, match_setup: String, prop_spec_file: String, lib_spec_file: String, interface_spec: String) -> Result<String, Error>  {
     let mut output = fs::File::create(GENNAME.to_owned())?;
     write!(output, "{}", LANGDECL.to_string())?;
     let require_prop = "(require \"".to_string() + PROPSPECPATH + &prop_spec_file + "\")\n";
     write!(output, "{}", require_prop)?;
     let require_lib = "(require \"".to_string() + LIBSPECPATH + &lib_spec_file + "\")\n";
     write!(output, "{}", require_lib)?;
-    write!(output, "{}", SETUP.to_string())?;
-    let code = "(check ".to_string() + &prop + " pres specs ls elem)\n";
+    write!(output, "{}", "(require \"".to_string() + &match_setup + "\")\n")?;
+    let code = "(check ".to_string() + &prop + " (cdr " + &interface_spec +") (car " + &interface_spec + ") ls n)\n";
     write!(output, "{}", code)?;
     Ok(GENNAME.to_string())
 }

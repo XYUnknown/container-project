@@ -107,8 +107,45 @@ impl TypeChecker {
             .filter(| decl | decl.is_contype_decl())
             .collect();
         match self.check_prop_decls(prop_decls) {
-            Ok(_) => self.check_contype_decls(contype_decls),
+            Ok(_) => {
+                match self.check_contype_decls(contype_decls.clone()) {
+                    Ok(_) => self.check_interface_decls(contype_decls),
+                    Err(e) => Err(e)
+                }
+            }
             Err(e) => Err(e)
+        }
+    }
+
+    pub fn check_interface_decls(&mut self, decls: Vec<&Decl>) -> Result<(), TypeError> {
+        let mut result = Ok(());
+        for decl in decls.into_iter() {
+            match self.check_interface_decl(decl) {
+                Ok(_) => continue,
+                Err(e) => {
+                    result = Err(e);
+                    break;
+                }
+            }
+        }
+        result
+    }
+
+    pub fn check_interface_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
+        match decl {
+            Decl::ConTypeDecl(_, (_, ins, _)) => {
+                // Duplicate interface decl checking
+                for i in ins.iter() {
+                    match self.global_ctx.get(&i.to_string()) {
+                        Some(_) => {
+                            return Err("Duplicate interface declaration".to_string());
+                        },
+                        None => continue, // TODO: check each interface is a valid rust trait
+                    }
+                }
+                Ok(())
+            },
+            _ => Err("Not a valid interface declaration".to_string())
         }
     }
 
@@ -117,7 +154,10 @@ impl TypeChecker {
         for decl in decls.into_iter() {
             match self.check_prop_decl(decl) {
                 Ok(_) => continue,
-                Err(e) => result = Err(e)
+                Err(e) => {
+                    result = Err(e);
+                    break;
+                }
             }
         }
         result
@@ -171,7 +211,10 @@ impl TypeChecker {
         for decl in decls.into_iter() {
             match self.check_contype_decl(decl) {
                 Ok(_) => continue,
-                Err(e) => result = Err(e)
+                Err(e) => {
+                    result = Err(e);
+                    break;
+                }
             }
         }
         result
@@ -179,37 +222,32 @@ impl TypeChecker {
 
     pub fn check_contype_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::ConTypeDecl(id, (vid, ty, r)) => {
+            Decl::ConTypeDecl(con_ty, (vid, ins, r)) => {
                 // Duplicate container type decl checking
-                match self.global_ctx.get(&id.to_string()) {
+                match self.global_ctx.get(&con_ty.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
-                        // ty has to be Con<T>
                         let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
-                        if ty.deref() == &con {
-                            let mut local_ctx = self.global_ctx.clone();
-                            local_ctx.insert(vid.to_string(),
-                                TypeScheme {
-                                    vars: Vec::new(),
-                                    ty: con
-                                }
-                            );
-                            match self.check_ref(&mut local_ctx, r) {
-                                Ok(_) => {
-                                    self.global_ctx.insert(id.to_string(), 
-                                        TypeScheme{
-                                            vars: Vec::new(),
-                                            ty: Type::Con(Box::new(id.to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))))
-                                        }
-                                    );
-                                    Ok(())
-                                },
-                                Err(e) => Err(e)
+                        let mut local_ctx = self.global_ctx.clone();
+                        local_ctx.insert(vid.to_string(),
+                            TypeScheme {
+                                vars: Vec::new(),
+                                ty: con
                             }
-                        } else {
-                            Err("The base type should be a basic container Con<T>".to_string())
+                        );
+                        match self.check_ref(&mut local_ctx, r) {
+                            Ok(_) => {
+                                self.global_ctx.insert(decl.get_name(), 
+                                    TypeScheme{
+                                        vars: Vec::new(),
+                                        ty: *con_ty.clone()
+                                    }
+                                );
+                                Ok(())
+                            },
+                            Err(e) => Err(e)
                         }
-                    },
+                    }
                 }
             },
             _ => Err("Not a valid container type declaration".to_string())
@@ -225,7 +263,7 @@ impl TypeChecker {
                         if t.is_bool() {
                             Ok(())
                         } else {
-                            Err("The refinement has evaluates to a Bool type.".to_string())
+                            Err("The refinement has to be evaluated to a Bool type.".to_string())
                         }
                     },
                     Err(e) => Err(e)

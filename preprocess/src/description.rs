@@ -2,14 +2,17 @@ use std::collections::HashMap;
 use std::collections::hash_map::Iter;
 
 use crate::parser::{Id};
-use crate::types::{Type};
 
 pub type Description = String;
+type ElemTypeName = String;
+type ConName = String;
+type InterfaceName = String;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Tag {
     Prop(Box<Description>), // analysis of a property
-    Con(Box<Vec<Tag>>) // analysis of a container type with refinements
+    Interface((ConName, ElemTypeName), Box<Vec<Description>>),
+    Con(ElemTypeName, InterfaceName, Box<Vec<Tag>>) // analysis of a container type with refinements
 }
 
 impl Tag {
@@ -20,10 +23,24 @@ impl Tag {
         }
     }
 
-    pub fn extract_desc(&self) -> Description {
+    pub fn is_interface_tag(&self) -> bool {
+        match self {
+            Tag::Interface(_, _) => true,
+            _ => false
+        }
+    }
+
+    pub fn extract_prop_desc(&self) -> Description {
         match self {
             Tag::Prop(desc) => desc.to_string(),
             _ => String::new()
+        }
+    }
+
+    pub fn extract_interface_descs(&self) -> Vec<Description> {
+        match self {
+            Tag::Interface(_, descs) => descs.to_vec(),
+            _ => Vec::new()
         }
     }
 }
@@ -49,12 +66,20 @@ impl InforMap {
         }
     }
 
+    pub fn update(&mut self, id: Id, tag: Tag) {
+        self.infor_map.insert(id, tag);
+    }
+
     pub fn get_id(&self, id: Id) -> Option<&Tag> {
         self.infor_map.get(&id)
     }
 
     pub fn iter(&self) -> Iter<'_, Id, Tag> {
         self.infor_map.iter()
+    }
+
+    pub fn contains(&self, id: &Id) -> bool {
+        self.infor_map.contains_key(id)
     }
 
     fn sz(&self) -> usize {

@@ -25,8 +25,27 @@ impl Type {
 
     pub fn is_bool(&self) -> bool {
         match self {
-            Type::Bool()=> true,
+            Type::Bool() => true,
             _ => false
+        }
+    }
+
+    pub fn get_con_elem(&self) -> Option<(String, String)> {
+        match self {
+            Type::Con(n, t) => Some((n.to_string(), t.to_string())),
+            _ => None
+        }
+    }
+}
+
+impl ToString for Type {
+    fn to_string(&self) -> String {
+        match self {
+            Type::Bool() => "bool".to_string(),
+            Type::Int() => "int".to_string(),
+            Type::T(tv) => tv.to_string(),
+            Type::Con(n, t) => n.to_string() + "<" + &t.to_string() + ">",
+            Type::Fun(t1, t2) => t1.to_string() + "->" + &t2.to_string(),
         }
     }
 }
@@ -158,6 +177,13 @@ impl TypeVar {
         let mut s = Subst::new();
         s.insert(self.clone(), ty.clone());
         Ok(s)
+    }
+}
+
+
+impl ToString for TypeVar {
+    fn to_string(&self) -> String {
+        self.name.to_string()
     }
 }
 

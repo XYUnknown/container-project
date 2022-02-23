@@ -1,14 +1,15 @@
 /*LIBSPEC-NAME*
-rust-btreeset-spec std::collections::BTreeSet
+rust-hashset-spec std::collections::HashSet
 *ENDLIBSPEC-NAME*/
 
-use std::collections::BTreeSet;
-use crate::traits::{Container, WithPosition};
+use std::collections::HashSet;
+use std::hash::Hash;
+use crate::traits::Container;
 
 /*IMPL*
 Container
 *ENDIMPL*/
-impl<T: Ord> Container<T> for BTreeSet<T> {
+impl<T: Ord + Hash> Container<T> for HashSet<T> {
 
     /*LIBSPEC*
     /*OPNAME*
@@ -19,7 +20,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-len xs r) (equal? r (spec-len xs)))
     *ENDLIBSPEC*/
     fn len(&self) -> usize {
-        BTreeSet::len(self)
+        HashSet::len(self)
     }
 
     /*LIBSPEC*
@@ -34,7 +35,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-contains xs x r) (equal? r (spec-contains xs x)))
     *ENDLIBSPEC*/
     fn contains(&self, x: &T) -> bool {
-        BTreeSet::contains(self, x)
+        HashSet::contains(self, x)
     }
 
     /*LIBSPEC*
@@ -46,7 +47,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-is-empty xs r) (equal? r (spec-is-empty xs)))
     *ENDLIBSPEC*/
     fn is_empty(&self) -> bool {
-        BTreeSet::is_empty(self)
+        HashSet::is_empty(self)
     }
 
     /*LIBSPEC*
@@ -58,7 +59,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-clear xs r) (equal? r (spec-clear xs)))
     *ENDLIBSPEC*/
     fn clear(&mut self) {
-        BTreeSet::clear(self);
+        HashSet::clear(self);
     }
 
     /*LIBSPEC*
@@ -70,7 +71,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-insert xs x ys) (equal? ys (spec-insert xs x)))
     *ENDLIBSPEC*/
     fn insert(&mut self, elt: T) {
-        BTreeSet::insert(self, elt);
+        HashSet::insert(self, elt);
     }
 
     /*LIBSPEC*
@@ -85,72 +86,21 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-remove xs r) (equal? r (spec-remove xs)))
     *ENDLIBSPEC*/
     fn remove(&mut self, elt: T) -> Option<T> {
-        match BTreeSet::remove(self, &elt) {
+        match HashSet::remove(self, &elt) {
             true => Some(elt),
             false => None
         }
     }
 }
 
-/*IMPL*
-WithPosition
-*ENDIMPL*/
-impl<T: Ord> WithPosition<T> for BTreeSet<T> {
-    /*LIBSPEC*
-    /*OPNAME*
-    first spec-first pre-first post-first
-    *ENDOPNAME*/
-    (define (spec-first xs)
-      (cond
-        [(null? xs) (cons xs null)]
-        [else (cons xs (first xs))]))
-    (define (pre-first xs) (equal? xs (remove-duplicates (sort xs <))))
-    (define (post-first xs r) (equal? r (spec-first xs)))
-    *ENDLIBSPEC*/
-    fn first(&self) -> Option<&T> {
-        BTreeSet::first(self)
-    }
-
-    /*LIBSPEC*
-    /*OPNAME*
-    last spec-last pre-last post-last
-    *ENDOPNAME*/
-    (define (spec-last xs)
-      (cond
-        [(null? xs) (cons xs null)]
-        [else (cons xs (last xs))]))
-    (define (pre-last xs) (equal? xs (remove-duplicates (sort xs <))))
-    (define (post-last xs r) (equal? r (spec-last xs)))
-    *ENDLIBSPEC*/
-    fn last(&self) -> Option<&T> {
-        BTreeSet::last(self)
-    }
-
-    /*LIBSPEC*
-    /*OPNAME*
-    nth spec-nth pre-nth post-nth
-    *ENDOPNAME*/
-    (define (spec-nth xs n)
-      (cond
-        [(>= n (length xs)) (cons xs null)]
-        [(< n 0) (cons xs null)]
-        [else (cons xs (list-ref xs n))]))
-    (define (pre-nth xs) (equal? xs (remove-duplicates (sort xs <))))
-    (define (post-nth n xs r) (equal? r (spec-nth xs n)))
-    *ENDLIBSPEC*/
-    fn nth(&self, n: usize) -> Option<&T> {
-        BTreeSet::iter(self).nth(n)
-    }                                      
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::traits::{Container, WithPosition};
-    use std::collections::BTreeSet;
+    use crate::traits::Container;
+    use std::collections::HashSet;
 
     #[test]
-    fn test_treeset_container_trait() {
-        let set : &mut dyn Container<u32> = &mut BTreeSet::<u32>::new();
+    fn test_hashset_container_trait() {
+        let set : &mut dyn Container<u32> = &mut HashSet::<u32>::new();
         assert_eq!(set.len(), 0);
         set.insert(1);
         set.insert(4);

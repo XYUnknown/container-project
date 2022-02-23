@@ -3,7 +3,10 @@ use std::fs;
 use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 use std::collections::BTreeMap;
 use std::collections::btree_map::Iter;
-use crate::spec_map::{LibSpecs};
+//use std::collections::hash_map::Iter;
+use std::collections::HashMap;
+
+use crate::spec_map::{LibSpecs, Interfaces};
 
 const LIBSPECNAME: &str = "/*LIBSPEC-NAME*";
 const LIBSPECNAMEEND: &str = "*ENDLIBSPEC-NAME*/";
@@ -13,10 +16,34 @@ const LANGDECL: &str = "#lang rosette\n";
 const GENPATH: &str = "./racket_specs/gen_lib_spec/";
 const OPNAME: &str = "/*OPNAME*";
 const OPNAMEEND: &str = "*ENDOPNAME*/";
+const IMPL: &str = "/*IMPL*";
+const IMPLEND: &str = "*ENDIMPL*/";
 
 type ErrorMessage = String;
 
-pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String), ErrorMessage> {
+fn is_next_pragma_impl(src: &String) -> bool {
+    match src.find(IMPL) {
+        Some(impl_pos) => {
+            match src.find(LIBSPEC) {
+                Some(spec_pos) => {
+                    impl_pos < spec_pos
+                },
+                None => true
+            }
+        },
+        None => false
+    }
+}
+
+fn has_pragma_impl(src: &String) -> bool {
+    src.contains(IMPL)
+}
+
+fn has_pragma_spec(src: &String) -> bool {
+    src.contains(LIBSPEC)
+}
+
+pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String, Interfaces), ErrorMessage> {
     let contents = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
     let trimed_contents = contents.trim().to_string();
@@ -40,39 +67,73 @@ pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, 
         let struct_name = v3.get(1).unwrap().trim().to_string();
         let s1 = v1.get(0).expect("Unexpected error.");
         let s2 = v2.get(1).expect("Unexpected error.");
+        // process interface blocks
         let mut trimed_contents = String::new();
         trimed_contents.push_str(&s1);
         trimed_contents.push_str(&s2);
-        let lib_specs = extract_lib_specs(trimed_contents);
-        match lib_specs {
-            Ok((v, infos)) => {
-                let provide = generate_provide(infos); 
-                Ok((spec_name, struct_name, v, provide))
-            },
-            Err(e) => Err(e)
+        if (!is_next_pragma_impl(&trimed_contents) && has_pragma_spec(&trimed_contents)) {
+            return Err("Specification without declared interface is not allowed".to_string());
+        } else {
+            let mut interfaces = Vec::<String>::new();
+            let mut interface_info = HashMap::<String, BTreeMap<String, (String, String, String)>>::new();
+            let mut code = Vec::<String>::new();
+            while (has_pragma_impl(&trimed_contents)) {
+                let v4: Vec<&str> = trimed_contents.splitn(2, IMPL).collect();
+                let s4 = v4.get(1).expect("Error, invalid interface declaration.");
+                let v5: Vec<&str> = s4.splitn(2, IMPLEND).collect();
+                let mut interface_name = v5.get(0).unwrap().trim().to_string();
+                trimed_contents = v5.get(1).unwrap().trim().to_string();
+                let lib_specs = extract_lib_specs(trimed_contents);
+                match lib_specs {
+                    Ok((rest, mut v, infos)) => {
+                        code.append(&mut v);
+                        interface_info.insert(interface_name.clone(), infos);
+                        interfaces.push(interface_name.clone());
+                        trimed_contents = rest;
+                    },
+                    Err(e) => {
+                        return Err(e);
+                    }
+                }
+            }
+            let (provide, interface_provide_map) = generate_provide(interface_info); 
+            Ok((spec_name, struct_name, code, provide, interface_provide_map))
         }
     }
 }
 
-pub fn generate_provide(infos: BTreeMap<String, (String, String, String)>) -> String {
-    let mut specs = Vec::<String>::new();
-    let mut pres = Vec::<String>::new();
-    for (key, value) in infos.iter() {
-        specs.push(value.0.clone());
-        pres.push(value.1.clone());
+pub fn generate_provide(interface_info: HashMap<String, BTreeMap<String, (String, String, String)>>) -> (String, Interfaces) {
+    let mut interfaces = Vec::<String>::new();
+    let mut provide = String::new();
+    let mut interface_provide_map = Interfaces::new();
+    for (interface, infos) in interface_info.iter() {
+        let mut specs = Vec::<String>::new();
+        let mut pres = Vec::<String>::new();
+        for (key, value) in infos.iter() {
+            specs.push(value.0.clone());
+            pres.push(value.1.clone());
+        }
+        let specs_name = interface.to_lowercase() + "-specs";
+        let pres_name = interface.to_lowercase() + "-pres";
+        let interface_name = interface.to_lowercase();
+        let specs_str = "\n(define ".to_string() + &specs_name + " (list " + &specs.join(" ") + "))\n";
+        let pres_str = "(define ".to_string()  + &pres_name + " (list " + &pres.join(" ") + "))\n";
+        let interface_str = "(define ".to_string() + &interface_name + " (cons " + &specs_name + " " + &pres_name + "))\n";
+        provide = provide + &specs_str + &pres_str + &interface_str;
+        interfaces.push(interface.to_lowercase());
+        interface_provide_map.insert(interface.to_string(), interface_name);
     }
-    let specs_str = "\n(define specs (list ".to_string() + &specs.join(" ") + "))\n";
-    let pres_str = "(define pres (list ".to_string() + &pres.join(" ") + "))\n";
-    let provide_str = "(provide specs pres)".to_string();
-    let provide = specs_str + &pres_str + &provide_str;
-    provide
+    let provide_str = "(provide ".to_string() + &interfaces.join(" ") + ")";
+
+    provide = provide + &provide_str;
+    (provide, interface_provide_map)
 }
 
-pub fn extract_lib_specs(src: String) -> Result<(Vec<String>, BTreeMap<String, (String, String, String)>), ErrorMessage> {
+pub fn extract_lib_specs(src: String) -> Result<(String, Vec<String>, BTreeMap<String, (String, String, String)>), ErrorMessage> {
     let mut result = Vec::<String>::new();
     let mut contents = src.trim();
     let mut op_infos = BTreeMap::<String, (String, String, String)>::new();
-    while (contents.len() > 0) {
+    while (contents.len() > 0 && !is_next_pragma_impl(&contents.to_string())) {
         if (contents.contains(LIBSPEC) && contents.contains(LIBSPECEND)) {
             let v1: Vec<&str> = contents.splitn(2, LIBSPEC).collect();
             let s = v1.get(1).expect("Error, invalid specification.");
@@ -88,7 +149,7 @@ pub fn extract_lib_specs(src: String) -> Result<(Vec<String>, BTreeMap<String, (
             break;
         }
     }
-    Ok((result, op_infos))
+    Ok((contents.to_string(), result, op_infos))
 }
 
 pub fn extract_op_info(spec: String) -> Result<(String, String, String, String), ErrorMessage> {
@@ -126,16 +187,16 @@ pub fn write_lib_file(filename : String, contents: Vec<String>, provide: String)
     Ok(())
 }
 
-pub fn process_lib_spec(filename: String) -> Result<(String, String), ErrorMessage> {
+pub fn process_lib_spec(filename: String) -> Result<(String, String, Interfaces), ErrorMessage> {
     let result = read_lib_file(filename);
     match result {
-        Ok((name, struct_name, specs, provide)) => {
+        Ok((name, struct_name, specs, provide, interface_provide_map)) => {
             let spec_name = name + ".rkt";
             let state = write_lib_file(spec_name.clone(), specs, provide);
             if (!state.is_ok()) {
                 return Err("Unable to create lib specification file".to_string());
             }
-            Ok((spec_name, struct_name))
+            Ok((spec_name, struct_name, interface_provide_map))
         },
         Err(e) => Err(e)
     }
@@ -150,8 +211,8 @@ pub fn process_lib_specs(dirname: String) -> Result<LibSpecs, ErrorMessage> {
     let mut lib_specs = LibSpecs::new();
     for path in files {
         match process_lib_spec(path) {
-            Ok((spec_name, struct_name)) => {
-                lib_specs.insert(struct_name, spec_name);
+            Ok((spec_name, struct_name, interface_provide_map)) => {
+                lib_specs.insert(struct_name, (spec_name, interface_provide_map));
             },
             Err(e) => {
                 return Err(e);

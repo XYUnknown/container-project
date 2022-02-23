@@ -1,20 +1,15 @@
 /*LIBSPEC-NAME*
-rust-vector-spec vector::Vector<T>
+rust-vec-spec std::vec::Vec
 *ENDLIBSPEC-NAME*/
 
 use std::vec::Vec;
-use std::ops::Deref;
-use std::ops::DerefMut;
+use crate::traits::{Container, Stack, WithPosition};
 
-pub struct Vector<T> {
-    v: Vec<T>,
-}
+/*IMPL*
+Container
+*ENDIMPL*/
+impl<T: PartialEq> Container<T> for Vec<T> {
 
-impl<T> Vector<T> {
-    pub const fn new() -> Vector<T> {
-        Vector { v: Vec::new() }
-    }
-    
     /*LIBSPEC*
     /*OPNAME*
     len spec-len pre-len post-len
@@ -23,8 +18,8 @@ impl<T> Vector<T> {
     (define (pre-len xs) #t)
     (define (post-len xs r) (equal? r (spec-len xs)))
     *ENDLIBSPEC*/
-    pub fn len(&self) -> usize {
-        self.v.len()
+    fn len(&self) -> usize {
+        Vec::len(self)
     }
 
     /*LIBSPEC*
@@ -38,11 +33,8 @@ impl<T> Vector<T> {
     (define (pre-contains xs) #t)
     (define (post-contains xs x r) (equal? r (spec-contains xs x)))
     *ENDLIBSPEC*/
-    pub fn contains(&self, x: &T) -> bool 
-    where
-        T: PartialEq<T>,
-    {
-        self.v.contains(x)
+    fn contains(&self, x: &T) -> bool {
+        <[T]>::contains(self, x) // use fully qualified syntax to avoid function name collision
     }
 
     /*LIBSPEC*
@@ -53,8 +45,20 @@ impl<T> Vector<T> {
     (define (pre-is-empty xs) #t)
     (define (post-is-empty xs r) (equal? r (spec-is-empty xs)))
     *ENDLIBSPEC*/
-    pub fn is_empty(&self) -> bool {
-        self.v.is_empty()
+    fn is_empty(&self) -> bool {
+        Vec::is_empty(self)
+    }
+
+    /*LIBSPEC*
+    /*OPNAME*
+    clear spec-clear pre-clear post-clear 
+    *ENDOPNAME*/
+    (define (spec-clear xs) null)
+    (define (pre-clear xs) #t)
+    (define (post-clear xs r) (equal? r (spec-clear xs)))
+    *ENDLIBSPEC*/
+    fn clear(&mut self) {
+        Vec::clear(self);
     }
 
     /*LIBSPEC*
@@ -65,8 +69,45 @@ impl<T> Vector<T> {
     (define (pre-insert xs) #t)
     (define (post-insert xs x ys) (equal? ys (spec-insert xs x)))
     *ENDLIBSPEC*/
-    pub fn insert(&mut self, elt: T) {
-        self.v.push(elt);
+    fn insert(&mut self, elt: T) {
+        Vec::push(self, elt);
+    }
+
+    /*LIBSPEC*
+    /*OPNAME*
+    remove spec-remove pre-remove post-remove
+    *ENDOPNAME*/
+    (define (spec-remove xs x)
+      (cond
+        [(list? (member x xs)) (cons (remove x xs) x)]
+        [else (cons xs null)]))
+    (define (pre-remove xs) #t)
+    (define (post-remove xs r) (equal? r (spec-remove xs)))
+    *ENDLIBSPEC*/
+    fn remove(&mut self, elt: T) -> Option<T> {
+        match self.iter().position(|x| *x == elt) {
+            Some(index) => {
+                Some(self.remove(index))
+            },
+            None => None
+        }
+    }
+}
+
+/*IMPL*
+Stack
+*ENDIMPL*/
+impl<T> Stack<T> for Vec<T> {
+    /*LIBSPEC*
+    /*OPNAME*
+    push spec-push pre-push post-push
+    *ENDOPNAME*/
+    (define (spec-push xs x) (append xs (list x)))
+    (define (pre-push xs) #t)
+    (define (post-push xs x ys) (equal? ys (spec-push xs x)))
+    *ENDLIBSPEC*/
+    fn push(&mut self, elt: T) {
+        Vec::push(self, elt);
     }
 
     /*LIBSPEC*
@@ -80,22 +121,15 @@ impl<T> Vector<T> {
     (define (pre-pop xs) #t)
     (define (post-pop xs r) (equal? r (spec-pop xs)))
     *ENDLIBSPEC*/
-    pub fn pop(&mut self) -> Option<T> {
-        self.v.pop()
+    fn pop(&mut self) -> Option<T> {
+        Vec::pop(self)
     }
+}
 
-    /*LIBSPEC*
-    /*OPNAME*
-    clear spec-clear pre-clear post-clear 
-    *ENDOPNAME*/
-    (define (spec-clear xs) null)
-    (define (pre-clear xs) #t)
-    (define (post-clear xs r) (equal? r (spec-clear xs)))
-    *ENDLIBSPEC*/
-    pub fn clear(&mut self) {
-        self.v.clear();
-    }
-
+/*IMPL*
+WithPosition
+*ENDIMPL*/
+impl<T> WithPosition<T> for Vec<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first
@@ -107,8 +141,8 @@ impl<T> Vector<T> {
     (define (pre-first xs) #t)
     (define (post-first xs r) (equal? r (spec-first xs)))
     *ENDLIBSPEC*/
-    pub fn first(&self) -> Option<&T> {
-        self.v.first()
+    fn first(&self) -> Option<&T> {
+        <[T]>::first(self)
     }
 
     /*LIBSPEC*
@@ -122,31 +156,58 @@ impl<T> Vector<T> {
     (define (pre-last xs) #t)
     (define (post-last xs r) (equal? r (spec-last xs)))
     *ENDLIBSPEC*/
-    pub fn last(&self) -> Option<&T> {
-        self.v.last()
+    fn last(&self) -> Option<&T> {
+        <[T]>::last(self)
     }
+
+    /*LIBSPEC*
+    /*OPNAME*
+    nth spec-nth pre-nth post-nth
+    *ENDOPNAME*/
+    (define (spec-nth xs n)
+      (cond
+        [(>= n (length xs)) (cons xs null)]
+        [(< n 0) (cons xs null)]
+        [else (cons xs (list-ref xs n))]))
+    (define (pre-nth xs) #t)
+    (define (post-nth xs n r) (equal? r (spec-nth xs n)))
+    *ENDLIBSPEC*/
+    fn nth(&self, n: usize) -> Option<&T> {
+        <[T]>::iter(self).nth(n)
+    }                                      
 }
 
-impl<T> Deref for Vector<T> {
-    type Target = Vec<T>;
+#[cfg(test)]
+mod tests {
+    use crate::traits::{Container, WithPosition};
+    use std::vec::Vec;
 
-    fn deref(&self) -> &Self::Target {
-        &self.v
+    #[test]
+    fn test_vec_container_trait() {
+        let vec : &mut dyn Container<u32> = &mut Vec::<u32>::new();
+        assert_eq!(vec.len(), 0);
+        vec.insert(1);
+        vec.insert(4);
+        assert_eq!(vec.len(), 2);
+        assert_eq!(vec.remove(9), None);
+        assert_eq!(vec.remove(1), Some(1));
+        assert_eq!(vec.len(), 1);
+        assert!(vec.contains(&4));
+        vec.clear();
+        assert_eq!(vec.len(), 0);
+        //assert_eq!(vec.pop(), None); // error
     }
-}
 
-impl<T> DerefMut for Vector<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.v
-    }
-}
-
-impl<T: Clone> Clone for Vector<T> {
-    fn clone(&self) -> Self {
-        Vector { v: self.v.clone() }
-    }
-
-    fn clone_from(&mut self, source: &Self) {
-        self.v.clone_from(&source.v);
+    #[test]
+    fn test_vec_with_position() {
+        trait ContainerWithPosition<T> : Container<T> + WithPosition<T> {}
+        impl<T: Ord> ContainerWithPosition<T> for Vec<T> {}
+        let vec : &mut dyn ContainerWithPosition<u32> = &mut Vec::<u32>::new();
+        vec.insert(1);
+        vec.insert(4);
+        vec.insert(2);
+        assert_eq!(vec.first(), Some(&1));
+        assert_eq!(vec.last(), Some(&2));
+        assert_eq!(vec.nth(1), Some(&4));
     }
 }
