@@ -59,8 +59,8 @@
 
 
 ; The list
-(define-symbolic elem integer?)
+(define-symbolic n integer?)
 (define-symbolic len (bitvector 32))
 (define ls (take-bv (generate-list 10) len))
 
-(provide check elem ls)
+(provide check n ls)
