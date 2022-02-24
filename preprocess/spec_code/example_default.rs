@@ -13,5 +13,5 @@ fn main () {
         c.insert(x);
         //c.first();
     }
-    is_empty()
+    assert!(!c.is_empty())
 }
