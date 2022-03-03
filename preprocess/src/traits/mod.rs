@@ -14,6 +14,7 @@ pub trait Stack<T> {
     fn pop(&mut self) -> Option<T>;
 }
 
+// random access
 pub trait WithPosition<T> {
     fn first(&self) -> Option<&T>;
     fn last(&self) -> Option<&T>;
