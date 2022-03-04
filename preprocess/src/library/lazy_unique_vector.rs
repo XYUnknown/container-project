@@ -1,14 +1,84 @@
 /*LIBSPEC-NAME*
-rust-btreeset-spec std::collections::BTreeSet
+rust-lazy-unique-vec-spec preprocess::library::lazy_unique_vector::LazyUniqueVec
 *ENDLIBSPEC-NAME*/
 
-use std::collections::BTreeSet;
-use crate::traits::{Container, WithPosition};
+use std::vec::Vec;
+use std::slice::Iter;
+use std::ops::Deref;
+use crate::traits::{Container, Stack, WithPosition};
+
+// A Unique Vector
+pub struct LazyUniqueVec<T> {
+    v: Vec<T>,
+}
+
+impl<T: Ord> LazyUniqueVec<T> {
+    pub fn new() -> LazyUniqueVec<T> {
+        LazyUniqueVec { v: Vec::new() }
+    }
+
+    pub fn len(&mut self) -> usize {
+        self.v.sort();
+        self.v.dedup();
+        self.v.len()
+    }
+
+    pub fn contains(&mut self, x: &T) -> bool {
+        self.v.sort();
+        self.v.dedup();
+        self.v.contains(x)
+    }
+
+    pub fn is_empty(&mut self) -> bool {
+        self.v.sort();
+        self.v.dedup();
+        self.len() == 0
+    }
+
+    // Duplicated elements will be discarded
+    pub fn push(&mut self, value: T) {
+        self.v.push(value);
+    }
+
+    pub fn pop(&mut self) -> Option<T> {
+        self.v.sort();
+        self.v.dedup();
+        self.v.pop()
+    }
+
+    pub fn remove(&mut self, index: usize) -> T {
+        self.v.sort();
+        self.v.dedup();
+        self.v.remove(index)
+    }
+
+    pub fn clear(&mut self) {
+        self.v.clear()
+    }
+
+    pub fn first(&mut self) -> Option<&T> {
+        self.v.sort();
+        self.v.dedup();
+        self.v.first()
+    }
+
+    pub fn last(&mut self) -> Option<&T> {
+        self.v.sort();
+        self.v.dedup();
+        self.v.last()
+    }
+
+    pub fn iter(&mut self) -> Iter<'_, T> {
+        self.v.sort();
+        self.v.dedup();
+        self.v.iter()
+    }
+}
 
 /*IMPL*
 Container
 *ENDIMPL*/
-impl<T: Ord> Container<T> for BTreeSet<T> {
+impl<T: Ord> Container<T> for LazyUniqueVec<T> {
 
     /*LIBSPEC*
     /*OPNAME*
@@ -19,7 +89,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-len xs r) (equal? r (spec-len xs)))
     *ENDLIBSPEC*/
     fn len(&mut self) -> usize {
-        BTreeSet::len(self)
+        LazyUniqueVec::len(self)
     }
 
     /*LIBSPEC*
@@ -34,7 +104,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-contains xs x r) (equal? r (spec-contains xs x)))
     *ENDLIBSPEC*/
     fn contains(&mut self, x: &T) -> bool {
-        BTreeSet::contains(self, x)
+        LazyUniqueVec::contains(self, x) // use fully qualified syntax to avoid function name collision
     }
 
     /*LIBSPEC*
@@ -46,7 +116,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-is-empty xs r) (equal? r (spec-is-empty xs)))
     *ENDLIBSPEC*/
     fn is_empty(&mut self) -> bool {
-        BTreeSet::is_empty(self)
+        LazyUniqueVec::is_empty(self)
     }
 
     /*LIBSPEC*
@@ -58,7 +128,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-clear xs r) (equal? r (spec-clear xs)))
     *ENDLIBSPEC*/
     fn clear(&mut self) {
-        BTreeSet::clear(self);
+        LazyUniqueVec::clear(self);
     }
 
     /*LIBSPEC*
@@ -70,7 +140,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-insert xs x ys) (equal? ys (spec-insert xs x)))
     *ENDLIBSPEC*/
     fn insert(&mut self, elt: T) {
-        BTreeSet::insert(self, elt);
+        LazyUniqueVec::push(self, elt);
     }
 
     /*LIBSPEC*
@@ -85,9 +155,11 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
     (define (post-remove xs r) (equal? r (spec-remove xs)))
     *ENDLIBSPEC*/
     fn remove(&mut self, elt: T) -> Option<T> {
-        match BTreeSet::remove(self, &elt) {
-            true => Some(elt),
-            false => None
+        match self.iter().position(|x| *x == elt) {
+            Some(index) => {
+                Some(self.remove(index))
+            },
+            None => None
         }
     }
 }
@@ -95,7 +167,7 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
 /*IMPL*
 WithPosition
 *ENDIMPL*/
-impl<T: Ord> WithPosition<T> for BTreeSet<T> {
+impl<T: Ord> WithPosition<T> for LazyUniqueVec<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first
@@ -108,7 +180,7 @@ impl<T: Ord> WithPosition<T> for BTreeSet<T> {
     (define (post-first xs r) (equal? r (spec-first xs)))
     *ENDLIBSPEC*/
     fn first(&mut self) -> Option<&T> {
-        BTreeSet::first(self)
+        LazyUniqueVec::first(self)
     }
 
     /*LIBSPEC*
@@ -123,7 +195,7 @@ impl<T: Ord> WithPosition<T> for BTreeSet<T> {
     (define (post-last xs r) (equal? r (spec-last xs)))
     *ENDLIBSPEC*/
     fn last(&mut self) -> Option<&T> {
-        BTreeSet::last(self)
+        LazyUniqueVec::last(self)
     }
 
     /*LIBSPEC*
@@ -139,27 +211,17 @@ impl<T: Ord> WithPosition<T> for BTreeSet<T> {
     (define (post-nth n xs r) (equal? r (spec-nth xs n)))
     *ENDLIBSPEC*/
     fn nth(&mut self, n: usize) -> Option<&T> {
-        BTreeSet::iter(self).nth(n)
+        LazyUniqueVec::iter(self).nth(n)
     }                                      
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::{Container, WithPosition};
-    use std::collections::BTreeSet;
-
+    use crate::library::lazy_unique_vector::LazyUniqueVec;
+    /** Unique Vector*/
     #[test]
-    fn test_treeset_container_trait() {
-        let set : &mut dyn Container<u32> = &mut BTreeSet::<u32>::new();
-        assert_eq!(set.len(), 0);
-        set.insert(1);
-        set.insert(4);
-        assert_eq!(set.len(), 2);
-        assert_eq!(set.remove(9), None);
-        assert_eq!(set.remove(1), Some(1));
-        assert_eq!(set.len(), 1);
-        assert!(set.contains(&4));
-        set.clear();
-        assert_eq!(set.len(), 0);
+    fn unique_vec_creation() {
+        let mut vec = LazyUniqueVec::<u32>::new();
+        assert_eq!(vec.len(), 0);
     }
 }

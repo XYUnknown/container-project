@@ -18,7 +18,7 @@ impl<T: PartialEq> Container<T> for Vec<T> {
     (define (pre-len xs) #t)
     (define (post-len xs r) (equal? r (spec-len xs)))
     *ENDLIBSPEC*/
-    fn len(&self) -> usize {
+    fn len(&mut self) -> usize {
         Vec::len(self)
     }
 
@@ -33,7 +33,7 @@ impl<T: PartialEq> Container<T> for Vec<T> {
     (define (pre-contains xs) #t)
     (define (post-contains xs x r) (equal? r (spec-contains xs x)))
     *ENDLIBSPEC*/
-    fn contains(&self, x: &T) -> bool {
+    fn contains(&mut self, x: &T) -> bool {
         <[T]>::contains(self, x) // use fully qualified syntax to avoid function name collision
     }
 
@@ -45,7 +45,7 @@ impl<T: PartialEq> Container<T> for Vec<T> {
     (define (pre-is-empty xs) #t)
     (define (post-is-empty xs r) (equal? r (spec-is-empty xs)))
     *ENDLIBSPEC*/
-    fn is_empty(&self) -> bool {
+    fn is_empty(&mut self) -> bool {
         Vec::is_empty(self)
     }
 
@@ -141,7 +141,7 @@ impl<T> WithPosition<T> for Vec<T> {
     (define (pre-first xs) #t)
     (define (post-first xs r) (equal? r (spec-first xs)))
     *ENDLIBSPEC*/
-    fn first(&self) -> Option<&T> {
+    fn first(&mut self) -> Option<&T> {
         <[T]>::first(self)
     }
 
@@ -156,7 +156,7 @@ impl<T> WithPosition<T> for Vec<T> {
     (define (pre-last xs) #t)
     (define (post-last xs r) (equal? r (spec-last xs)))
     *ENDLIBSPEC*/
-    fn last(&self) -> Option<&T> {
+    fn last(&mut self) -> Option<&T> {
         <[T]>::last(self)
     }
 
@@ -172,7 +172,7 @@ impl<T> WithPosition<T> for Vec<T> {
     (define (pre-nth xs) #t)
     (define (post-nth xs n r) (equal? r (spec-nth xs n)))
     *ENDLIBSPEC*/
-    fn nth(&self, n: usize) -> Option<&T> {
+    fn nth(&mut self, n: usize) -> Option<&T> {
         <[T]>::iter(self).nth(n)
     }                                      
 }

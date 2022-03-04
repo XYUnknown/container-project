@@ -19,7 +19,7 @@ impl<T: Ord + Hash> Container<T> for HashSet<T> {
     (define (pre-len xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-len xs r) (equal? r (spec-len xs)))
     *ENDLIBSPEC*/
-    fn len(&self) -> usize {
+    fn len(&mut self) -> usize {
         HashSet::len(self)
     }
 
@@ -34,7 +34,7 @@ impl<T: Ord + Hash> Container<T> for HashSet<T> {
     (define (pre-contains xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-contains xs x r) (equal? r (spec-contains xs x)))
     *ENDLIBSPEC*/
-    fn contains(&self, x: &T) -> bool {
+    fn contains(&mut self, x: &T) -> bool {
         HashSet::contains(self, x)
     }
 
@@ -46,7 +46,7 @@ impl<T: Ord + Hash> Container<T> for HashSet<T> {
     (define (pre-is-empty xs) (equal? xs (remove-duplicates (sort xs <))))
     (define (post-is-empty xs r) (equal? r (spec-is-empty xs)))
     *ENDLIBSPEC*/
-    fn is_empty(&self) -> bool {
+    fn is_empty(&mut self) -> bool {
         HashSet::is_empty(self)
     }
 

@@ -22,7 +22,7 @@ impl<T: Ord> Container<T> for LinkedList<T> {
     (define (pre-len xs) #t)
     (define (post-len xs r) (equal? r (spec-len xs)))
     *ENDLIBSPEC*/
-    fn len(&self) -> usize {
+    fn len(&mut self) -> usize {
         LinkedList::len(self)
     }
 
@@ -37,7 +37,7 @@ impl<T: Ord> Container<T> for LinkedList<T> {
     (define (pre-contains xs) #t)
     (define (post-contains xs x r) (equal? r (spec-contains xs x)))
     *ENDLIBSPEC*/
-    fn contains(&self, x: &T) -> bool {
+    fn contains(&mut self, x: &T) -> bool {
         LinkedList::contains(self, x)
     }
 
@@ -49,7 +49,7 @@ impl<T: Ord> Container<T> for LinkedList<T> {
     (define (pre-is-empty xs) #t)
     (define (post-is-empty xs r) (equal? r (spec-is-empty xs)))
     *ENDLIBSPEC*/
-    fn is_empty(&self) -> bool {
+    fn is_empty(&mut self) -> bool {
         LinkedList::is_empty(self)
     }
 
@@ -155,7 +155,7 @@ impl<T> WithPosition<T> for LinkedList<T> {
     (define (pre-first xs) #t)
     (define (post-first xs r) (equal? r (spec-first xs)))
     *ENDLIBSPEC*/
-    fn first(&self) -> Option<&T> {
+    fn first(&mut self) -> Option<&T> {
         LinkedList::front(self)
     }
 
@@ -170,7 +170,7 @@ impl<T> WithPosition<T> for LinkedList<T> {
     (define (pre-last xs) #t)
     (define (post-last xs r) (equal? r (spec-last xs)))
     *ENDLIBSPEC*/
-    fn last(&self) -> Option<&T> {
+    fn last(&mut self) -> Option<&T> {
         LinkedList::back(self)
     }
 
@@ -186,7 +186,7 @@ impl<T> WithPosition<T> for LinkedList<T> {
     (define (pre-nth xs) #t)
     (define (post-nth xs n r) (equal? r (spec-nth xs n)))
     *ENDLIBSPEC*/
-    fn nth(&self, n: usize) -> Option<&T> {
+    fn nth(&mut self, n: usize) -> Option<&T> {
         LinkedList::iter(self).nth(n)
     }                                      
 }
