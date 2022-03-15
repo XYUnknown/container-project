@@ -134,11 +134,11 @@ impl TypeChecker {
     pub fn check_interface_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
             Decl::ConTypeDecl(_, (_, ins, _)) => {
-                // Duplicate interface decl checking
+                // Duplicate interface name checking
                 for i in ins.iter() {
                     match self.global_ctx.get(&i.to_string()) {
                         Some(_) => {
-                            return Err("Duplicate interface declaration".to_string());
+                            return Err("Duplicate interface name declaration".to_string());
                         },
                         None => continue, // TODO: check each interface is a valid rust trait
                     }
