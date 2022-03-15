@@ -222,7 +222,7 @@ impl Analyser {
             Term::VarTerm(id) => {
                 id.to_string()
             },
-            Term::LambdaTerm(id, t) => {
+            Term::LambdaTerm((id, _), t) => {
                 match **t {
                     Term::AppTerm(_, _) => {
                         "(lambda (".to_string() + id + ") (" + &self.analyse_term(t) + "))"

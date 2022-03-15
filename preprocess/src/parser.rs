@@ -22,7 +22,7 @@ pub enum Refinement {
 pub enum Term {
     LitTerm(Box<Literal>),
     VarTerm(Box<Id>),
-    LambdaTerm(Box<Id>, Box<Term>),
+    LambdaTerm((Box<Id>, Box<Interfaces>), Box<Term>),
     AppTerm(Box<Term>, Box<Term>),
 }
 
@@ -133,9 +133,9 @@ pub grammar spec() for str {
             --
             v:id() { Term::VarTerm(Box::new(v)) }
             --
-            "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm(Box::new(v), Box::new(t)) }
+            "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(vec!["Container".to_string()])), Box::new(t)) }
             --
-            "\\" v:id() _ "<:" _ "(" _ i:interface() _ ")" _ "->" _ t:term() { Term::LambdaTerm(Box::new(v), Box::new(t)) }
+            "\\" v:id() _ "<:" _ "(" _ i:interface() _ ")" _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(i)), Box::new(t)) }
             --
             "(" _ t1:term() __ t2:term() _ ")" { Term::AppTerm(Box::new(t1), Box::new(t2)) }
         }

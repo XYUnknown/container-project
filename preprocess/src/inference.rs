@@ -62,7 +62,7 @@ impl TypeEnv {
                 }
             }
             // Infer abstraction
-            Term::LambdaTerm(n, ref e) => {
+            Term::LambdaTerm((n, _), ref e) => {
                 let tv = Type::T(tvg.next());
                 let mut env = self.clone();
                 env.remove(&n.to_string());
