@@ -55,7 +55,7 @@ impl Analyser {
             .collect();
         match self.analyse_prop_decls(prop_decls) {
             Ok(_) => match self.analyse_contype_decls(contype_decls.clone()) {
-                Ok(_) => self.analyse_interface_decls(contype_decls),
+                Ok(_) => self.analyse_bound_decls(contype_decls),
                 Err(e) => Err(e)
             }
             Err(e) => Err(e)
@@ -88,10 +88,10 @@ impl Analyser {
         }
     }
 
-    pub fn analyse_interface_decls(&mut self, decls: Vec<&Decl>) -> Result<(), AnalyserError> {
+    pub fn analyse_bound_decls(&mut self, decls: Vec<&Decl>) -> Result<(), AnalyserError> {
         let mut result = Ok(());
         for decl in decls.into_iter() {
-            match self.analyse_interface_decl(decl) {
+            match self.analyse_bound_decl(decl) {
                 Ok(_) => continue,
                 Err(e) => result = Err(e)
             }
@@ -99,12 +99,12 @@ impl Analyser {
         result
     }
 
-    pub fn analyse_interface_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
+    pub fn analyse_bound_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
             Decl::ConTypeDecl(con_ty, (_, ins, tags)) => {
                 let (c, t) = con_ty.get_con_elem().unwrap();
                 let mut name = c.clone() + "Trait";
-                let interface_tag = Tag::Interface((c.clone(), t), Box::new(ins.to_vec()));
+                let bound_tag = Tag::Bound((c.clone(), t), Box::new(ins.to_vec()));
                 let immut_ctx = self.ctx.clone();
                 // prevent generating existing name
                 let mut i: usize = 0;
@@ -121,10 +121,10 @@ impl Analyser {
                         return Err("Not a valid container declaration.".to_string());
                     }
                 }
-                self.ctx.put(name, interface_tag);
+                self.ctx.put(name, bound_tag);
                 Ok(())
             },
-            _ => Err("Not a valid interface declaration".to_string())
+            _ => Err("Not a valid bound declaration".to_string())
         }
     }
 
@@ -144,7 +144,7 @@ impl Analyser {
         match decl {
             Decl::ConTypeDecl(con_ty, (vid, ins, r)) => {
                 let (c, t) = con_ty.get_con_elem().unwrap();
-                let i_tag = Tag::Interface((c.clone(), t.clone()), Box::new(ins.to_vec()));
+                let i_tag = Tag::Bound((c.clone(), t.clone()), Box::new(ins.to_vec()));
                 tags.push(i_tag);
                 match self.analyse_ref(r.deref(), vid) {
                     Ok(prop_tags) => {

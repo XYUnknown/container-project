@@ -10,7 +10,7 @@ pub type Id = String;
 pub type Literal = String;
 
 // traits
-pub type Interfaces = Vec<Id>;
+pub type Bounds = Vec<Id>;
 
 #[derive(Clone, Debug)]
 pub enum Refinement {
@@ -22,14 +22,14 @@ pub enum Refinement {
 pub enum Term {
     LitTerm(Box<Literal>),
     VarTerm(Box<Id>),
-    LambdaTerm((Box<Id>, Box<Interfaces>), Box<Term>),
+    LambdaTerm((Box<Id>, Box<Bounds>), Box<Term>),
     AppTerm(Box<Term>, Box<Term>),
 }
 
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl((Box<Id>, Box<Type>), Box<Term>),
-    ConTypeDecl(Box<Type>, (Box<Id>, Box<Interfaces>, Box<Refinement>))
+    ConTypeDecl(Box<Type>, (Box<Id>, Box<Bounds>, Box<Refinement>))
 }
 
 impl Decl {
@@ -135,7 +135,7 @@ pub grammar spec() for str {
             --
             "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(vec!["Container".to_string()])), Box::new(t)) }
             --
-            "\\" v:id() _ "<:" _ "(" _ i:interface() _ ")" _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(i)), Box::new(t)) }
+            "\\" v:id() _ "<:" _ "(" _ b:bounds() _ ")" _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(b)), Box::new(t)) }
             --
             "(" _ t1:term() __ t2:term() _ ")" { Term::AppTerm(Box::new(t1), Box::new(t2)) }
         }
@@ -147,7 +147,7 @@ pub grammar spec() for str {
             "(" _ p1:refinement() __ "and" __ p2:refinement() _ ")" { Refinement::AndProps(Box::new(p1), Box::new(p2)) }
         }
 
-    pub rule interface() -> Interfaces
+    pub rule bounds() -> Bounds
         = l: ((_ i:id() _ {i}) ++ "," ) { l }
 
     pub rule decl() -> Decl
@@ -157,9 +157,9 @@ pub grammar spec() for str {
                 Decl::PropertyDecl((Box::new(p), Box::new(ty)), Box::new(t))
             }
             --
-            _ "type" __ ty:ty() _ "=" _ "{" _ c:id() _ "impl" __ "(" _ i:interface() _ ")" _ "|" _ t:refinement() _ "}" _
+            _ "type" __ ty:ty() _ "=" _ "{" _ c:id() _ "impl" __ "(" _ b:bounds() _ ")" _ "|" _ t:refinement() _ "}" _
             {
-                Decl::ConTypeDecl(Box::new(ty), (Box::new(c), Box::new(i), Box::new(t)))
+                Decl::ConTypeDecl(Box::new(ty), (Box::new(c), Box::new(b), Box::new(t)))
             }
         }
 

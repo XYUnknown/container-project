@@ -109,7 +109,7 @@ impl TypeChecker {
         match self.check_prop_decls(prop_decls) {
             Ok(_) => {
                 match self.check_contype_decls(contype_decls.clone()) {
-                    Ok(_) => self.check_interface_decls(contype_decls),
+                    Ok(_) => self.check_bound_decls(contype_decls),
                     Err(e) => Err(e)
                 }
             }
@@ -117,10 +117,10 @@ impl TypeChecker {
         }
     }
 
-    pub fn check_interface_decls(&mut self, decls: Vec<&Decl>) -> Result<(), TypeError> {
+    pub fn check_bound_decls(&mut self, decls: Vec<&Decl>) -> Result<(), TypeError> {
         let mut result = Ok(());
         for decl in decls.into_iter() {
-            match self.check_interface_decl(decl) {
+            match self.check_bound_decl(decl) {
                 Ok(_) => continue,
                 Err(e) => {
                     result = Err(e);
@@ -131,21 +131,21 @@ impl TypeChecker {
         result
     }
 
-    pub fn check_interface_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
+    pub fn check_bound_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
             Decl::ConTypeDecl(_, (_, ins, _)) => {
-                // Duplicate interface name checking
+                // Duplicate bound name checking
                 for i in ins.iter() {
                     match self.global_ctx.get(&i.to_string()) {
                         Some(_) => {
-                            return Err("Duplicate interface name declaration".to_string());
+                            return Err("Duplicate bound name declaration".to_string());
                         },
-                        None => continue, // TODO: check each interface is a valid rust trait
+                        None => continue, // TODO: check each bound is a valid rust trait
                     }
                 }
                 Ok(())
             },
-            _ => Err("Not a valid interface declaration".to_string())
+            _ => Err("Not a valid bound declaration".to_string())
         }
     }
 

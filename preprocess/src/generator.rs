@@ -55,17 +55,17 @@ pub fn process_block(block: &Block) -> String {
     }
 }
 
-fn process_interface_elem_ty(t: &str, elem_ty: &str) -> String {
+fn process_bound_elem_ty(t: &str, elem_ty: &str) -> String {
     return TRAITCRATE.to_string() + t + "<" + elem_ty + ">";
 }
 
-pub fn process_interface_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
+pub fn process_bound_decl(ctx: &InforMap) -> Result<String, ErrorMessage> {
     let mut code = String::new();
     let match_setup = initialise_match_setup();
     for (id, tag) in ctx.iter() {
         match tag {
-            Tag::Interface((c, t), decs) => {
-                let traits = decs.iter().map(|name| process_interface_elem_ty(name, t)).collect::<Vec<String>>().join(" + ");
+            Tag::Bound((c, t), decs) => {
+                let traits = decs.iter().map(|name| process_bound_elem_ty(name, t)).collect::<Vec<String>>().join(" + ");
                 code = code + &gen_trait_code(id, c, t, &traits);
             },
             _ => continue
@@ -85,12 +85,12 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
                     .filter(| t | t.is_prop_tag())
                     .map(| t | t.extract_prop_desc())
                     .collect();
-                let interfaces: Vec<Description> =
+                let bounds: Vec<Description> =
                     tags.iter()
-                    .filter(| t | t.is_interface_tag())
-                    .flat_map(| t | t.extract_interface_descs())
+                    .filter(| t | t.is_bound_tag())
+                    .flat_map(| t | t.extract_bound_descs())
                     .collect();
-                let lookup_result = library_spec_lookup(id.to_string(), prop_descs, interfaces, prop_specs, &match_setup);
+                let lookup_result = library_spec_lookup(id.to_string(), prop_descs, bounds, prop_specs, &match_setup);
                 match lookup_result {
                     Ok(struct_choices) => {
                         if struct_choices.is_empty() {
@@ -111,7 +111,7 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
     Ok(code)
 }
 
-fn library_spec_lookup(id: String, properties: Vec<Description>, interfaces: Vec<Description>, prop_specs: &PropSpecs, match_setup: &MatchSetup) -> Result<Vec<String>, ErrorMessage> {
+fn library_spec_lookup(id: String, properties: Vec<Description>, bounds: Vec<Description>, prop_specs: &PropSpecs, match_setup: &MatchSetup) -> Result<Vec<String>, ErrorMessage> {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(200);
     pb.set_style(
@@ -132,20 +132,20 @@ fn library_spec_lookup(id: String, properties: Vec<Description>, interfaces: Vec
     pb.set_message("Finding library implementations for ".to_owned() + &id + "...");
     let lib_spec = process_lib_specs(LIB.to_string()).expect("Error: Unable to process library files"); // The specifications of library structs
     let mut structs = Vec::new();
-    // select library structs implement interfaces decl in contype
+    // select library structs implement bounds decl in contype
     let mut lib_spec_impls = lib_spec.clone();
     for (name, (_, impls)) in lib_spec.iter() {
-        if (!interfaces.iter().all(|i| impls.keys().cloned().collect::<String>().contains(i))) {
+        if (!bounds.iter().all(|i| impls.keys().cloned().collect::<String>().contains(i))) {
             lib_spec_impls.remove(name);
         }
     }
-    for (name, (lib_spec_dir, interface_ctx)) in lib_spec_impls.iter() {
+    for (name, (lib_spec_dir, bound_ctx)) in lib_spec_impls.iter() {
         let mut is_match = false;
         for p in &properties {
             let mut is_partial_match = false;
-            for i in &interfaces {
+            for i in &bounds {
                 let prop_file = prop_specs.get(p).expect(&("Error: No property specification found for: ".to_string() + &p));
-                match gen_match_script(p.to_string(), match_setup.get(i).unwrap().to_string(), prop_file.to_string(), lib_spec_dir.to_string(), interface_ctx.get(i).unwrap().to_string()) {
+                match gen_match_script(p.to_string(), match_setup.get(i).unwrap().to_string(), prop_file.to_string(), lib_spec_dir.to_string(), bound_ctx.get(i).unwrap().to_string()) {
                     Ok(_) => {
                         let result = run_matching(MATCHSCRIPT.to_string());
                         match result {
@@ -197,7 +197,7 @@ pub fn process_src(filename : String) -> Result<String, ErrorMessage> {
                         Ok(_) => {
                             let mut result = String::new();
                             // generate con types according to the information in con decl
-                            match process_interface_decl(analyser.get_ctx()) {
+                            match process_bound_decl(analyser.get_ctx()) {
                                 Ok(code) => {
                                     result = result + &code;
                                     match process_con_decl(analyser.get_ctx(), analyser.get_prop_specs()) {
@@ -275,8 +275,8 @@ r#"struct {s}<{elem_type}> {{
 
 impl<{elem_type}: 'static + Ord + std::hash::Hash> ContainerConstructor for {s}<{elem_type}> {{
     type Impl = {chosen}<{elem_type}>; // All possible choices: {choices}
-    type Interface = dyn {trait_name}<{elem_type}>;
-    fn new() -> Box<Self::Interface> {{
+    type Bound = dyn {trait_name}<{elem_type}>;
+    fn new() -> Box<Self::Bound> {{
         Box::new(Self::Impl::new())
     }}
 }}
