@@ -10,45 +10,65 @@ use crate::traits::{Container, Stack, WithPosition};
 // A Unique Vector
 pub struct LazyUniqueVec<T> {
     v: Vec<T>,
+    modified: bool
 }
 
 impl<T: Ord> LazyUniqueVec<T> {
     pub fn new() -> LazyUniqueVec<T> {
-        LazyUniqueVec { v: Vec::new() }
+        LazyUniqueVec { 
+            v: Vec::new(),
+            modified: false
+        }
     }
 
     pub fn len(&mut self) -> usize {
-        self.v.sort();
-        self.v.dedup();
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
         self.v.len()
     }
 
     pub fn contains(&mut self, x: &T) -> bool {
-        self.v.sort();
-        self.v.dedup();
-        self.v.contains(x)
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
+        self.v.binary_search(x).is_ok()
     }
 
     pub fn is_empty(&mut self) -> bool {
-        self.v.sort();
-        self.v.dedup();
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
         self.len() == 0
     }
 
     // Duplicated elements will be discarded
     pub fn push(&mut self, value: T) {
         self.v.push(value);
+        self.modified = true;
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        self.v.sort();
-        self.v.dedup();
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
         self.v.pop()
     }
 
     pub fn remove(&mut self, index: usize) -> T {
-        self.v.sort();
-        self.v.dedup();
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
         self.v.remove(index)
     }
 
@@ -57,20 +77,29 @@ impl<T: Ord> LazyUniqueVec<T> {
     }
 
     pub fn first(&mut self) -> Option<&T> {
-        self.v.sort();
-        self.v.dedup();
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
         self.v.first()
     }
 
     pub fn last(&mut self) -> Option<&T> {
-        self.v.sort();
-        self.v.dedup();
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
         self.v.last()
     }
 
     pub fn iter(&mut self) -> Iter<'_, T> {
-        self.v.sort();
-        self.v.dedup();
+        if (self.modified) {
+            self.v.sort();
+            self.v.dedup();
+            self.modified = false;
+        }
         self.v.iter()
     }
 }
@@ -223,5 +252,15 @@ mod tests {
     fn unique_vec_creation() {
         let mut vec = LazyUniqueVec::<u32>::new();
         assert_eq!(vec.len(), 0);
+    }
+
+    #[test]
+    fn unique_vec_contains() {
+        let mut vec = LazyUniqueVec::<u32>::new();
+        for i in 0..10 {
+            vec.push(i);
+        }
+        assert_eq!(vec.contains(&10), false);
+        assert_eq!(vec.contains(&6), true);
     }
 }

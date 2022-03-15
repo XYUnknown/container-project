@@ -11,6 +11,12 @@ peg = "0.8.0"
 indicatif = "0.16.2"
 rand = "0.8.5"
 
+[dev-dependencies]
+criterion = "0.3.5"
 
 [[example]]
 name = "process_file"
+
+[[bench]]
+name = "criterion_benchmark"
+harness = false
