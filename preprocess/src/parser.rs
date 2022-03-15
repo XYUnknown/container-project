@@ -28,7 +28,7 @@ pub enum Term {
 
 #[derive(Clone, Debug)]
 pub enum Decl {
-    PropertyDecl(Box<Id>, Box<Term>),
+    PropertyDecl((Box<Id>, Box<Type>), Box<Term>),
     ConTypeDecl(Box<Type>, (Box<Id>, Box<Interfaces>, Box<Refinement>))
 }
 
@@ -53,7 +53,7 @@ impl Decl {
                 let (con, _) = con_ty.get_con_elem().unwrap();
                 con 
             },
-            Decl::PropertyDecl(id, _) => id.to_string()
+            Decl::PropertyDecl((id, _), _) => id.to_string()
         }
     }
 }
@@ -135,6 +135,8 @@ pub grammar spec() for str {
             --
             "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm(Box::new(v), Box::new(t)) }
             --
+            "\\" v:id() _ "<:" _ "(" _ i:interface() _ ")" _ "->" _ t:term() { Term::LambdaTerm(Box::new(v), Box::new(t)) }
+            --
             "(" _ t1:term() __ t2:term() _ ")" { Term::AppTerm(Box::new(t1), Box::new(t2)) }
         }
     
@@ -150,14 +152,14 @@ pub grammar spec() for str {
 
     pub rule decl() -> Decl
         = precedence! {
-            _ "property" __ p:id() _ "{" _ t:term() _ "}" _ 
+            _ "property" __ p:id() _ "<" _ ty:ty() _ ">" _ "{" _ t:term() _ "}" _ 
             {
-                Decl::PropertyDecl(Box::new(p), Box::new(t))
+                Decl::PropertyDecl((Box::new(p), Box::new(ty)), Box::new(t))
             }
             --
-            _ "type" __ t1:ty() _ "=" _ "{" _ c:id() _ "impl" __ "(" _ i:interface() _ ")" _ "|" _ t:refinement() _ "}" _
+            _ "type" __ ty:ty() _ "=" _ "{" _ c:id() _ "impl" __ "(" _ i:interface() _ ")" _ "|" _ t:refinement() _ "}" _
             {
-                Decl::ConTypeDecl(Box::new(t1), (Box::new(c), Box::new(i), Box::new(t)))
+                Decl::ConTypeDecl(Box::new(ty), (Box::new(c), Box::new(i), Box::new(t)))
             }
         }
 
@@ -241,7 +243,7 @@ mod tests {
     #[test]
     fn test_property() {
         assert!(spec::decl(
-            r#"property id {
+            r#"property id<T> {
                  \c -> c 
                 }"#
             ).is_ok());
@@ -251,7 +253,7 @@ mod tests {
     fn test_property_true() {
         
         assert!(spec::decl(
-            r#"property default {
+            r#"property default<T> {
                 \c -> true
             }"#
             ).is_ok());
@@ -260,7 +262,7 @@ mod tests {
     #[test]
     fn test_property_unique() {
         assert!(spec::decl(
-            r#"property unique {
+            r#"property unique<T> {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }"#
             ).is_ok());
@@ -277,7 +279,7 @@ mod tests {
     fn test_spec() {
         assert!(spec::spec( // raw string literal
             r#"/*SPEC*
-            property unique {
+            property unique<T> {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
             type UniqueCon<T> = {c impl (Container) | (unique c)}
@@ -303,7 +305,7 @@ mod tests {
     fn test_block_spec() {
         assert!(spec::block(
             r#"/*SPEC*
-            property unique {
+            property unique<T> {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
             type UniqueCon<T> = {c impl (Container) | (unique c)}
@@ -330,7 +332,7 @@ mod tests {
         assert!(spec::prog(
             r#"
             /*SPEC*
-            property unique {
+            property unique<T> {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
             type UniqueCon<T> = {c impl (Container) | (unique c) }
@@ -348,7 +350,7 @@ mod tests {
             /*ENDCODE*/
 
             /*SPEC*
-            property unique {
+            property unique<T> {
                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
             }
             type UniqueCon<T> = {c impl (Container) | (unique c) }

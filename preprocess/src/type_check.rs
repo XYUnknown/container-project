@@ -165,7 +165,7 @@ impl TypeChecker {
 
     pub fn check_prop_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::PropertyDecl(id, term) => {
+            Decl::PropertyDecl((id, ty), term) => {
                 // Duplicate property decl checking
                 match self.global_ctx.get(&id.to_string()) {
                     Some(_) => Err("Duplicate property declaration".to_string()),

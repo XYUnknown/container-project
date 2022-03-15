@@ -75,7 +75,7 @@ impl Analyser {
 
     pub fn analyse_prop_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
-            Decl::PropertyDecl(id, term) => {
+            Decl::PropertyDecl((id, _), term) => {
                 let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
                 self.write_prop_spec_file(filename.clone(), code);
