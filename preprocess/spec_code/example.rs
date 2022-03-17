@@ -10,7 +10,7 @@ type UniqueCon<T> = {c impl (Container) | (unique c) }
 property ascending<T> {
     \c -> ((for-all-consecutive-pairs c) leq?)
 }
-type AscendingConWithPos<T> = {c impl (Container, WithPosition) | (ascending c)}
+type AscendingConWithPos<T> = {c impl (Container, RandomAccess) | (ascending c)}
 
 type UniqueAscendingCon<T> = {c impl (Container) | ((unique c) and (ascending c)) }
 *ENDSPEC*/

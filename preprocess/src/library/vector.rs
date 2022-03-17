@@ -3,7 +3,7 @@ rust-vec-spec std::vec::Vec
 *ENDLIBSPEC-NAME*/
 
 use std::vec::Vec;
-use crate::traits::{Container, Stack, WithPosition};
+use crate::traits::{Container, Stack, RandomAccess};
 
 /*IMPL*
 Container
@@ -127,9 +127,9 @@ impl<T> Stack<T> for Vec<T> {
 }
 
 /*IMPL*
-WithPosition
+RandomAccess
 *ENDIMPL*/
-impl<T> WithPosition<T> for Vec<T> {
+impl<T> RandomAccess<T> for Vec<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first
@@ -179,7 +179,7 @@ impl<T> WithPosition<T> for Vec<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::{Container, WithPosition};
+    use crate::traits::{Container, RandomAccess};
     use std::vec::Vec;
 
     #[test]
@@ -200,9 +200,9 @@ mod tests {
 
     #[test]
     fn test_vec_with_position() {
-        trait ContainerWithPosition<T> : Container<T> + WithPosition<T> {}
-        impl<T: Ord> ContainerWithPosition<T> for Vec<T> {}
-        let vec : &mut dyn ContainerWithPosition<u32> = &mut Vec::<u32>::new();
+        trait ContainerRandomAccess<T> : Container<T> + RandomAccess<T> {}
+        impl<T: Ord> ContainerRandomAccess<T> for Vec<T> {}
+        let vec : &mut dyn ContainerRandomAccess<u32> = &mut Vec::<u32>::new();
         vec.insert(1);
         vec.insert(4);
         vec.insert(2);

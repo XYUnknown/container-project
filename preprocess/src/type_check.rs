@@ -22,39 +22,42 @@ impl TypeChecker {
 
     fn predefined(&mut self) {
         // put for_all_unique_pair into context
-        let binary_fn1 = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let binary_fn1 = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("for-all-unique-pairs".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                    Box::new(vec!["Container".to_string()]))), 
                     Box::new(Type::Fun(Box::new(binary_fn1), Box::new(Type::Bool()))))
                 }
             );
 
         // put for_all_unique_pair into context
-        let binary_fn2 = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let binary_fn2 = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("for-all-consecutive-pairs".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                    Box::new(vec!["Container".to_string()]))), 
                     Box::new(Type::Fun(Box::new(binary_fn2), Box::new(Type::Bool()))))
                 }
             );
         
-        let unary_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()));
+        let unary_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()));
         self.global_ctx.insert("for-all-elems".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                    Box::new(vec!["Container".to_string()]))), 
                     Box::new(Type::Fun(Box::new(unary_fn), Box::new(Type::Bool()))))
                 }
             );
 
         // put neq into context
-        let neq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let neq_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("neq".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
@@ -63,7 +66,7 @@ impl TypeChecker {
         );
 
         // put leq into context
-        let leq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let leq_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("leq?".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
@@ -71,9 +74,10 @@ impl TypeChecker {
             }
         );
 
-        let unique_count_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), 
+        let unique_count_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), 
                                 Box::new(Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                                Box::new(Type::T(TypeVar::new("T".to_string()))))), Box::new(Type::Bool()))));
+                                Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                                Box::new(vec!["Container".to_string()]))), Box::new(Type::Bool()))));
         self.global_ctx.insert("unique-count?".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
@@ -174,10 +178,11 @@ impl TypeChecker {
                         match self.global_ctx.type_inference(term, &mut self.tvg) {
                             Ok(ty) => {
                                 // it should have type Con<T> -> Bool
+                                println!("{:?}", ty);
                                 match ty {
                                     Type::Fun(ref t1, ref t2) => {
                                         match (t1.deref(), t2.deref()) {
-                                            (Type::Con(n, t), Type::Bool()) => {
+                                            (Type::Con(n, t, _), Type::Bool()) => {
                                                 if n.to_string() == "Con".to_string() {
                                                     self.global_ctx.insert(
                                                         id.to_string(),
@@ -237,7 +242,7 @@ impl TypeChecker {
                 match self.global_ctx.get(&con_ty.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
-                        let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
+                        let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(vec!["Container".to_string()]));
                         let mut local_ctx = self.global_ctx.clone();
                         local_ctx.insert(vid.to_string(),
                             TypeScheme {

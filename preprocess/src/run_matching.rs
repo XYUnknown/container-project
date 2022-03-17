@@ -19,7 +19,7 @@ const MATCHDIR: &str =  "./racket_specs/gen_match/";
 pub fn initialise_match_setup() -> MatchSetup {
     let mut match_setup = MatchSetup::new();
     match_setup.insert("Container".to_string(), "../container-setup.rkt".to_string());
-    match_setup.insert("WithPosition".to_string(), "../withposition-setup.rkt".to_string());
+    match_setup.insert("RandomAccess".to_string(), "../RandomAccess-setup.rkt".to_string());
     match_setup
 }
 

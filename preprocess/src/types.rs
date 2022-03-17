@@ -6,19 +6,23 @@ use std::fmt;
 use std::result;
 
 pub type Name = String;
+
+// traits
+pub type Bounds = Vec<Name>;
+
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Type {
     Bool(),
     Int(),
-    T(TypeVar),
-    Con(Box<Name>, Box<Type>),
+    Var(TypeVar),
+    Con(Box<Name>, Box<Type>, Box<Bounds>),
     Fun(Box<Type>, Box<Type>)
 }
 
 impl Type {
-    pub fn is_t(&self) -> bool {
+    pub fn is_var(&self) -> bool {
         match self {
-            Type::T(_) => true,
+            Type::Var(_) => true,
             _ => false
         }
     }
@@ -32,7 +36,7 @@ impl Type {
 
     pub fn get_con_elem(&self) -> Option<(String, String)> {
         match self {
-            Type::Con(n, t) => Some((n.to_string(), t.to_string())),
+            Type::Con(n, t, _) => Some((n.to_string(), t.to_string())),
             _ => None
         }
     }
@@ -43,8 +47,8 @@ impl ToString for Type {
         match self {
             Type::Bool() => "bool".to_string(),
             Type::Int() => "int".to_string(),
-            Type::T(tv) => tv.to_string(),
-            Type::Con(n, t) => n.to_string() + "<" + &t.to_string() + ">",
+            Type::Var(tv) => tv.to_string(),
+            Type::Con(n, t, bounds) => n.to_string() + "<" + &t.to_string() + ">" + " <: (" + &bounds.join(", ") + ")",
             Type::Fun(t1, t2) => t1.to_string() + "->" + &t2.to_string(),
         }
     }
@@ -75,23 +79,23 @@ impl Type {
         match (self, other) {
             // Unify function type
             (&Type::Fun(ref in1, ref out1), &Type::Fun(ref in2, ref out2)) => {
-                let sub1 = in1.mgu(&*in2)?;
+                let sub1 = in1.mgu(in2)?;
                 let sub2 = out1.apply(&sub1).mgu(&out2.apply(&sub1))?;
                 Ok(sub1.compose(&sub2))
             }
 
             // Unify con type
-            (&Type::Con(ref n1, ref t1), &Type::Con(ref n2, ref t2)) => {
+            (&Type::Con(ref n1, ref t1,  _), &Type::Con(ref n2, ref t2, _)) => {
                 if n1.to_string() != n2.to_string() {
                     Err("Cannot unify two different container".to_string())
                 } else {
-                    t1.mgu(&*t2)
+                    t1.mgu(t2)
                 }
             }
 
             // Type variable biding
-            (&Type::T(ref v), t) => v.bind(t),
-            (t, &Type::T(ref v)) => v.bind(t),
+            (&Type::Var(ref v), t) => v.bind(t),
+            (t, &Type::Var(ref v)) => v.bind(t),
 
             // Unify primitives
             (&Type::Int(), &Type::Int()) | (&Type::Bool(), &Type::Bool()) => {
@@ -163,7 +167,7 @@ impl TypeVar {
     /// Attempt to bind a type variable to a type, returning an appropriate substitution.
     fn bind(&self, ty: &Type) -> Result<Subst, UnificationError> {
         // Binding to itself
-        if let &Type::T(ref u) = ty {
+        if let &Type::Var(ref u) = ty {
             if u == self {
                 return Ok(Subst::new());
             }
@@ -211,19 +215,19 @@ impl<'a, T> Types for Vec<T>
 impl Types for Type {
     fn ftv(&self) -> HashSet<TypeVar> {
         match self {
-            &Type::T(ref s) => [s.clone()].iter().cloned().collect(),
+            &Type::Var(ref s) => [s.clone()].iter().cloned().collect(),
             &Type::Int() | &Type::Bool() => HashSet::new(),
             &Type::Fun(ref i, ref o) => i.ftv().union(&o.ftv()).cloned().collect(),
-            &Type::Con(_, ref s) => s.ftv().union(&HashSet::new()).cloned().collect(),
+            &Type::Con(_, ref s, _) => s.ftv().union(&HashSet::new()).cloned().collect(),
         }
     }
 
     // apply substitution
     fn apply(&self, s: &Subst) -> Type {
         match self {
-            &Type::T(ref n) => s.get(n).cloned().unwrap_or(self.clone()),
+            &Type::Var(ref n) => s.get(n).cloned().unwrap_or(self.clone()),
             &Type::Fun(ref t1, ref t2) => Type::Fun(Box::new(t1.apply(s)), Box::new(t2.apply(s))),
-            &Type::Con(ref n, ref t) => Type::Con(Box::new(n.to_string()), Box::new(t.apply(s))),
+            &Type::Con(ref n, ref t, ref bounds) => Type::Con(Box::new(n.to_string()), Box::new(t.apply(s)), bounds.clone()),
             _ => self.clone(),
         }
     }
@@ -262,7 +266,7 @@ impl Types for TypeScheme {
 impl TypeScheme {
     /// Instantiates a typescheme into a type. 
     pub fn instantiate(&self, tvg: &mut TypeVarGen) -> Type {
-        let newvars = self.vars.iter().map(|_| Type::T(tvg.next()));
+        let newvars = self.vars.iter().map(|_| Type::Var(tvg.next()));
         self.ty.apply(&Subst(self.vars
                                  .iter()
                                  .cloned()

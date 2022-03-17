@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use std::marker::PhantomData;
 // nightly features
 use std::collections::linked_list::CursorMut;
-use crate::traits::{Container, Stack, WithPosition};
+use crate::traits::{Container, Stack, RandomAccess};
 
 /*IMPL*
 Container
@@ -141,9 +141,9 @@ impl<T> Stack<T> for LinkedList<T> {
 }
 
 /*IMPL*
-WithPosition
+RandomAccess
 *ENDIMPL*/
-impl<T> WithPosition<T> for LinkedList<T> {
+impl<T> RandomAccess<T> for LinkedList<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first
@@ -211,7 +211,7 @@ impl<T: 'static + Ord> Constructor for Con<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::{Container, Stack, WithPosition};
+    use crate::traits::{Container, Stack, RandomAccess};
     use crate::library::list::{Constructor, Con};
     use std::collections::LinkedList;
 
@@ -261,9 +261,9 @@ mod tests {
 
     #[test]
     fn test_list_with_position() {
-        trait ContainerWithPosition<T> : Container<T> + WithPosition<T> {}
-        impl<T: Ord> ContainerWithPosition<T> for LinkedList<T> {}
-        let list : &mut dyn ContainerWithPosition<u32> = &mut LinkedList::<u32>::new();
+        trait ContainerRandomAccess<T> : Container<T> + RandomAccess<T> {}
+        impl<T: Ord> ContainerRandomAccess<T> for LinkedList<T> {}
+        let list : &mut dyn ContainerRandomAccess<u32> = &mut LinkedList::<u32>::new();
         list.insert(1);
         list.insert(4);
         list.insert(2);

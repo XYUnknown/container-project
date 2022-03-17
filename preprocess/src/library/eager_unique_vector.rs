@@ -5,7 +5,7 @@ rust-eager-unique-vec-spec preprocess::library::eager_unique_vector::EagerUnique
 use std::vec::Vec;
 use std::slice::Iter;
 use std::ops::Deref;
-use crate::traits::{Container, Stack, WithPosition};
+use crate::traits::{Container, Stack, RandomAccess};
 
 // A Unique Vector
 pub struct EagerUniqueVec<T> {
@@ -151,9 +151,9 @@ impl<T: PartialEq> Container<T> for EagerUniqueVec<T> {
 }
 
 /*IMPL*
-WithPosition
+RandomAccess
 *ENDIMPL*/
-impl<T: PartialEq> WithPosition<T> for EagerUniqueVec<T> {
+impl<T: PartialEq> RandomAccess<T> for EagerUniqueVec<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first

@@ -3,14 +3,11 @@ use peg::parser;
 
 use std::vec::Vec;
 
-use crate::types::{Name, Type, TypeVar};
+use crate::types::{Name, Type, TypeVar, Bounds};
 
 pub type Id = String;
 
 pub type Literal = String;
-
-// traits
-pub type Bounds = Vec<Id>;
 
 #[derive(Clone, Debug)]
 pub enum Refinement {
@@ -121,10 +118,10 @@ pub grammar spec() for str {
     pub rule ty() -> Type
         = precedence! {
             n:name() "<" _ t:ty() _ ">"
-            { Type::Con(Box::new(n), Box::new(t)) }
+            { Type::Con(Box::new(n), Box::new(t), Box::new(vec!["Container".to_string()])) }
             --
             n:name()
-            { Type::T(TypeVar::new(n)) }
+            { Type::Var(TypeVar::new(n)) }
         }
   
     pub rule term() -> Term
@@ -133,7 +130,7 @@ pub grammar spec() for str {
             --
             v:id() { Term::VarTerm(Box::new(v)) }
             --
-            "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(vec!["Container".to_string()])), Box::new(t)) }
+            "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(Vec::new())), Box::new(t)) }
             --
             "\\" v:id() _ "<:" _ "(" _ b:bounds() _ ")" _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(b)), Box::new(t)) }
             --
@@ -148,7 +145,7 @@ pub grammar spec() for str {
         }
 
     pub rule bounds() -> Bounds
-        = l: ((_ i:id() _ {i}) ++ "," ) { l }
+        = l: ((_ n:name() _ {n}) ++ "," ) { l }
 
     pub rule decl() -> Decl
         = precedence! {

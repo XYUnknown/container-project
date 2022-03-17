@@ -6,7 +6,7 @@ use std::collections::btree_map::Iter;
 //use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 
-use crate::spec_map::{LibSpecs, Interfaces};
+use crate::spec_map::{LibSpecs, Bounds};
 
 const LIBSPECNAME: &str = "/*LIBSPEC-NAME*";
 const LIBSPECNAMEEND: &str = "*ENDLIBSPEC-NAME*/";
@@ -43,7 +43,7 @@ fn has_pragma_spec(src: &String) -> bool {
     src.contains(LIBSPEC)
 }
 
-pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String, Interfaces), ErrorMessage> {
+pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, String, Bounds), ErrorMessage> {
     let contents = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
     let trimed_contents = contents.trim().to_string();
@@ -102,10 +102,10 @@ pub fn read_lib_file(filename : String) -> Result<(String, String, Vec<String>, 
     }
 }
 
-pub fn generate_provide(interface_info: HashMap<String, BTreeMap<String, (String, String, String)>>) -> (String, Interfaces) {
+pub fn generate_provide(interface_info: HashMap<String, BTreeMap<String, (String, String, String)>>) -> (String, Bounds) {
     let mut interfaces = Vec::<String>::new();
     let mut provide = String::new();
-    let mut interface_provide_map = Interfaces::new();
+    let mut interface_provide_map = Bounds::new();
     for (interface, infos) in interface_info.iter() {
         let mut specs = Vec::<String>::new();
         let mut pres = Vec::<String>::new();
@@ -187,7 +187,7 @@ pub fn write_lib_file(filename : String, contents: Vec<String>, provide: String)
     Ok(())
 }
 
-pub fn process_lib_spec(filename: String) -> Result<(String, String, Interfaces), ErrorMessage> {
+pub fn process_lib_spec(filename: String) -> Result<(String, String, Bounds), ErrorMessage> {
     let result = read_lib_file(filename);
     match result {
         Ok((name, struct_name, specs, provide, interface_provide_map)) => {

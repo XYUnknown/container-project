@@ -49,8 +49,8 @@ impl TypeEnv {
 
     // Main type inference algorithm
     fn ti(&self, term: &Term, tvg: &mut TypeVarGen) -> Result<(Subst, Type), InferenceError> {
-        let (s, t) = (match &*term {
-            // Inter literal: currently only boolean
+        let (s, t) = (match term {
+            // Infer literal: currently only boolean
             Term::LitTerm(_) => {
                 Ok((Subst::new(), Type::Bool()))
             }
@@ -62,10 +62,14 @@ impl TypeEnv {
                 }
             }
             // Infer abstraction
-            Term::LambdaTerm((n, _), ref e) => {
-                let tv = Type::T(tvg.next());
+            Term::LambdaTerm((n, bounds), ref e) => {
+                let mut tv = Type::Var(tvg.next());
+                if (!bounds.is_empty()) {
+                    tv = Type::Con(Box::new("Con".to_string()), Box::new(tv), bounds.clone());
+                }
                 let mut env = self.clone();
                 env.remove(&n.to_string());
+
                 env.insert(
                     n.to_string(), 
                     TypeScheme {
@@ -74,13 +78,14 @@ impl TypeEnv {
                     }
                 );
                 let (s1, t1) = env.ti(e, tvg)?;
-                Ok((s1.clone(), Type::Fun(Box::new(tv.apply(&s1)), Box::new(t1))))
+                let result_ty = Type::Fun(Box::new(tv.apply(&s1)), Box::new(t1));
+                Ok((s1.clone(), result_ty))
             }
             // Infer application
             Term::AppTerm(ref e1, ref e2) => {
                 let (s1, t1) = self.ti(e1, tvg)?;
                 let (s2, t2) = self.apply(&s1).ti(e2, tvg)?;
-                let tv = Type::T(tvg.next());
+                let tv = Type::Var(tvg.next());
                 let s3 = t1.apply(&s2).mgu(&Type::Fun(Box::new(t2), Box::new(tv.clone())))?;
                 Ok((s3.compose(&s2.compose(&s1)), tv.apply(&s3)))
             }
