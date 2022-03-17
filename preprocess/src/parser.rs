@@ -2,6 +2,7 @@ extern crate peg;
 use peg::parser;
 
 use std::vec::Vec;
+use std::iter::FromIterator;
 
 use crate::types::{Name, Type, TypeVar, Bounds};
 
@@ -118,7 +119,7 @@ pub grammar spec() for str {
     pub rule ty() -> Type
         = precedence! {
             n:name() "<" _ t:ty() _ ">"
-            { Type::Con(Box::new(n), Box::new(t), Box::new(vec!["Container".to_string()])) }
+            { Type::Con(Box::new(n), Box::new(t), Box::new(Bounds::from(["Container".to_string()]))) }
             --
             n:name()
             { Type::Var(TypeVar::new(n)) }
@@ -130,7 +131,7 @@ pub grammar spec() for str {
             --
             v:id() { Term::VarTerm(Box::new(v)) }
             --
-            "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(Vec::new())), Box::new(t)) }
+            "\\" v:id() _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(Bounds::new())), Box::new(t)) }
             --
             "\\" v:id() _ "<:" _ "(" _ b:bounds() _ ")" _ "->" _ t:term() { Term::LambdaTerm((Box::new(v), Box::new(b)), Box::new(t)) }
             --
@@ -145,7 +146,7 @@ pub grammar spec() for str {
         }
 
     pub rule bounds() -> Bounds
-        = l: ((_ n:name() _ {n}) ++ "," ) { l }
+        = l: ((_ n:name() _ {n}) ++ "," ) { Bounds::from_iter(l.iter().cloned()) }
 
     pub rule decl() -> Decl
         = precedence! {

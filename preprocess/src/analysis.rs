@@ -104,7 +104,7 @@ impl Analyser {
             Decl::ConTypeDecl(con_ty, (_, ins, tags)) => {
                 let (c, t) = con_ty.get_con_elem().unwrap();
                 let mut name = c.clone() + "Trait";
-                let bound_tag = Tag::Bound((c.clone(), t), Box::new(ins.to_vec()));
+                let bound_tag = Tag::Bound((c.clone(), t), Box::new(ins.clone().into_iter().collect::<Vec<String>>()));
                 let immut_ctx = self.ctx.clone();
                 // prevent generating existing name
                 let mut i: usize = 0;
@@ -144,7 +144,7 @@ impl Analyser {
         match decl {
             Decl::ConTypeDecl(con_ty, (vid, ins, r)) => {
                 let (c, t) = con_ty.get_con_elem().unwrap();
-                let i_tag = Tag::Bound((c.clone(), t.clone()), Box::new(ins.to_vec()));
+                let i_tag = Tag::Bound((c.clone(), t.clone()), Box::new(ins.clone().into_iter().collect::<Vec<String>>()));
                 tags.push(i_tag);
                 match self.analyse_ref(r.deref(), vid) {
                     Ok(prop_tags) => {

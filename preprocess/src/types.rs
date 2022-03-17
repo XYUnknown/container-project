@@ -8,7 +8,7 @@ use std::result;
 pub type Name = String;
 
 // traits
-pub type Bounds = Vec<Name>;
+pub type Bounds = HashSet<Name>;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Type {
@@ -48,7 +48,7 @@ impl ToString for Type {
             Type::Bool() => "bool".to_string(),
             Type::Int() => "int".to_string(),
             Type::Var(tv) => tv.to_string(),
-            Type::Con(n, t, bounds) => n.to_string() + "<" + &t.to_string() + ">" + " <: (" + &bounds.join(", ") + ")",
+            Type::Con(n, t, bounds) => n.to_string() + "<" + &t.to_string() + ">" + " <: (" + &bounds.clone().into_iter().collect::<Vec<String>>().join(", ") + ")",
             Type::Fun(t1, t2) => t1.to_string() + "->" + &t2.to_string(),
         }
     }
@@ -85,7 +85,7 @@ impl Type {
             }
 
             // Unify con type
-            (&Type::Con(ref n1, ref t1,  _), &Type::Con(ref n2, ref t2, _)) => {
+            (&Type::Con(ref n1, ref t1, _), &Type::Con(ref n2, ref t2, _)) => {
                 if n1.to_string() != n2.to_string() {
                     Err("Cannot unify two different container".to_string())
                 } else {
@@ -103,7 +103,11 @@ impl Type {
             }
 
             // Otherwise, the types cannot be unified.
-            (t1, t2) => Err("types do not unify".to_string()),
+            (t1, t2) => {
+                println!("{:?}", t1);
+                println!("{:?}", t2);
+                Err("types do not unify".to_string())
+            }
         }
     }
 }

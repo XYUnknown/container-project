@@ -6,6 +6,7 @@ use std::result;
 
 use crate::parser::{Id, Term};
 use crate::types::{Name, Type, TypeVar, Types, TypeVarGen, Subst, TypeScheme};
+use crate::bounded_ops::{BoundedOps, generate_bounded_ops};
 
 /// A type environment
 #[derive(Clone, Debug)]
@@ -49,6 +50,8 @@ impl TypeEnv {
 
     // Main type inference algorithm
     fn ti(&self, term: &Term, tvg: &mut TypeVarGen) -> Result<(Subst, Type), InferenceError> {
+        // Get types of operations defined in traits
+        let bounded_ops = generate_bounded_ops();
         let (s, t) = (match term {
             // Infer literal: currently only boolean
             Term::LitTerm(_) => {
@@ -64,10 +67,24 @@ impl TypeEnv {
             // Infer abstraction
             Term::LambdaTerm((n, bounds), ref e) => {
                 let mut tv = Type::Var(tvg.next());
+                let mut env = self.clone();
                 if (!bounds.is_empty()) {
                     tv = Type::Con(Box::new("Con".to_string()), Box::new(tv), bounds.clone());
+                    for b in bounds.iter() {
+                        if bounded_ops.contains_key(b) {
+                            let ops_info = bounded_ops.get(b).unwrap();
+                            for (op_name, op_ty) in ops_info {
+                                env.insert(
+                                    op_name.to_string(), 
+                                    TypeScheme {
+                                        vars: Vec::new(),
+                                        ty: op_ty.clone(),
+                                    }
+                                );
+                            }
+                        }
+                    }
                 }
-                let mut env = self.clone();
                 env.remove(&n.to_string());
 
                 env.insert(
