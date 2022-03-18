@@ -76,7 +76,7 @@ impl Analyser {
     pub fn analyse_prop_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
             Decl::PropertyDecl((id, _), term) => {
-                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")\n" + "(provide " + id + ")";
+                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term, true) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
                 self.write_prop_spec_file(filename.clone(), code);
                 let prop_tag = Tag::Prop(Box::new(id.to_string()));
@@ -210,7 +210,7 @@ impl Analyser {
         }
     }
 
-    pub fn analyse_term(&self, term: &Term) -> String {
+    pub fn analyse_term(&self, term: &Term, is_outter_app: bool) -> String {
         match term {
             Term::LitTerm(lit) => {
                 if (lit.to_string() == "true".to_string()) {
@@ -223,18 +223,28 @@ impl Analyser {
                 id.to_string()
             },
             Term::LambdaTerm((id, _), t) => {
-                match **t {
-                    Term::AppTerm(_, _) => {
-                        "(lambda (".to_string() + id + ") (" + &self.analyse_term(t) + "))"
-                    }
-                    _ => {
-                        "(lambda (".to_string() + id + ") " + &self.analyse_term(t) + ")"
-                    }
-                }
-                
+                 "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true) + ")"                
             },
             Term::AppTerm(t1, t2) => {
-                self.analyse_term(t1) + " " + &self.analyse_term(t2)
+                let mut result = String::new();
+                match (*t1.clone(), *t2.clone()) {
+                    (_, Term::AppTerm(ref t21, ref t22)) => {
+                        println!("{:?}", t21);
+                        println!("{:?}", t22);
+                        if (is_outter_app) {
+                            "(".to_string() + &self.analyse_term(t1, false) + " (" + &self.analyse_term(t21, false) + " " + &self.analyse_term(t22, true) + "))"
+                        } else {
+                            self.analyse_term(t1, false) + " (" + &self.analyse_term(t21, false) + " " + &self.analyse_term(t22, true) + ")"
+                        }
+                    },
+                    (_, _) => {
+                        if (is_outter_app) {
+                            "(".to_string() + &self.analyse_term(t1, false) + " " + &self.analyse_term(t2, false) + ")"
+                        } else {
+                            self.analyse_term(t1, false) + " " + &self.analyse_term(t2, false)
+                        }
+                    }
+                }
             }
         }
     }
