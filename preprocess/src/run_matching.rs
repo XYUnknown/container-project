@@ -7,7 +7,7 @@ use crate::spec_map::{MatchSetup};
 
 type ExecutionError = String;
 
-const LANGDECL: &str = "#lang rosette\n";
+pub const LANGDECL: &str = "#lang rosette\n";
 const GENNAME: &str = "./racket_specs/gen_match/match-script.rkt";
 const LIBSPECPATH: &str = "../gen_lib_spec/";
 const PROPSPECPATH: &str = "../gen_prop_spec/";
@@ -20,6 +20,7 @@ pub fn initialise_match_setup() -> MatchSetup {
     let mut match_setup = MatchSetup::new();
     match_setup.insert("Container".to_string(), "../container-setup.rkt".to_string());
     match_setup.insert("RandomAccess".to_string(), "../randomaccess-setup.rkt".to_string());
+    match_setup.insert("Stack".to_string(), "../stack-setup.rkt".to_string());
     match_setup
 }
 

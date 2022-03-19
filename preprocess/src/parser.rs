@@ -24,6 +24,21 @@ pub enum Term {
     AppTerm(Box<Term>, Box<Term>),
 }
 
+impl Term {
+    pub fn is_quantifier(&self) -> bool {
+        match self {
+            Term::VarTerm(id) => {
+                if id.to_string().eq("forall") {
+                    true
+                } else {
+                    false
+                }
+            },
+            _ => false
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Decl {
     PropertyDecl((Box<Id>, Box<Type>), Box<Term>),

@@ -10,7 +10,22 @@ use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 type AnalyserError = String;
 const LANGDECL: &str = "#lang rosette\n";
 const REQUIRE: &str = "(require \"../combinators.rkt\")\n";
+const EXTRAREQUIRE: &str = "(require \"../gen_lib_spec/ops.rkt\")\n";
 const GENPATH: &str = "./racket_specs/gen_prop_spec/";
+
+// length can be adjusted
+// set to 5 to speed up testing
+const LISTMODEL: &str =
+r#"
+(define (generate-list n)
+    (define-symbolic* y integer? #:length n)
+    y)
+
+(define-symbolic n integer?)
+(define-symbolic len (bitvector 32))
+(define ls (take-bv (generate-list 5) len))
+"#;
+const PROVIDELIST: &str = "\n(provide n ls)";
 
 pub struct Analyser {
     ctx: InforMap,
@@ -76,7 +91,7 @@ impl Analyser {
     pub fn analyse_prop_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
             Decl::PropertyDecl((id, _), term) => {
-                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term, true) + ")\n" + "(provide " + id + ")";
+                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term, true, false) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
                 self.write_prop_spec_file(filename.clone(), code);
                 let prop_tag = Tag::Prop(Box::new(id.to_string()));
@@ -210,7 +225,7 @@ impl Analyser {
         }
     }
 
-    pub fn analyse_term(&self, term: &Term, is_outter_app: bool) -> String {
+    pub fn analyse_term(&self, term: &Term, is_outter_app: bool, is_quantifier: bool) -> String {
         match term {
             Term::LitTerm(lit) => {
                 if (lit.to_string() == "true".to_string()) {
@@ -223,25 +238,35 @@ impl Analyser {
                 id.to_string()
             },
             Term::LambdaTerm((id, _), t) => {
-                 "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true) + ")"                
+                if (is_quantifier) {
+                    "(list ".to_string() + id + ") " + &self.analyse_term(t, true, false) 
+                } else {
+                    "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true, false) + ")" 
+                }
+                               
             },
             Term::AppTerm(t1, t2) => {
                 let mut result = String::new();
-                match (*t1.clone(), *t2.clone()) {
+                match ((*t1.clone()).is_quantifier(), *t2.clone()) {
                     (_, Term::AppTerm(ref t21, ref t22)) => {
-                        println!("{:?}", t21);
-                        println!("{:?}", t22);
                         if (is_outter_app) {
-                            "(".to_string() + &self.analyse_term(t1, false) + " (" + &self.analyse_term(t21, false) + " " + &self.analyse_term(t22, true) + "))"
+                            "(".to_string() + &self.analyse_term(t1, false, false) + " (" + &self.analyse_term(t21, false, false) + " " + &self.analyse_term(t22, true, false) + "))"
                         } else {
-                            self.analyse_term(t1, false) + " (" + &self.analyse_term(t21, false) + " " + &self.analyse_term(t22, true) + ")"
+                            self.analyse_term(t1, false, false) + " (" + &self.analyse_term(t21, false, false) + " " + &self.analyse_term(t22, true, false) + ")"
                         }
                     },
-                    (_, _) => {
+                    (false, _) => {
                         if (is_outter_app) {
-                            "(".to_string() + &self.analyse_term(t1, false) + " " + &self.analyse_term(t2, false) + ")"
+                            "(".to_string() + &self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, false) + ")"
                         } else {
-                            self.analyse_term(t1, false) + " " + &self.analyse_term(t2, false)
+                            self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, false)
+                        }
+                    },
+                    (true, _) => {
+                        if (is_outter_app) {
+                            "(".to_string() + &self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, true) + ")"
+                        } else {
+                            self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, true)
                         }
                     }
                 }
@@ -253,7 +278,10 @@ impl Analyser {
         let mut output = fs::File::create(GENPATH.to_owned() + &filename)?;
         write!(output, "{}", LANGDECL.to_string())?;
         write!(output, "{}", REQUIRE.to_string())?;
+        write!(output, "{}", EXTRAREQUIRE.to_string())?;
+        write!(output, "{}", LISTMODEL.to_string())?;
         write!(output, "{}", contents)?;
+        write!(output, "{}", PROVIDELIST.to_string())?;
         Ok(())
     }
 }

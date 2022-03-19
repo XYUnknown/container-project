@@ -9,8 +9,8 @@ use crate::type_check::{TypeChecker};
 use crate::analysis::{Analyser};
 use crate::description::{Tag, Description, InforMap};
 use crate::lib_spec_processor::{process_lib_specs};
-use crate::spec_map::{PropSpecs, MatchSetup};
-use crate::run_matching::{initialise_match_setup, gen_match_script, run_matching, cleanup_script, setup_dirs};
+use crate::spec_map::{PropSpecs, MatchSetup, ProvidedOps};
+use crate::run_matching::{LANGDECL, initialise_match_setup, gen_match_script, run_matching, cleanup_script, setup_dirs};
 
 const CODEGEN: &str = "/*CODEGEN*/\n";
 const CODEGENEND: &str = "/*ENDCODEGEN*/\n";
@@ -26,6 +26,8 @@ const MATCHSCRIPT: &str = "./racket_specs/gen_match/match-script.rkt";
 
 const IMPORT: &str = "use preprocess::traits::container_constructor::ContainerConstructor;\n";
 const TRAITCRATE: &str = "preprocess::traits::";
+
+const OPS: &str = "./racket_specs/gen_lib_spec/ops.rkt";
 
 type ErrorMessage = String;
 
@@ -111,6 +113,20 @@ pub fn process_con_decl(ctx: &InforMap, prop_specs: &PropSpecs) -> Result<String
     Ok(code)
 }
 
+fn write_provided_ops(provided_ops: &ProvidedOps) -> Result<(), Error>  {
+    let ops_path = OPS;
+    let (code, ops) = provided_ops;
+    let mut output = fs::File::create(ops_path.to_owned())?;
+    write!(output, "{}", LANGDECL.to_string())?;
+    for i in 0..code.len() {
+        write!(output, "{}", code[i])?;
+    }
+    let ops_string = ops.join(" ");
+    let provide = "\n(provide ".to_string() + &ops_string + ")";
+    write!(output, "{}", provide)?;
+    Ok(())
+}
+
 fn library_spec_lookup(id: String, properties: Vec<Description>, bounds: Vec<Description>, prop_specs: &PropSpecs, match_setup: &MatchSetup) -> Result<Vec<String>, ErrorMessage> {
     let pb = ProgressBar::new_spinner();
     pb.enable_steady_tick(200);
@@ -134,12 +150,18 @@ fn library_spec_lookup(id: String, properties: Vec<Description>, bounds: Vec<Des
     let mut structs = Vec::new();
     // select library structs implement bounds decl in contype
     let mut lib_spec_impls = lib_spec.clone();
-    for (name, (_, impls)) in lib_spec.iter() {
+    for (name, (_, impls, _)) in lib_spec.iter() {
         if (!bounds.iter().all(|i| impls.keys().cloned().collect::<String>().contains(i))) {
             lib_spec_impls.remove(name);
         }
     }
-    for (name, (lib_spec_dir, bound_ctx)) in lib_spec_impls.iter() {
+    for (name, (lib_spec_dir, bound_ctx, provided_ops)) in lib_spec_impls.iter() {
+        match write_provided_ops(provided_ops) {
+            Ok(_) => { },
+            Err(_) => {
+                return Err("Error, cannot obtain provided operations from the library specifiction".to_string());
+            }
+        }
         let mut is_match = false;
         for p in &properties {
             let mut is_partial_match = false;
