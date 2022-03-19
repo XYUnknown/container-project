@@ -250,7 +250,6 @@ impl Analyser {
             Term::AppTerm(t1, t2) => {
                 // Temporary solution of cdr required to adjust model ops
                 if ((*t1.clone()).require_cdr() && !cdr_added.contains(&t1.to_string())) {
-                    println!("{:?}", "here");
                     cdr_added.push(t1.to_string());
                     *term = Term::AppTerm(Box::new(Term::VarTerm(Box::new("cdr".to_string()))), Box::new(term.clone()));
                     self.analyse_term(term, is_outter_app, is_quantifier, cdr_added)

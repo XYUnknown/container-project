@@ -197,7 +197,6 @@ impl TypeChecker {
                         match self.global_ctx.type_inference(term, &mut self.tvg) {
                             Ok(ty) => {
                                 // it should have type Con<T> -> Bool
-                                println!("{:?}", ty);
                                 match ty {
                                     Type::Fun(ref t1, ref t2) => {
                                         match (t1.deref(), t2.deref()) {
