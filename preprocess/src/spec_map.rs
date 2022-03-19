@@ -11,7 +11,8 @@ pub type ProvidedOps = (Vec<String>, Vec<String>);
 
 type PropertyName = String;
 type PropSpecDir = String;
+type PropSymbolics = Vec<String>;
 
 pub type LibSpecs = HashMap<StructName, (LibSpecDir, Bounds, ProvidedOps)>;
-pub type PropSpecs = HashMap<PropertyName, PropSpecDir>;
+pub type PropSpecs = HashMap<PropertyName, (PropSpecDir, PropSymbolics)>;
 pub type MatchSetup = HashMap<BoundName, MatchSetupDir>;

@@ -25,7 +25,7 @@ pub fn initialise_match_setup() -> MatchSetup {
 }
 
 
-pub fn gen_match_script(prop: String, match_setup: String, prop_spec_file: String, lib_spec_file: String, interface_spec: String) -> Result<String, Error>  {
+pub fn gen_match_script(prop: String, match_setup: String, prop_spec_file: String, lib_spec_file: String, interface_spec: String, symbolics: &Vec<String>) -> Result<String, Error>  {
     let mut output = fs::File::create(GENNAME.to_owned())?;
     write!(output, "{}", LANGDECL.to_string())?;
     let require_prop = "(require \"".to_string() + PROPSPECPATH + &prop_spec_file + "\")\n";
@@ -33,7 +33,8 @@ pub fn gen_match_script(prop: String, match_setup: String, prop_spec_file: Strin
     let require_lib = "(require \"".to_string() + LIBSPECPATH + &lib_spec_file + "\")\n";
     write!(output, "{}", require_lib)?;
     write!(output, "{}", "(require \"".to_string() + &match_setup + "\")\n")?;
-    let code = "(check ".to_string() + &prop + " (cdr " + &interface_spec +") (car " + &interface_spec + ") ls n)\n";
+    let s = symbolics.join(" ");
+    let code = "(check ".to_string() + &prop + " (cdr " + &interface_spec +") (car " + &interface_spec + ") ls " + &s + ")\n";
     write!(output, "{}", code)?;
     Ok(GENNAME.to_string())
 }

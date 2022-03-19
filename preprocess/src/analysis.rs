@@ -20,12 +20,30 @@ r#"
 (define (generate-list n)
     (define-symbolic* y integer? #:length n)
     y)
-
-(define-symbolic n integer?)
 (define-symbolic len (bitvector 32))
 (define ls (take-bv (generate-list 5) len))
 "#;
-const PROVIDELIST: &str = "\n(provide n ls)";
+
+fn gen_symbolic(n: &str) -> String {
+    format!(
+r#"
+(define-symbolic {n} integer?)
+"#)
+}
+
+fn gen_symbolics(symbolics: &Vec<String>) -> String {
+    let provide = symbolics.join(" ");
+    let mut code = String::new();
+    for s in symbolics.iter () {
+        code = code + &gen_symbolic(s);
+    }
+    let provide = format!(
+r#"
+(provide {provide} ls)
+"#); 
+    code = code + &provide;
+    code
+}
 
 pub struct Analyser {
     ctx: InforMap,
@@ -93,12 +111,21 @@ impl Analyser {
             Decl::PropertyDecl((id, _), term) => {
                 let mut mterm = term.clone();
                 let mut cdr_added = Vec::<String>::new();
-                let code =  "(define ".to_string() + id + " " + &self.analyse_term(&mut mterm, true, false, &mut cdr_added) + ")\n" + "(provide " + id + ")";
+                let mut symbolics =  Vec::<String>::new();
+                let code =  "(define ".to_string() + id + " " + &self.analyse_term(&mut mterm, true, false, &mut cdr_added, &mut symbolics) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
-                self.write_prop_spec_file(filename.clone(), code);
+                let mut symbolics_provided = gen_symbolics(&vec!["n".to_string()]);
+                if (symbolics.len() != 0) {
+                    symbolics_provided = gen_symbolics(&symbolics);
+                } 
+                self.write_prop_spec_file(filename.clone(), code, symbolics_provided);
                 let prop_tag = Tag::Prop(Box::new(id.to_string()));
                 self.ctx.put(id.to_string(), prop_tag);
-                self.prop_specs.insert(id.to_string(), filename);
+                if (symbolics.len() == 0) {
+                    self.prop_specs.insert(id.to_string(), (filename, vec!["n".to_string()]));
+                } else {
+                    self.prop_specs.insert(id.to_string(), (filename, symbolics));
+                }
                 Ok(())
             },
             _ => Err("Not a valid property declaration".to_string())
@@ -227,7 +254,7 @@ impl Analyser {
         }
     }
 
-    pub fn analyse_term(&self, term: &mut Term, is_outter_app: bool, is_quantifier: bool, cdr_added: &mut Vec::<String>) -> String {
+    pub fn analyse_term(&self, term: &mut Term, is_outter_app: bool, is_quantifier: bool, cdr_added: &mut Vec<String>, symbolics: &mut Vec<String>) -> String {
         match term {
             Term::LitTerm(lit) => {
                 if (lit.to_string() == "true".to_string()) {
@@ -241,9 +268,10 @@ impl Analyser {
             },
             Term::LambdaTerm((id, _), t) => {
                 if (is_quantifier) {
-                    "(list ".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added) 
+                    symbolics.push(id.to_string());
+                    "(list ".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added, symbolics) 
                 } else {
-                    "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added) + ")" 
+                    "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added, symbolics) + ")" 
                 }
                                
             },
@@ -252,29 +280,29 @@ impl Analyser {
                 if ((*t1.clone()).require_cdr() && !cdr_added.contains(&t1.to_string())) {
                     cdr_added.push(t1.to_string());
                     *term = Term::AppTerm(Box::new(Term::VarTerm(Box::new("cdr".to_string()))), Box::new(term.clone()));
-                    self.analyse_term(term, is_outter_app, is_quantifier, cdr_added)
+                    self.analyse_term(term, is_outter_app, is_quantifier, cdr_added, symbolics)
                 } else {
                     let mut result = String::new();
                     match ((*t1.clone()).is_quantifier(), *t2.clone()) {
                         (_, Term::AppTerm(_, _)) => {
                             if (is_outter_app) {
-                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, true, false, cdr_added) + ")"
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, true, false, cdr_added, symbolics) + ")"
                             } else {
-                                self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, true, false, cdr_added)
+                                self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, true, false, cdr_added, symbolics)
                             }
                         },
                         (false, _) => {
                             if (is_outter_app) {
-                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, false, cdr_added) + ")"
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, false, cdr_added, symbolics) + ")"
                             } else {
-                                self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, false, cdr_added)
+                                self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, false, cdr_added, symbolics)
                             }
                         },
                         (true, _) => {
                             if (is_outter_app) {
-                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, true, cdr_added) + ")"
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, true, cdr_added, symbolics) + ")"
                             } else {
-                                self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, true, cdr_added)
+                                self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, true, cdr_added, symbolics)
                             }
                         }
                     }
@@ -283,14 +311,14 @@ impl Analyser {
         }
     }
 
-    fn write_prop_spec_file(&self, filename : String, contents: String) -> Result<(), Error> {
+    fn write_prop_spec_file(&self, filename : String, contents: String, symbolics: String) -> Result<(), Error> {
         let mut output = fs::File::create(GENPATH.to_owned() + &filename)?;
         write!(output, "{}", LANGDECL.to_string())?;
         write!(output, "{}", REQUIRE.to_string())?;
         write!(output, "{}", EXTRAREQUIRE.to_string())?;
         write!(output, "{}", LISTMODEL.to_string())?;
         write!(output, "{}", contents)?;
-        write!(output, "{}", PROVIDELIST.to_string())?;
+        write!(output, "{}", symbolics)?;
         Ok(())
     }
 }

@@ -166,8 +166,8 @@ fn library_spec_lookup(id: String, properties: Vec<Description>, bounds: Vec<Des
         for p in &properties {
             let mut is_partial_match = false;
             for i in &bounds {
-                let prop_file = prop_specs.get(p).expect(&("Error: No property specification found for: ".to_string() + &p));
-                match gen_match_script(p.to_string(), match_setup.get(i).unwrap().to_string(), prop_file.to_string(), lib_spec_dir.to_string(), bound_ctx.get(i).unwrap().to_string()) {
+                let (prop_file, symbolics) = prop_specs.get(p).expect(&("Error: No property specification found for: ".to_string() + &p));
+                match gen_match_script(p.to_string(), match_setup.get(i).unwrap().to_string(), prop_file.to_string(), lib_spec_dir.to_string(), bound_ctx.get(i).unwrap().to_string(), symbolics) {
                     Ok(_) => {
                         let result = run_matching(MATCHSCRIPT.to_string());
                         match result {

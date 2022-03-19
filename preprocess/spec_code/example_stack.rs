@@ -1,6 +1,6 @@
 /*SPEC*
 property lifo<T> {
-    \c <: (Stack) -> (forall \n -> ((equal? (pop ((push c) n))) n))
+    \c <: (Stack) -> (forall \x -> ((equal? (pop ((push c) x))) x))
 }
 
 type StrackCon<S> = {c impl (Container, Stack) | (lifo c)}
@@ -13,5 +13,5 @@ fn main () {
         c.insert(x);
         //c.first();
     }
-    assert_eq!(c.len(), 10);
+    assert_eq!(c.len(), 20);
 }
