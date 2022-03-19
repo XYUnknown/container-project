@@ -5,7 +5,7 @@ rust-lazy-unique-vec-spec preprocess::library::lazy_unique_vector::LazyUniqueVec
 use std::vec::Vec;
 use std::slice::Iter;
 use std::ops::Deref;
-use crate::traits::{Container, Stack, WithPosition};
+use crate::traits::{Container, Stack, RandomAccess};
 
 // A Unique Vector
 pub struct LazyUniqueVec<T> {
@@ -194,9 +194,9 @@ impl<T: Ord> Container<T> for LazyUniqueVec<T> {
 }
 
 /*IMPL*
-WithPosition
+RandomAccess
 *ENDIMPL*/
-impl<T: Ord> WithPosition<T> for LazyUniqueVec<T> {
+impl<T: Ord> RandomAccess<T> for LazyUniqueVec<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first

@@ -1,6 +1,6 @@
 /*SPEC*
-property unique {
-    \c -> ((for-all-elems c) \a -> ((unique-count? a) c))
+property unique<T> {
+    \c <: (Container, RandomAccess) -> ((for-all-elems c) \a -> ((unique-count? a) c))
 }
 
 type UniqueCon<S> = {c impl (Container) | (unique c)}

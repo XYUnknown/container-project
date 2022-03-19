@@ -1,7 +1,7 @@
 use crate::parser::{Prog, Block, Spec, Decl, Term, Refinement, Id, spec};
 use crate::inference::{TypeEnv};
 use crate::generator::{readfile};
-use crate::types::{Type, TypeVar, TypeScheme, TypeVarGen};
+use crate::types::{Type, TypeVar, TypeScheme, TypeVarGen, Bounds};
 
 use std::ops::Deref;
 
@@ -22,39 +22,42 @@ impl TypeChecker {
 
     fn predefined(&mut self) {
         // put for_all_unique_pair into context
-        let binary_fn1 = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let binary_fn1 = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("for-all-unique-pairs".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                    Box::new(Bounds::from(["Container".to_string()])))), 
                     Box::new(Type::Fun(Box::new(binary_fn1), Box::new(Type::Bool()))))
                 }
             );
 
         // put for_all_unique_pair into context
-        let binary_fn2 = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let binary_fn2 = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("for-all-consecutive-pairs".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                    Box::new(Bounds::from(["Container".to_string()])))), 
                     Box::new(Type::Fun(Box::new(binary_fn2), Box::new(Type::Bool()))))
                 }
             );
         
-        let unary_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()));
+        let unary_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()));
         self.global_ctx.insert("for-all-elems".to_string(),
             TypeScheme {
                 vars: Vec::new(),
                 ty: Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                    Box::new(Type::T(TypeVar::new("T".to_string()))))), 
+                    Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                    Box::new(Bounds::from(["Container".to_string()])))), 
                     Box::new(Type::Fun(Box::new(unary_fn), Box::new(Type::Bool()))))
                 }
             );
 
         // put neq into context
-        let neq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let neq_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("neq".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
@@ -63,7 +66,7 @@ impl TypeChecker {
         );
 
         // put leq into context
-        let leq_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        let leq_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("leq?".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
@@ -71,13 +74,33 @@ impl TypeChecker {
             }
         );
 
-        let unique_count_fn = Type::Fun(Box::new(Type::T(TypeVar::new("T".to_string()))), 
+        let equal = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        self.global_ctx.insert("equal?".to_string(), 
+            TypeScheme {
+                vars: Vec::new(),
+                ty: equal
+            }
+        );
+
+        let unique_count_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), 
                                 Box::new(Type::Fun(Box::new(Type::Con(Box::new("Con".to_string()), 
-                                Box::new(Type::T(TypeVar::new("T".to_string()))))), Box::new(Type::Bool()))));
+                                Box::new(Type::Var(TypeVar::new("T".to_string()))),
+                                Box::new(Bounds::from(["Container".to_string()])))), Box::new(Type::Bool()))));
         self.global_ctx.insert("unique-count?".to_string(), 
             TypeScheme {
                 vars: Vec::new(),
                 ty: unique_count_fn
+            }
+        );
+
+        // the forall quantifier
+        let forall = Type::Fun(
+                        Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))),
+                        Box::new(Type::Bool()));
+        self.global_ctx.insert("forall".to_string(), 
+            TypeScheme {
+                vars: Vec::new(),
+                ty: forall
             }
         );
     }
@@ -109,7 +132,7 @@ impl TypeChecker {
         match self.check_prop_decls(prop_decls) {
             Ok(_) => {
                 match self.check_contype_decls(contype_decls.clone()) {
-                    Ok(_) => self.check_interface_decls(contype_decls),
+                    Ok(_) => self.check_bound_decls(contype_decls),
                     Err(e) => Err(e)
                 }
             }
@@ -117,10 +140,10 @@ impl TypeChecker {
         }
     }
 
-    pub fn check_interface_decls(&mut self, decls: Vec<&Decl>) -> Result<(), TypeError> {
+    pub fn check_bound_decls(&mut self, decls: Vec<&Decl>) -> Result<(), TypeError> {
         let mut result = Ok(());
         for decl in decls.into_iter() {
-            match self.check_interface_decl(decl) {
+            match self.check_bound_decl(decl) {
                 Ok(_) => continue,
                 Err(e) => {
                     result = Err(e);
@@ -131,21 +154,21 @@ impl TypeChecker {
         result
     }
 
-    pub fn check_interface_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
+    pub fn check_bound_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
             Decl::ConTypeDecl(_, (_, ins, _)) => {
-                // Duplicate interface name checking
+                // Duplicate bound name checking
                 for i in ins.iter() {
                     match self.global_ctx.get(&i.to_string()) {
                         Some(_) => {
-                            return Err("Duplicate interface name declaration".to_string());
+                            return Err("Duplicate bound name declaration".to_string());
                         },
-                        None => continue, // TODO: check each interface is a valid rust trait
+                        None => continue, // TODO: check each bound is a valid rust trait
                     }
                 }
                 Ok(())
             },
-            _ => Err("Not a valid interface declaration".to_string())
+            _ => Err("Not a valid bound declaration".to_string())
         }
     }
 
@@ -165,7 +188,7 @@ impl TypeChecker {
 
     pub fn check_prop_decl(&mut self, decl: &Decl) -> Result<(), TypeError> {
         match decl {
-            Decl::PropertyDecl(id, term) => {
+            Decl::PropertyDecl((id, ty), term) => {
                 // Duplicate property decl checking
                 match self.global_ctx.get(&id.to_string()) {
                     Some(_) => Err("Duplicate property declaration".to_string()),
@@ -177,7 +200,7 @@ impl TypeChecker {
                                 match ty {
                                     Type::Fun(ref t1, ref t2) => {
                                         match (t1.deref(), t2.deref()) {
-                                            (Type::Con(n, t), Type::Bool()) => {
+                                            (Type::Con(n, t, _), Type::Bool()) => {
                                                 if n.to_string() == "Con".to_string() {
                                                     self.global_ctx.insert(
                                                         id.to_string(),
@@ -237,7 +260,7 @@ impl TypeChecker {
                 match self.global_ctx.get(&con_ty.to_string()) {
                     Some(_) => Err("Duplicate container type declaration".to_string()),
                     None => {
-                        let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::T(TypeVar::new("T".to_string()))));
+                        let con = Type::Con(Box::new("Con".to_string()), Box::new(Type::Var(TypeVar::new("T".to_string()))), ins.clone());
                         let mut local_ctx = self.global_ctx.clone();
                         local_ctx.insert(vid.to_string(),
                             TypeScheme {

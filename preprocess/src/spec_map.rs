@@ -3,14 +3,16 @@ use std::collections::hash_map::Iter;
 
 type StructName = String;
 type LibSpecDir = String;
-type InterfaceName = String;
-type InterfaceProvide = String;
+type BoundName = String;
+type BoundProvide = String;
 type MatchSetupDir = String;
-pub type Interfaces = HashMap<InterfaceName, InterfaceProvide>;
+pub type Bounds = HashMap<BoundName, BoundProvide>;
+pub type ProvidedOps = (Vec<String>, Vec<String>);
 
 type PropertyName = String;
 type PropSpecDir = String;
+type PropSymbolics = Vec<String>;
 
-pub type LibSpecs = HashMap<StructName, (LibSpecDir, Interfaces)>;
-pub type PropSpecs = HashMap<PropertyName, PropSpecDir>;
-pub type MatchSetup = HashMap<InterfaceName, MatchSetupDir>;
+pub type LibSpecs = HashMap<StructName, (LibSpecDir, Bounds, ProvidedOps)>;
+pub type PropSpecs = HashMap<PropertyName, (PropSpecDir, PropSymbolics)>;
+pub type MatchSetup = HashMap<BoundName, MatchSetupDir>;

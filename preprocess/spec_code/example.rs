@@ -1,5 +1,5 @@
 /*SPEC*
-property unique {
+property unique<T> {
     \c -> ((for-all-elems c) \a -> ((unique-count? a) c))
 }
 
@@ -7,10 +7,10 @@ type UniqueCon<T> = {c impl (Container) | (unique c) }
 *ENDSPEC*/
 
 /*SPEC*
-property ascending {
+property ascending<T> {
     \c -> ((for-all-consecutive-pairs c) leq?)
 }
-type AscendingConWithPos<T> = {c impl (Container, WithPosition) | (ascending c)}
+type AscendingConRandomAccess<T> = {c impl (Container, RandomAccess) | (ascending c)}
 
 type UniqueAscendingCon<T> = {c impl (Container) | ((unique c) and (ascending c)) }
 *ENDSPEC*/

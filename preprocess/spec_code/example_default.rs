@@ -1,5 +1,5 @@
 /*SPEC*
-property default {
+property default<T> {
     \c -> true
 }
 

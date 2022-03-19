@@ -10,7 +10,40 @@ use std::io::{Write, BufReader, BufRead, Error, ErrorKind};
 type AnalyserError = String;
 const LANGDECL: &str = "#lang rosette\n";
 const REQUIRE: &str = "(require \"../combinators.rkt\")\n";
+const EXTRAREQUIRE: &str = "(require \"../gen_lib_spec/ops.rkt\")\n";
 const GENPATH: &str = "./racket_specs/gen_prop_spec/";
+
+// length can be adjusted
+// set to 5 to speed up testing
+const LISTMODEL: &str =
+r#"
+(define (generate-list n)
+    (define-symbolic* y integer? #:length n)
+    y)
+(define-symbolic len (bitvector 32))
+(define ls (take-bv (generate-list 5) len))
+"#;
+
+fn gen_symbolic(n: &str) -> String {
+    format!(
+r#"
+(define-symbolic {n} integer?)
+"#)
+}
+
+fn gen_symbolics(symbolics: &Vec<String>) -> String {
+    let provide = symbolics.join(" ");
+    let mut code = String::new();
+    for s in symbolics.iter () {
+        code = code + &gen_symbolic(s);
+    }
+    let provide = format!(
+r#"
+(provide {provide} ls)
+"#); 
+    code = code + &provide;
+    code
+}
 
 pub struct Analyser {
     ctx: InforMap,
@@ -55,7 +88,7 @@ impl Analyser {
             .collect();
         match self.analyse_prop_decls(prop_decls) {
             Ok(_) => match self.analyse_contype_decls(contype_decls.clone()) {
-                Ok(_) => self.analyse_interface_decls(contype_decls),
+                Ok(_) => self.analyse_bound_decls(contype_decls),
                 Err(e) => Err(e)
             }
             Err(e) => Err(e)
@@ -75,23 +108,34 @@ impl Analyser {
 
     pub fn analyse_prop_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
-            Decl::PropertyDecl(id, term) => {
-                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term) + ")\n" + "(provide " + id + ")";
+            Decl::PropertyDecl((id, _), term) => {
+                let mut mterm = term.clone();
+                let mut cdr_added = Vec::<String>::new();
+                let mut symbolics =  Vec::<String>::new();
+                let code =  "(define ".to_string() + id + " " + &self.analyse_term(&mut mterm, true, false, &mut cdr_added, &mut symbolics) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
-                self.write_prop_spec_file(filename.clone(), code);
+                let mut symbolics_provided = gen_symbolics(&vec!["n".to_string()]);
+                if (symbolics.len() != 0) {
+                    symbolics_provided = gen_symbolics(&symbolics);
+                } 
+                self.write_prop_spec_file(filename.clone(), code, symbolics_provided);
                 let prop_tag = Tag::Prop(Box::new(id.to_string()));
                 self.ctx.put(id.to_string(), prop_tag);
-                self.prop_specs.insert(id.to_string(), filename);
+                if (symbolics.len() == 0) {
+                    self.prop_specs.insert(id.to_string(), (filename, vec!["n".to_string()]));
+                } else {
+                    self.prop_specs.insert(id.to_string(), (filename, symbolics));
+                }
                 Ok(())
             },
             _ => Err("Not a valid property declaration".to_string())
         }
     }
 
-    pub fn analyse_interface_decls(&mut self, decls: Vec<&Decl>) -> Result<(), AnalyserError> {
+    pub fn analyse_bound_decls(&mut self, decls: Vec<&Decl>) -> Result<(), AnalyserError> {
         let mut result = Ok(());
         for decl in decls.into_iter() {
-            match self.analyse_interface_decl(decl) {
+            match self.analyse_bound_decl(decl) {
                 Ok(_) => continue,
                 Err(e) => result = Err(e)
             }
@@ -99,12 +143,12 @@ impl Analyser {
         result
     }
 
-    pub fn analyse_interface_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
+    pub fn analyse_bound_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
             Decl::ConTypeDecl(con_ty, (_, ins, tags)) => {
                 let (c, t) = con_ty.get_con_elem().unwrap();
                 let mut name = c.clone() + "Trait";
-                let interface_tag = Tag::Interface((c.clone(), t), Box::new(ins.to_vec()));
+                let bound_tag = Tag::Bound((c.clone(), t), Box::new(ins.clone().into_iter().collect::<Vec<String>>()));
                 let immut_ctx = self.ctx.clone();
                 // prevent generating existing name
                 let mut i: usize = 0;
@@ -121,10 +165,10 @@ impl Analyser {
                         return Err("Not a valid container declaration.".to_string());
                     }
                 }
-                self.ctx.put(name, interface_tag);
+                self.ctx.put(name, bound_tag);
                 Ok(())
             },
-            _ => Err("Not a valid interface declaration".to_string())
+            _ => Err("Not a valid bound declaration".to_string())
         }
     }
 
@@ -144,7 +188,7 @@ impl Analyser {
         match decl {
             Decl::ConTypeDecl(con_ty, (vid, ins, r)) => {
                 let (c, t) = con_ty.get_con_elem().unwrap();
-                let i_tag = Tag::Interface((c.clone(), t.clone()), Box::new(ins.to_vec()));
+                let i_tag = Tag::Bound((c.clone(), t.clone()), Box::new(ins.clone().into_iter().collect::<Vec<String>>()));
                 tags.push(i_tag);
                 match self.analyse_ref(r.deref(), vid) {
                     Ok(prop_tags) => {
@@ -210,7 +254,7 @@ impl Analyser {
         }
     }
 
-    pub fn analyse_term(&self, term: &Term) -> String {
+    pub fn analyse_term(&self, term: &mut Term, is_outter_app: bool, is_quantifier: bool, cdr_added: &mut Vec<String>, symbolics: &mut Vec<String>) -> String {
         match term {
             Term::LitTerm(lit) => {
                 if (lit.to_string() == "true".to_string()) {
@@ -222,28 +266,59 @@ impl Analyser {
             Term::VarTerm(id) => {
                 id.to_string()
             },
-            Term::LambdaTerm(id, t) => {
-                match **t {
-                    Term::AppTerm(_, _) => {
-                        "(lambda (".to_string() + id + ") (" + &self.analyse_term(t) + "))"
-                    }
-                    _ => {
-                        "(lambda (".to_string() + id + ") " + &self.analyse_term(t) + ")"
-                    }
+            Term::LambdaTerm((id, _), t) => {
+                if (is_quantifier) {
+                    symbolics.push(id.to_string());
+                    "(list ".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added, symbolics) 
+                } else {
+                    "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added, symbolics) + ")" 
                 }
-                
+                               
             },
             Term::AppTerm(t1, t2) => {
-                self.analyse_term(t1) + " " + &self.analyse_term(t2)
+                // Temporary solution of cdr required to adjust model ops
+                if ((*t1.clone()).require_cdr() && !cdr_added.contains(&t1.to_string())) {
+                    cdr_added.push(t1.to_string());
+                    *term = Term::AppTerm(Box::new(Term::VarTerm(Box::new("cdr".to_string()))), Box::new(term.clone()));
+                    self.analyse_term(term, is_outter_app, is_quantifier, cdr_added, symbolics)
+                } else {
+                    let mut result = String::new();
+                    match ((*t1.clone()).is_quantifier(), *t2.clone()) {
+                        (_, Term::AppTerm(_, _)) => {
+                            if (is_outter_app) {
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, true, false, cdr_added, symbolics) + ")"
+                            } else {
+                                self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, true, false, cdr_added, symbolics)
+                            }
+                        },
+                        (false, _) => {
+                            if (is_outter_app) {
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, false, cdr_added, symbolics) + ")"
+                            } else {
+                                self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, false, cdr_added, symbolics)
+                            }
+                        },
+                        (true, _) => {
+                            if (is_outter_app) {
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, true, cdr_added, symbolics) + ")"
+                            } else {
+                                self.analyse_term(t1, false, false, cdr_added, symbolics) + " " + &self.analyse_term(t2, false, true, cdr_added, symbolics)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
-    fn write_prop_spec_file(&self, filename : String, contents: String) -> Result<(), Error> {
+    fn write_prop_spec_file(&self, filename : String, contents: String, symbolics: String) -> Result<(), Error> {
         let mut output = fs::File::create(GENPATH.to_owned() + &filename)?;
         write!(output, "{}", LANGDECL.to_string())?;
         write!(output, "{}", REQUIRE.to_string())?;
+        write!(output, "{}", EXTRAREQUIRE.to_string())?;
+        write!(output, "{}", LISTMODEL.to_string())?;
         write!(output, "{}", contents)?;
+        write!(output, "{}", symbolics)?;
         Ok(())
     }
 }

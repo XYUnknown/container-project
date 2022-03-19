@@ -3,7 +3,7 @@ rust-btreeset-spec std::collections::BTreeSet
 *ENDLIBSPEC-NAME*/
 
 use std::collections::BTreeSet;
-use crate::traits::{Container, WithPosition};
+use crate::traits::{Container, RandomAccess};
 
 /*IMPL*
 Container
@@ -93,9 +93,9 @@ impl<T: Ord> Container<T> for BTreeSet<T> {
 }
 
 /*IMPL*
-WithPosition
+RandomAccess
 *ENDIMPL*/
-impl<T: Ord> WithPosition<T> for BTreeSet<T> {
+impl<T: Ord> RandomAccess<T> for BTreeSet<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first
@@ -145,7 +145,7 @@ impl<T: Ord> WithPosition<T> for BTreeSet<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::{Container, WithPosition};
+    use crate::traits::{Container, RandomAccess};
     use std::collections::BTreeSet;
 
     #[test]

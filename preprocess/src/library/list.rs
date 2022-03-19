@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use std::marker::PhantomData;
 // nightly features
 use std::collections::linked_list::CursorMut;
-use crate::traits::{Container, Stack, WithPosition};
+use crate::traits::{Container, Stack, RandomAccess};
 
 /*IMPL*
 Container
@@ -114,11 +114,11 @@ Stack
 impl<T> Stack<T> for LinkedList<T> {
     /*LIBSPEC*
     /*OPNAME*
-    push spec-push pre-push post-push
+    push push pre-push post-push
     *ENDOPNAME*/
-    (define (spec-push xs x) (append xs (list x)))
+    (define (push xs x) (append xs (list x)))
     (define (pre-push xs) #t)
-    (define (post-push xs x ys) (equal? ys (spec-push xs x)))
+    (define (post-push xs x ys) (equal? ys (push xs x)))
     *ENDLIBSPEC*/
     fn push(&mut self, elt: T) {
         LinkedList::push_back(self, elt);
@@ -126,14 +126,14 @@ impl<T> Stack<T> for LinkedList<T> {
 
     /*LIBSPEC*
     /*OPNAME*
-    pop spec-pop pre-pop post-pop
+    pop pop pre-pop post-pop
     *ENDOPNAME*/
-    (define (spec-pop xs)
+    (define (pop xs)
       (cond
         [(null? xs) (cons xs null)]
         [else (cons (take xs (- (length xs) 1)) (last xs))]))
     (define (pre-pop xs) #t)
-    (define (post-pop xs r) (equal? r (spec-pop xs)))
+    (define (post-pop xs r) (equal? r (pop xs)))
     *ENDLIBSPEC*/
     fn pop(&mut self) -> Option<T> {
         LinkedList::pop_back(self)
@@ -141,9 +141,9 @@ impl<T> Stack<T> for LinkedList<T> {
 }
 
 /*IMPL*
-WithPosition
+RandomAccess
 *ENDIMPL*/
-impl<T> WithPosition<T> for LinkedList<T> {
+impl<T> RandomAccess<T> for LinkedList<T> {
     /*LIBSPEC*
     /*OPNAME*
     first spec-first pre-first post-first
@@ -211,7 +211,7 @@ impl<T: 'static + Ord> Constructor for Con<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::traits::{Container, Stack, WithPosition};
+    use crate::traits::{Container, Stack, RandomAccess};
     use crate::library::list::{Constructor, Con};
     use std::collections::LinkedList;
 
@@ -261,9 +261,9 @@ mod tests {
 
     #[test]
     fn test_list_with_position() {
-        trait ContainerWithPosition<T> : Container<T> + WithPosition<T> {}
-        impl<T: Ord> ContainerWithPosition<T> for LinkedList<T> {}
-        let list : &mut dyn ContainerWithPosition<u32> = &mut LinkedList::<u32>::new();
+        trait ContainerRandomAccess<T> : Container<T> + RandomAccess<T> {}
+        impl<T: Ord> ContainerRandomAccess<T> for LinkedList<T> {}
+        let list : &mut dyn ContainerRandomAccess<u32> = &mut LinkedList::<u32>::new();
         list.insert(1);
         list.insert(4);
         list.insert(2);

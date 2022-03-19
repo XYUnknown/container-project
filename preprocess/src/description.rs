@@ -6,13 +6,13 @@ use crate::parser::{Id};
 pub type Description = String;
 type ElemTypeName = String;
 type ConName = String;
-type InterfaceName = String;
+type BoundName = String;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub enum Tag {
     Prop(Box<Description>), // analysis of a property
-    Interface((ConName, ElemTypeName), Box<Vec<Description>>),
-    Con(ElemTypeName, InterfaceName, Box<Vec<Tag>>) // analysis of a container type with refinements
+    Bound((ConName, ElemTypeName), Box<Vec<Description>>),
+    Con(ElemTypeName, BoundName, Box<Vec<Tag>>) // analysis of a container type with refinements
 }
 
 impl Tag {
@@ -23,9 +23,9 @@ impl Tag {
         }
     }
 
-    pub fn is_interface_tag(&self) -> bool {
+    pub fn is_bound_tag(&self) -> bool {
         match self {
-            Tag::Interface(_, _) => true,
+            Tag::Bound(_, _) => true,
             _ => false
         }
     }
@@ -37,9 +37,9 @@ impl Tag {
         }
     }
 
-    pub fn extract_interface_descs(&self) -> Vec<Description> {
+    pub fn extract_bound_descs(&self) -> Vec<Description> {
         match self {
-            Tag::Interface(_, descs) => descs.to_vec(),
+            Tag::Bound(_, descs) => descs.to_vec(),
             _ => Vec::new()
         }
     }

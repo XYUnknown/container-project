@@ -13,6 +13,7 @@ pub mod inference;
 pub mod lib_spec_processor;
 pub mod spec_map;
 pub mod run_matching;
+pub mod bounded_ops;
 
 pub mod library;
 

@@ -1,9 +1,4 @@
 #lang rosette
-; (generate-list n) -> list?
-; Generate a list of symbolic integer values of length n
-(define (generate-list n)
-    (define-symbolic* y integer? #:length n)
-    y)
 
 (define (check-not-contradict prop pre xs)
   (assert (and (prop xs) (pre xs) (> (length xs) 1))))
@@ -33,10 +28,4 @@
                (unsat? (verify (check-spec-nth prop (third pres) (third specs) xs n)))
                )]))
 
-
-; The list
-(define-symbolic n integer?)
-(define-symbolic len (bitvector 32))
-(define ls (take-bv (generate-list 10) len))
-
-(provide check n ls)
+(provide check)
