@@ -37,6 +37,30 @@ impl Term {
             _ => false
         }
     }
+
+    pub fn require_cdr(&self) -> bool {
+        match self {
+            Term::VarTerm(id) => {
+                if id.to_string().eq("pop") {
+                    true
+                } else {
+                    false
+                }
+            },
+            _ => false
+        }
+    }
+}
+
+impl ToString for Term {
+    fn to_string(&self) -> String {
+        match self {
+            Term::LitTerm(l) => l.to_string(),
+            Term::VarTerm(id) => id.to_string(),
+            Term::LambdaTerm((id, bounds), t) => id.to_string(),
+            Term::AppTerm(t1, t2) => t1.to_string() + &t2.to_string(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

@@ -91,7 +91,9 @@ impl Analyser {
     pub fn analyse_prop_decl(&mut self, decl: &Decl) -> Result<(), AnalyserError> {
         match decl {
             Decl::PropertyDecl((id, _), term) => {
-                let code =  "(define ".to_string() + id + " " + &self.analyse_term(term, true, false) + ")\n" + "(provide " + id + ")";
+                let mut mterm = term.clone();
+                let mut cdr_added = Vec::<String>::new();
+                let code =  "(define ".to_string() + id + " " + &self.analyse_term(&mut mterm, true, false, &mut cdr_added) + ")\n" + "(provide " + id + ")";
                 let filename = id.to_string() + ".rkt";
                 self.write_prop_spec_file(filename.clone(), code);
                 let prop_tag = Tag::Prop(Box::new(id.to_string()));
@@ -225,7 +227,7 @@ impl Analyser {
         }
     }
 
-    pub fn analyse_term(&self, term: &Term, is_outter_app: bool, is_quantifier: bool) -> String {
+    pub fn analyse_term(&self, term: &mut Term, is_outter_app: bool, is_quantifier: bool, cdr_added: &mut Vec::<String>) -> String {
         match term {
             Term::LitTerm(lit) => {
                 if (lit.to_string() == "true".to_string()) {
@@ -239,34 +241,42 @@ impl Analyser {
             },
             Term::LambdaTerm((id, _), t) => {
                 if (is_quantifier) {
-                    "(list ".to_string() + id + ") " + &self.analyse_term(t, true, false) 
+                    "(list ".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added) 
                 } else {
-                    "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true, false) + ")" 
+                    "(lambda (".to_string() + id + ") " + &self.analyse_term(t, true, false, cdr_added) + ")" 
                 }
                                
             },
             Term::AppTerm(t1, t2) => {
-                let mut result = String::new();
-                match ((*t1.clone()).is_quantifier(), *t2.clone()) {
-                    (_, Term::AppTerm(ref t21, ref t22)) => {
-                        if (is_outter_app) {
-                            "(".to_string() + &self.analyse_term(t1, false, false) + " (" + &self.analyse_term(t21, false, false) + " " + &self.analyse_term(t22, true, false) + "))"
-                        } else {
-                            self.analyse_term(t1, false, false) + " (" + &self.analyse_term(t21, false, false) + " " + &self.analyse_term(t22, true, false) + ")"
-                        }
-                    },
-                    (false, _) => {
-                        if (is_outter_app) {
-                            "(".to_string() + &self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, false) + ")"
-                        } else {
-                            self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, false)
-                        }
-                    },
-                    (true, _) => {
-                        if (is_outter_app) {
-                            "(".to_string() + &self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, true) + ")"
-                        } else {
-                            self.analyse_term(t1, false, false) + " " + &self.analyse_term(t2, false, true)
+                // Temporary solution of cdr required to adjust model ops
+                if ((*t1.clone()).require_cdr() && !cdr_added.contains(&t1.to_string())) {
+                    println!("{:?}", "here");
+                    cdr_added.push(t1.to_string());
+                    *term = Term::AppTerm(Box::new(Term::VarTerm(Box::new("cdr".to_string()))), Box::new(term.clone()));
+                    self.analyse_term(term, is_outter_app, is_quantifier, cdr_added)
+                } else {
+                    let mut result = String::new();
+                    match ((*t1.clone()).is_quantifier(), *t2.clone()) {
+                        (_, Term::AppTerm(_, _)) => {
+                            if (is_outter_app) {
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, true, false, cdr_added) + ")"
+                            } else {
+                                self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, true, false, cdr_added)
+                            }
+                        },
+                        (false, _) => {
+                            if (is_outter_app) {
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, false, cdr_added) + ")"
+                            } else {
+                                self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, false, cdr_added)
+                            }
+                        },
+                        (true, _) => {
+                            if (is_outter_app) {
+                                "(".to_string() + &self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, true, cdr_added) + ")"
+                            } else {
+                                self.analyse_term(t1, false, false, cdr_added) + " " + &self.analyse_term(t2, false, true, cdr_added)
+                            }
                         }
                     }
                 }
