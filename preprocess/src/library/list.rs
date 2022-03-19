@@ -114,11 +114,11 @@ Stack
 impl<T> Stack<T> for LinkedList<T> {
     /*LIBSPEC*
     /*OPNAME*
-    push spec-push pre-push post-push
+    push push pre-push post-push
     *ENDOPNAME*/
-    (define (spec-push xs x) (append xs (list x)))
+    (define (push xs x) (append xs (list x)))
     (define (pre-push xs) #t)
-    (define (post-push xs x ys) (equal? ys (spec-push xs x)))
+    (define (post-push xs x ys) (equal? ys (push xs x)))
     *ENDLIBSPEC*/
     fn push(&mut self, elt: T) {
         LinkedList::push_back(self, elt);
@@ -126,14 +126,14 @@ impl<T> Stack<T> for LinkedList<T> {
 
     /*LIBSPEC*
     /*OPNAME*
-    pop spec-pop pre-pop post-pop
+    pop pop pre-pop post-pop
     *ENDOPNAME*/
-    (define (spec-pop xs)
+    (define (pop xs)
       (cond
         [(null? xs) (cons xs null)]
         [else (cons (take xs (- (length xs) 1)) (last xs))]))
     (define (pre-pop xs) #t)
-    (define (post-pop xs r) (equal? r (spec-pop xs)))
+    (define (post-pop xs r) (equal? r (pop xs)))
     *ENDLIBSPEC*/
     fn pop(&mut self) -> Option<T> {
         LinkedList::pop_back(self)

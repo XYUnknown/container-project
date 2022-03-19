@@ -1,13 +1,13 @@
 /*SPEC*
 property lifo<T> {
-    \c <: (Stack) -> (forall \x -> ((equal? (pop ((push c) x))) x))
+    \c <: (Stack) -> (forall \n -> ((equal? (pop ((push c) n))) n))
 }
 
-type UniqueCon<S> = {c impl (Container, Stack) | (lifo c)}
+type StrackCon<S> = {c impl (Container, Stack) | (lifo c)}
 *ENDSPEC*/
 
 fn main () {
-    let mut c = UniqueCon::<u32>::new();
+    let mut c = StackCon::<u32>::new();
     for x in 0..10 {
         c.insert(x);
         c.insert(x);
