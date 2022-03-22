@@ -3,7 +3,7 @@ property lifo<T> {
     \c <: (Stack) -> (forall \x -> ((equal? (pop ((push c) x))) x))
 }
 
-type StrackCon<S> = {c impl (Container, Stack) | (lifo c)}
+type StackCon<S> = {c impl (Container, Stack) | (lifo c)}
 *ENDSPEC*/
 
 fn main () {
