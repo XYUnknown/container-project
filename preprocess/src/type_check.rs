@@ -74,6 +74,14 @@ impl TypeChecker {
             }
         );
 
+        let geq_fn = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
+        self.global_ctx.insert("geq?".to_string(), 
+            TypeScheme {
+                vars: Vec::new(),
+                ty: geq_fn
+            }
+        );
+
         let equal = Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Fun(Box::new(Type::Var(TypeVar::new("T".to_string()))), Box::new(Type::Bool()))));
         self.global_ctx.insert("equal?".to_string(), 
             TypeScheme {

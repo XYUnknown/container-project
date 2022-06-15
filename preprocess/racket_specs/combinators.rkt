@@ -34,6 +34,12 @@
         [(andmap char? args) (apply char<=? args)]
         [else (apply <= args)]))
 
+; (geq? a b) -> boolean?
+(define (geq? . args)
+  (cond [(andmap string? args) (apply string>=? args)]
+        [(andmap char? args) (apply char>=? args)]
+        [else (apply >= args)]))
+
 ; (contains? elem lst) -> boolean?
 (define (contains x l)
   (cond
@@ -69,4 +75,4 @@
     [else (append (list (take l 2)) (consecutive-pairs (drop l 1)))]))
 
 ; Export procedures
-(provide for-all-unique-pairs for-all-consecutive-pairs for-all-elems elem-and not-equal? leq? unique-count?)
+(provide for-all-unique-pairs for-all-consecutive-pairs for-all-elems elem-and not-equal? leq? geq? unique-count?)

@@ -1,0 +1,9 @@
+./scripts/b_unique_con.sh
+./scripts/b_asc_con.sh
+./scripts/b_des_con.sh
+./scripts/b_unique_asc_con.sh
+./scripts/b_unique_con_ra.sh
+./scripts/b_asc_con_ra.sh
+./scripts/b_des_con_ra.sh
+./scripts/b_unique_asc_con_ra.sh
+./scripts/b_stack_con.sh
