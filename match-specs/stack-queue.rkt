@@ -27,6 +27,10 @@
 (define (pre-push-unique-alt xs) (equal? xs (remove-duplicates xs)))
 (define (spec-push-unique-alt xs x)
   (remove-duplicates (append xs (list x))))
+;(define (spec-push-unique-alt xs x)
+;  (cond
+;    [(list? (member x xs)) xs]
+;    [else (append xs (list x))]))
 
 (define (pre-pop-unique-alt xs) (equal? xs (remove-duplicates xs)))
 (define (spec-pop-unique-alt xs)
@@ -42,7 +46,7 @@
 ; The list
 (define-symbolic elem integer?)
 (define-symbolic len (bitvector 32))
-(define ls (take-bv (generate-list 10) len))
+(define ls (take-bv (generate-list 5) len))
 
 ;(verify (assert ((lifo spec-push spec-pop) ls elem)))
 (define (check-unique-stack-sat xs)

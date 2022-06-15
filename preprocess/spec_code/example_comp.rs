@@ -2,12 +2,15 @@
 property unique<T> {
     \c <: (Container) -> ((for-all-elems c) \a -> ((unique-count? a) c))
 }
+property ascending<T> {
+    \c -> ((for-all-consecutive-pairs c) leq?)
+}
 
-type UniqueCon<S> = {c impl (Container, RandomAccess) | (unique c)}
+type StrictlyAscendingCon<S> = {c impl (Container, RandomAccess) | ((unique c) and (ascending c))}
 *ENDSPEC*/
 
 fn main () {
-    let mut c = UniqueCon::<u32>::new();
+    let mut c = StrictlyAscendingCon::<u32>::new();
     for x in 0..10 {
         c.insert(x);
         c.insert(x);
