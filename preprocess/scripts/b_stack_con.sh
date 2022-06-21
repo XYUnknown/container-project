@@ -1,7 +1,7 @@
 #!/bin/bash
 TIMEFORMAT='
 semantic property: lifo
-syntacyic property: Container, Stack
+syntactic property: Container, Stack
 search time: %R seconds
 '
 time {

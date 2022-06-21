@@ -1,7 +1,7 @@
 #!/bin/bash
 TIMEFORMAT='
 semantic property: unique
-syntacyic properties: Container, RandomAccess
+syntactic properties: Container, RandomAccess
 search time: %R seconds
 '
 time {
