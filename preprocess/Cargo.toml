@@ -10,6 +10,8 @@ edition = "2018"
 peg = "0.8.0"
 indicatif = "0.16.2"
 rand = "0.8.5"
+im = "10.2.0"
+proptest = "1.0.0"
 
 [dev-dependencies]
 criterion = "0.3.5"

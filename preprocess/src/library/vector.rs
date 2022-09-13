@@ -5,6 +5,11 @@ rust-vec-spec std::vec::Vec
 use std::vec::Vec;
 use crate::traits::{Container, Stack, RandomAccess};
 
+use proptest::prelude::*;
+use proptest::collection::vec;
+
+use im::conslist::{ConsList};
+
 /*IMPL*
 Container
 *ENDIMPL*/
@@ -175,6 +180,28 @@ impl<T> RandomAccess<T> for Vec<T> {
     fn nth(&mut self, n: usize) -> Option<&T> {
         <[T]>::iter(self).nth(n)
     }                                      
+}
+
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+fn abstraction<T>(v: Vec<T>) -> ConsList<T> {
+    let list: ConsList<T> = ConsList::from(v);
+    list
+}
+
+proptest! {
+    #[test]
+    fn test_vec_strategy(ref v in vec(".*", 10..100)) {
+        assert!(v.len() < 100);
+        assert!(v.len() >= 10);
+    }
+
+    #[test]
+    fn test_vec_len(ref v in vec(".*", 10..100)) {
+        assert_eq!(v.len(), abstraction(v.clone()).len());
+    }
 }
 
 #[cfg(test)]
