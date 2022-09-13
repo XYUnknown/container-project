@@ -16,6 +16,8 @@ MAlonzo/**
 # Others
 drafts/*
 */drafts/*
+# proptest
+*/proptest-regressions/
 
 # Scala
 *.class
