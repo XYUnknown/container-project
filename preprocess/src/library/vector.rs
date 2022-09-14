@@ -9,6 +9,8 @@ use proptest::prelude::*;
 use proptest::collection::vec;
 
 use im::conslist::{ConsList};
+use im::conslist;
+use std::any::Any;
 
 /*IMPL*
 Container
@@ -191,6 +193,32 @@ fn abstraction<T>(v: Vec<T>) -> ConsList<T> {
     list
 }
 
+fn contains<T: PartialEq>(list: &ConsList<T>, elem: &T) -> bool {
+    list.iter().find(|x| x.as_ref() == elem).is_some()
+}
+
+fn clear<T>(list: &ConsList<T>) -> ConsList<T> {
+    ConsList::<T>::new()
+}
+
+fn remove<T: PartialEq+Clone>(list: &ConsList<T>, a: T) -> (ConsList<T>, Option<T>) {
+    if contains(list, &a) {
+        let mut result = ConsList::<T>::new();
+        let mut found = false;
+        for i in list.iter() {
+            if i.as_ref() == &a && !found {
+                found = true;
+                continue;
+            } else {
+                result = result.append(conslist![i.clone()]);
+            }
+        }
+        (result, Some(a))
+    } else {
+        (list.clone(), None)
+    }
+}
+
 proptest! {
     #[test]
     fn test_vec_strategy(ref v in vec(".*", 10..100)) {
@@ -200,8 +228,50 @@ proptest! {
 
     #[test]
     fn test_vec_len(ref v in vec(".*", 10..100)) {
-        assert_eq!(v.len(), abstraction(v.clone()).len());
+        let abs_list = abstraction(v.clone());
+        assert_eq!(v.len(), abs_list.len());
+        assert_eq!(abstraction(v.clone()), abs_list);
     }
+
+    #[test]
+    fn test_vec_contains(ref mut v in vec(".*", 10..100), a in ".*") {
+        let abs_list = abstraction(v.clone());
+        assert_eq!(v.contains(&a), contains(&abs_list, &a));
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_vec_is_empty(ref v in vec(".*", 10..100)) {
+        let abs_list = abstraction(v.clone());
+        assert_eq!(v.is_empty(), abs_list.is_empty());
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_vec_insert(ref mut v in vec(".*", 10..100), a in ".*") {
+        let abs_list = abstraction(v.clone());
+        let after_list = abs_list.append(conslist![a.clone()]);
+        Container::<String>::insert(v, a.clone());
+        assert_eq!(abstraction(v.clone()), after_list);
+    }
+
+    #[test]
+    fn test_vec_clear(ref mut v in vec(".*", 10..100)) {
+        let abs_list = abstraction(v.clone());
+        let after_list = clear(&abs_list);
+        Container::<String>::clear(v);
+        assert_eq!(abstraction(v.clone()), after_list);
+    }
+
+    #[test]
+    fn test_vec_remove(ref mut v in vec(".*", 10..100), a in ".*") {
+        let abs_list = abstraction(v.clone());
+        let (after_list, abs_elem) = remove(&abs_list, a.clone());
+        let elem = Container::<String>::remove(v, a.clone());
+        assert_eq!(abstraction(v.clone()), after_list);
+        assert_eq!(elem, abs_elem);
+    }
+
 }
 
 #[cfg(test)]
