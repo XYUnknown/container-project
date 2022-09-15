@@ -11,6 +11,7 @@ use proptest::collection::vec;
 use im::conslist::{ConsList};
 use im::conslist;
 use std::any::Any;
+use std::sync::Arc;
 
 /*IMPL*
 Container
@@ -184,10 +185,6 @@ impl<T> RandomAccess<T> for Vec<T> {
     }                                      
 }
 
-fn add(a: i32, b: i32) -> i32 {
-    a + b
-}
-
 fn abstraction<T>(v: Vec<T>) -> ConsList<T> {
     let list: ConsList<T> = ConsList::from(v);
     list
@@ -219,6 +216,31 @@ fn remove<T: PartialEq+Clone>(list: &ConsList<T>, a: T) -> (ConsList<T>, Option<
     }
 }
 
+fn first<T>(list: &ConsList<T>) -> Option<&T> {
+    list.head().map(|x| unsafe{&*Arc::into_raw(x)})
+}
+
+fn last<T>(list: &ConsList<T>) -> Option<&T> {
+    list.reverse().head().map(|x| unsafe{&*Arc::into_raw(x)})
+}
+
+fn nth<T>(list: &ConsList<T>, n: usize) -> Option<&T> {
+    list.iter().nth(n).map(|x| unsafe{&*Arc::into_raw(x)})
+}
+
+fn push<T>(list: &ConsList<T>, a: T) -> ConsList<T> {
+    list.append(conslist![a])
+}
+
+fn pop<T>(list: &ConsList<T>) -> (ConsList<T>, Option<Arc<T>>) {
+    if list.is_empty() {
+        (ConsList::<T>::new(), None)
+    } else {
+        let (elem, result) = list.reverse().uncons().unwrap();
+        (result.reverse(), Some(elem))
+    }
+}
+
 proptest! {
     #[test]
     fn test_vec_strategy(ref v in vec(".*", 10..100)) {
@@ -227,28 +249,28 @@ proptest! {
     }
 
     #[test]
-    fn test_vec_len(ref v in vec(".*", 10..100)) {
+    fn test_vec_len(ref mut v in vec(".*", 10..100)) {
         let abs_list = abstraction(v.clone());
-        assert_eq!(v.len(), abs_list.len());
+        assert_eq!(Container::<String>::len(v), abs_list.len());
         assert_eq!(abstraction(v.clone()), abs_list);
     }
 
     #[test]
-    fn test_vec_contains(ref mut v in vec(".*", 10..100), a in ".*") {
+    fn test_vec_contains(ref mut v in vec(".*", 0..100), a in ".*") {
         let abs_list = abstraction(v.clone());
-        assert_eq!(v.contains(&a), contains(&abs_list, &a));
+        assert_eq!(Container::<String>::contains(v, &a), contains(&abs_list, &a));
         assert_eq!(abstraction(v.clone()), abs_list);
     }
 
     #[test]
-    fn test_vec_is_empty(ref v in vec(".*", 10..100)) {
+    fn test_vec_is_empty(ref mut v in vec(".*", 0..100)) {
         let abs_list = abstraction(v.clone());
-        assert_eq!(v.is_empty(), abs_list.is_empty());
+        assert_eq!(Container::<String>::is_empty(v), abs_list.is_empty());
         assert_eq!(abstraction(v.clone()), abs_list);
     }
 
     #[test]
-    fn test_vec_insert(ref mut v in vec(".*", 10..100), a in ".*") {
+    fn test_vec_insert(ref mut v in vec(".*", 0..100), a in ".*") {
         let abs_list = abstraction(v.clone());
         let after_list = abs_list.append(conslist![a.clone()]);
         Container::<String>::insert(v, a.clone());
@@ -256,7 +278,7 @@ proptest! {
     }
 
     #[test]
-    fn test_vec_clear(ref mut v in vec(".*", 10..100)) {
+    fn test_vec_clear(ref mut v in vec(".*", 0..100)) {
         let abs_list = abstraction(v.clone());
         let after_list = clear(&abs_list);
         Container::<String>::clear(v);
@@ -264,7 +286,7 @@ proptest! {
     }
 
     #[test]
-    fn test_vec_remove(ref mut v in vec(".*", 10..100), a in ".*") {
+    fn test_vec_remove(ref mut v in vec(".*", 0..100), a in ".*") {
         let abs_list = abstraction(v.clone());
         let (after_list, abs_elem) = remove(&abs_list, a.clone());
         let elem = Container::<String>::remove(v, a.clone());
@@ -272,6 +294,49 @@ proptest! {
         assert_eq!(elem, abs_elem);
     }
 
+    #[test]
+    fn test_vec_first(ref mut v in vec(".*", 0..100)) {
+        let abs_list = abstraction(v.clone());
+        let elem = RandomAccess::<String>::first(v);
+        let abs_first = first(&abs_list);
+        assert_eq!(elem, abs_first);
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_vec_last(ref mut v in vec(".*", 0..100)) {
+        let abs_list = abstraction(v.clone());
+        let elem = RandomAccess::<String>::last(v);
+        let abs_last = last(&abs_list);
+        assert_eq!(elem, abs_last);
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_vec_nth(ref mut v in vec(".*", 0..100), n in 0usize..100) {
+        let abs_list = abstraction(v.clone());
+        let elem = RandomAccess::<String>::nth(v, n.clone());
+        let abs_nth = nth(&abs_list, n);
+        assert_eq!(elem, abs_nth);
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_vec_push(ref mut v in vec(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(v.clone());
+        let after_list = push(&abs_list, a.clone());
+        Stack::<String>::push(v, a.clone());
+        assert_eq!(abstraction(v.clone()), after_list);
+    }
+
+    #[test]
+    fn test_vec_pop(ref mut v in vec(".*", 0..100)) {
+        let abs_list = abstraction(v.clone());
+        let (after_list, abs_elem) = pop(&abs_list);
+        let elem = Stack::<String>::pop(v);
+        assert_eq!(abstraction(v.clone()), after_list);
+        assert_eq!(elem.map(|x| Arc::new(x)), abs_elem);
+    }
 }
 
 #[cfg(test)]
