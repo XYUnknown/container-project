@@ -11,7 +11,6 @@ use proptest::collection::vec;
 
 use im::conslist::{ConsList};
 use im::conslist;
-use std::any::Any;
 use std::sync::Arc;
 
 /*IMPL*
