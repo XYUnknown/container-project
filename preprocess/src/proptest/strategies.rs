@@ -14,3 +14,10 @@ where <T as Strategy>::Value: PartialEq
 {
     vec(element, size.clone()).prop_map(EagerUniqueVec::from_vec)
 }
+
+
+pub fn lazy_unique_vec<T: Strategy + 'static>(element: T, size: Range<usize>) -> impl Strategy<Value = LazyUniqueVec<T::Value>>
+where <T as Strategy>::Value: Ord
+{
+    vec(element, size.clone()).prop_map(LazyUniqueVec::from_vec)
+}

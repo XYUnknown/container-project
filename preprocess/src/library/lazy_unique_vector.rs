@@ -7,7 +7,16 @@ use std::slice::Iter;
 use std::ops::Deref;
 use crate::traits::{Container, Stack, RandomAccess};
 
+use proptest::prelude::*;
+use crate::proptest::strategies::{lazy_unique_vec};
+use crate::proptest::*;
+
+use im::conslist::{ConsList};
+use im::conslist;
+use std::sync::Arc;
+
 // A Unique Vector
+#[derive(Debug, Clone)]
 pub struct LazyUniqueVec<T> {
     v: Vec<T>,
     modified: bool
@@ -19,6 +28,12 @@ impl<T: Ord> LazyUniqueVec<T> {
             v: Vec::new(),
             modified: false
         }
+    }
+
+    pub fn from_vec(mut v: Vec<T>) -> LazyUniqueVec<T> {
+        v.sort();
+        v.dedup();
+        LazyUniqueVec{ v: v, modified: false }
     }
 
     pub fn len(&mut self) -> usize {
@@ -101,6 +116,10 @@ impl<T: Ord> LazyUniqueVec<T> {
             self.modified = false;
         }
         self.v.iter()
+    }
+
+    pub fn to_vec(self) -> Vec<T> {
+        self.v
     }
 }
 
@@ -242,6 +261,104 @@ impl<T: Ord> RandomAccess<T> for LazyUniqueVec<T> {
     fn nth(&mut self, n: usize) -> Option<&T> {
         LazyUniqueVec::iter(self).nth(n)
     }                                      
+}
+
+fn abstraction<T>(v: LazyUniqueVec<T>) -> ConsList<T>
+where T: Ord
+{
+    let list: ConsList<T> = ConsList::from(v.to_vec());
+    unique(&list.sort())
+}
+
+proptest! {
+    #[test]
+    fn test_lazy_unique_vec_len(ref mut v in lazy_unique_vec(".*", 0..100)) {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::len(v), abs_list.len());
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_lazy_unique_vec_contains(ref mut v in lazy_unique_vec(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::contains(v, &a), contains(&abs_list, &a));
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_lazy_unique_vec_insert(ref mut v in lazy_unique_vec(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let after_list = unique(&abs_list.append(conslist![a.clone()]).sort());
+        Container::<String>::insert(v, a.clone());
+        assert_eq!(abstraction(v.clone()), after_list);
+    }
+
+    #[test]
+    fn test_lazy_vec_is_empty(ref mut v in lazy_unique_vec(".*", 0..100)) {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::is_empty(v), abs_list.is_empty());
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_lazy_unique_vec_remove(ref mut v in lazy_unique_vec(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let (after_list, abs_elem) = remove(&abs_list, a.clone());
+        let elem = Container::<String>::remove(v, a.clone());
+        assert_eq!(abstraction(v.clone()), after_list);
+        assert_eq!(elem, abs_elem);
+    }
+
+    #[test]
+    fn test_lazy_unique_vec_first(ref mut v in lazy_unique_vec(".*", 0..100)) {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let elem = RandomAccess::<String>::first(v);
+        let abs_first = first(&abs_list);
+        assert_eq!(elem, abs_first);
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_lazy_unique_vec_last(ref mut v in lazy_unique_vec(".*", 0..100)) {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let elem = RandomAccess::<String>::last(v);
+        let abs_last = last(&abs_list);
+        assert_eq!(elem, abs_last);
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_lazy_unique_vec_nth(ref mut v in lazy_unique_vec(".*", 0..100), n in 0usize..100) {
+        let abs_list = abstraction(v.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let elem = RandomAccess::<String>::nth(v, n.clone());
+        let abs_nth = nth(&abs_list, n);
+        assert_eq!(elem, abs_nth);
+        assert_eq!(abstraction(v.clone()), abs_list);
+    }
 }
 
 #[cfg(test)]
