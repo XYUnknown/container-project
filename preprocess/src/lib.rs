@@ -18,3 +18,5 @@ pub mod bounded_ops;
 pub mod library;
 
 pub mod traits;
+
+pub mod proptest;
