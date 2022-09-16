@@ -5,9 +5,18 @@ rust-linked-list-spec std::collections::LinkedList
 use std::collections::LinkedList;
 use std::cmp::Ordering;
 use std::marker::PhantomData;
+use std::iter::FromIterator;
 // nightly features
 use std::collections::linked_list::CursorMut;
 use crate::traits::{Container, Stack, RandomAccess};
+use crate::proptest::*;
+use proptest::prelude::*;
+use proptest::collection::linked_list;
+
+use im::conslist::{ConsList};
+use im::conslist;
+use std::any::Any;
+use std::sync::Arc;
 
 /*IMPL*
 Container
@@ -208,6 +217,104 @@ impl<T: 'static + Ord> Constructor for Con<T> {
         Box::new(Self::Impl::new())
     }
 }
+
+fn abstraction<T>(l: LinkedList<T>) -> ConsList<T> {
+    let list: ConsList<T> = ConsList::from_iter(l);
+    list
+}
+
+proptest! {
+    #[test]
+    fn test_list_len(ref mut l in linked_list(".*", 0..100)) {
+        let abs_list = abstraction(l.clone());
+        assert_eq!(Container::<String>::len(l), abs_list.len());
+        assert_eq!(abstraction(l.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_list_contains(ref mut l in linked_list(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(l.clone());
+        assert_eq!(Container::<String>::contains(l, &a), contains(&abs_list, &a));
+        assert_eq!(abstraction(l.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_list_is_empty(ref mut l in linked_list(".*", 0..100)) {
+        let abs_list = abstraction(l.clone());
+        assert_eq!(Container::<String>::is_empty(l), abs_list.is_empty());
+        assert_eq!(abstraction(l.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_list_insert(ref mut l in linked_list(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(l.clone());
+        let after_list = abs_list.append(conslist![a.clone()]);
+        Container::<String>::insert(l, a.clone());
+        assert_eq!(abstraction(l.clone()), after_list);
+    }
+
+    #[test]
+    fn test_list_clear(ref mut l in linked_list(".*", 0..100)) {
+        let abs_list = abstraction(l.clone());
+        let after_list = clear(&abs_list);
+        Container::<String>::clear(l);
+        assert_eq!(abstraction(l.clone()), after_list);
+    }
+
+    #[test]
+    fn test_list_remove(ref mut l in linked_list(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(l.clone());
+        let (after_list, abs_elem) = remove(&abs_list, a.clone());
+        let elem = Container::<String>::remove(l, a.clone());
+        assert_eq!(abstraction(l.clone()), after_list);
+        assert_eq!(elem, abs_elem);
+    }
+
+    #[test]
+    fn test_list_first(ref mut l in linked_list(".*", 0..100)) {
+        let abs_list = abstraction(l.clone());
+        let elem = RandomAccess::<String>::first(l);
+        let abs_first = first(&abs_list);
+        assert_eq!(elem, abs_first);
+        assert_eq!(abstraction(l.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_list_last(ref mut l in linked_list(".*", 0..100)) {
+        let abs_list = abstraction(l.clone());
+        let elem = RandomAccess::<String>::last(l);
+        let abs_last = last(&abs_list);
+        assert_eq!(elem, abs_last);
+        assert_eq!(abstraction(l.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_list_nth(ref mut l in linked_list(".*", 0..100), n in 0usize..100) {
+        let abs_list = abstraction(l.clone());
+        let elem = RandomAccess::<String>::nth(l, n.clone());
+        let abs_nth = nth(&abs_list, n);
+        assert_eq!(elem, abs_nth);
+        assert_eq!(abstraction(l.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_list_push(ref mut l in linked_list(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(l.clone());
+        let after_list = push(&abs_list, a.clone());
+        Stack::<String>::push(l, a.clone());
+        assert_eq!(abstraction(l.clone()), after_list);
+    }
+
+    #[test]
+    fn test_list_pop(ref mut l in linked_list(".*", 0..100)) {
+        let abs_list = abstraction(l.clone());
+        let (after_list, abs_elem) = pop(&abs_list);
+        let elem = Stack::<String>::pop(l);
+        assert_eq!(abstraction(l.clone()), after_list);
+        assert_eq!(elem.map(|x| Arc::new(x)), abs_elem);
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
