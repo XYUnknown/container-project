@@ -1,3 +1,5 @@
+pub mod strategies;
+
 use im::conslist::{ConsList};
 use im::conslist;
 use std::sync::Arc;
