@@ -3,7 +3,16 @@ rust-btreeset-spec std::collections::BTreeSet
 *ENDLIBSPEC-NAME*/
 
 use std::collections::BTreeSet;
+use std::iter::FromIterator;
 use crate::traits::{Container, RandomAccess};
+use crate::proptest::*;
+
+use proptest::prelude::*;
+use proptest::collection::btree_set;
+
+use im::conslist::{ConsList};
+use im::conslist;
+use std::sync::Arc;
 
 /*IMPL*
 Container
@@ -141,6 +150,113 @@ impl<T: Ord> RandomAccess<T> for BTreeSet<T> {
     fn nth(&mut self, n: usize) -> Option<&T> {
         BTreeSet::iter(self).nth(n)
     }                                      
+}
+
+fn abstraction<T>(t: BTreeSet<T>) -> ConsList<T> {
+    let list: ConsList<T> = ConsList::from_iter(t);
+    list
+}
+
+proptest!{
+    #[test]
+    fn test_btree_len(ref mut t in btree_set(".*", 0..100)) {
+        let abs_list = abstraction(t.clone());
+        // pre: our list model is a sorted and unique list
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::len(t), abs_list.len());
+        assert_eq!(abstraction(t.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_btree_contains(ref mut t in btree_set(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::contains(t, &a), contains(&abs_list, &a));
+        assert_eq!(abstraction(t.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_btree_is_empty(ref mut t in btree_set(".*", 0..100)) {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::is_empty(t), abs_list.is_empty());
+        assert_eq!(abstraction(t.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_btree_insert(ref mut t in btree_set(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let after_list = unique(&abs_list.append(conslist![a.clone()]).sort());
+        Container::<String>::insert(t, a.clone());
+        assert_eq!(abstraction(t.clone()), after_list);
+    }
+
+    #[test]
+    fn test_btree_clear(ref mut t in btree_set(".*", 0..100)) {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let after_list = clear(&abs_list);
+        Container::<String>::clear(t);
+        assert_eq!(abstraction(t.clone()), after_list);
+    }
+
+    #[test]
+    fn test_btree_remove(ref mut t in btree_set(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let (after_list, abs_elem) = remove(&abs_list, a.clone());
+        let elem = Container::<String>::remove(t, a.clone());
+        assert_eq!(abstraction(t.clone()), after_list);
+        assert_eq!(elem, abs_elem);
+    }
+
+    #[test]
+    fn test_btree_first(ref mut t in btree_set(".*", 0..100)) {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let elem = RandomAccess::<String>::first(t);
+        let abs_first = first(&abs_list);
+        assert_eq!(elem, abs_first);
+        assert_eq!(abstraction(t.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_btree_last(ref mut t in btree_set(".*", 0..100)) {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let elem = RandomAccess::<String>::last(t);
+        let abs_last = last(&abs_list);
+        assert_eq!(elem, abs_last);
+        assert_eq!(abstraction(t.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_btree_nth(ref mut t in btree_set(".*", 0..100), n in 0usize..100) {
+        let abs_list = abstraction(t.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let elem = RandomAccess::<String>::nth(t, n.clone());
+        let abs_nth = nth(&abs_list, n);
+        assert_eq!(elem, abs_nth);
+        assert_eq!(abstraction(t.clone()), abs_list);
+    }
 }
 
 #[cfg(test)]

@@ -52,3 +52,15 @@ pub fn pop<T>(list: &ConsList<T>) -> (ConsList<T>, Option<Arc<T>>) {
         (result.reverse(), Some(elem))
     }
 }
+
+pub fn unique<T: PartialEq>(list: &ConsList<T>) -> ConsList<T> {
+    let mut result = ConsList::<T>::new();
+    for i in list.iter() {
+        if contains(&result, &i) {
+            continue;
+        } else {
+            result = result.append(conslist![i.clone()]);
+        }
+    }
+    result
+}
