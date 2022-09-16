@@ -6,6 +6,15 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use crate::traits::Container;
 
+use crate::proptest::*;
+use proptest::prelude::*;
+use proptest::collection::hash_set;
+
+use im::conslist::{ConsList};
+use im::conslist;
+use std::sync::Arc;
+use std::iter::FromIterator;
+
 /*IMPL*
 Container
 *ENDIMPL*/
@@ -90,6 +99,77 @@ impl<T: Ord + Hash> Container<T> for HashSet<T> {
             true => Some(elt),
             false => None
         }
+    }
+}
+
+fn abstraction<T: Ord>(h: HashSet<T>) -> ConsList<T> {
+    let list: ConsList<T> = ConsList::from_iter(h);
+    list.sort()
+}
+
+proptest!{
+    #[test]
+    fn test_hashset_len(ref mut h in hash_set(".*", 0..100)) {
+        let abs_list = abstraction(h.clone());
+        // pre: our list model is a sorted and unique list
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::len(h), abs_list.len());
+        assert_eq!(abstraction(h.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_hashset_contains(ref mut h in hash_set(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(h.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::contains(h, &a), contains(&abs_list, &a));
+        assert_eq!(abstraction(h.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_hashset_is_empty(ref mut h in hash_set(".*", 0..100)) {
+        let abs_list = abstraction(h.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        assert_eq!(Container::<String>::is_empty(h), abs_list.is_empty());
+        assert_eq!(abstraction(h.clone()), abs_list);
+    }
+
+    #[test]
+    fn test_hashset_insert(ref mut h in hash_set(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(h.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let after_list = unique(&abs_list.append(conslist![a.clone()]).sort());
+        Container::<String>::insert(h, a.clone());
+        assert_eq!(abstraction(h.clone()), after_list);
+    }
+
+    #[test]
+    fn test_hash_clear(ref mut h in hash_set(".*", 0..100)) {
+        let abs_list = abstraction(h.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let after_list = clear(&abs_list);
+        Container::<String>::clear(h);
+        assert_eq!(abstraction(h.clone()), after_list);
+    }
+
+    #[test]
+    fn test_hashset_remove(ref mut h in hash_set(".*", 0..100), a in ".*") {
+        let abs_list = abstraction(h.clone());
+        //pre
+        assert_eq!(abs_list, unique(&abs_list.sort()));
+        //post
+        let (after_list, abs_elem) = remove(&abs_list, a.clone());
+        let elem = Container::<String>::remove(h, a.clone());
+        assert_eq!(abstraction(h.clone()), after_list);
+        assert_eq!(elem, abs_elem);
     }
 }
 
