@@ -17,7 +17,7 @@ use im::conslist;
 use std::sync::Arc;
 
 
-// A Unique Vector
+// A Sorted Vector
 #[derive(Debug, Clone)]
 pub struct EagerSortedVec<T> {
     v: Vec<T>,
