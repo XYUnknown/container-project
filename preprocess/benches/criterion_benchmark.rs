@@ -40,7 +40,7 @@ fn gen_dataset_256() -> Vec<u32> { // avoid duplication
 }
 
 fn gen_dataset_512() -> Vec<u32> { // avoid duplication
-    let size = 512 * 1024 * 1024; // 256 MB
+    let size = 512 * 1024 * 1024; // 512 MB
     let amount = size / size_of::<u32>();
     let mut data: Vec<u32> = (1..amount as u32).collect(); //ensure no duplication
     let mut rng = StdRng::seed_from_u64(222);
