@@ -22,3 +22,6 @@ name = "process_file"
 [[bench]]
 name = "criterion_benchmark"
 harness = false
+
+[[bin]]
+name = "btreeset_1m"

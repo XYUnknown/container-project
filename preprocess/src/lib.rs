@@ -16,7 +16,7 @@ pub mod run_matching;
 pub mod bounded_ops;
 
 pub mod library;
-
 pub mod traits;
 
 pub mod proptest;
+pub mod tools;
