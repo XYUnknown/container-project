@@ -223,6 +223,10 @@ fn abstraction<T>(l: LinkedList<T>) -> ConsList<T> {
 }
 
 proptest! {
+    #![proptest_config(ProptestConfig {
+        cases: 100, .. ProptestConfig::default()
+      })]
+    
     #[test]
     fn test_list_len(ref mut l in linked_list(".*", 0..100)) {
         let abs_list = abstraction(l.clone());
@@ -315,66 +319,66 @@ proptest! {
 }
 
 
-#[cfg(test)]
-mod tests {
-    use crate::traits::{Container, Stack, RandomAccess};
-    use crate::library::list::{Constructor, Con};
-    use std::collections::LinkedList;
+// #[cfg(test)]
+// mod tests {
+//     use crate::traits::{Container, Stack, RandomAccess};
+//     use crate::library::list::{Constructor, Con};
+//     use std::collections::LinkedList;
 
-    #[test]
-    fn test_list_container_trait() {
-        //type Foo<T> = dyn Container<T>;
-        //let list : &mut Foo<u32> = &mut LinkedList::<u32>::new();
-        let list : &mut dyn Container<u32> = &mut LinkedList::<u32>::new();
-        assert_eq!(list.len(), 0);
-        list.insert(1);
-        list.insert(4);
-        assert_eq!(list.len(), 2);
-        assert_eq!(list.remove(9), None);
-        assert_eq!(list.remove(1), Some(1));
-        assert_eq!(list.len(), 1);
-        assert!(list.contains(&4));
-        list.clear();
-        assert_eq!(list.len(), 0);
-        //assert_eq!(list.pop_back(), None); // error
-    }
+//     #[test]
+//     fn test_list_container_trait() {
+//         //type Foo<T> = dyn Container<T>;
+//         //let list : &mut Foo<u32> = &mut LinkedList::<u32>::new();
+//         let list : &mut dyn Container<u32> = &mut LinkedList::<u32>::new();
+//         assert_eq!(list.len(), 0);
+//         list.insert(1);
+//         list.insert(4);
+//         assert_eq!(list.len(), 2);
+//         assert_eq!(list.remove(9), None);
+//         assert_eq!(list.remove(1), Some(1));
+//         assert_eq!(list.len(), 1);
+//         assert!(list.contains(&4));
+//         list.clear();
+//         assert_eq!(list.len(), 0);
+//         //assert_eq!(list.pop_back(), None); // error
+//     }
 
-    #[test]
-    fn test_list_constructor() {
-        let mut list = Con::<u32>::new();
-        assert_eq!(list.len(), 0);
-        list.insert(1);
-        // assert_eq!(list.pop_back(), None);
-    }
+//     #[test]
+//     fn test_list_constructor() {
+//         let mut list = Con::<u32>::new();
+//         assert_eq!(list.len(), 0);
+//         list.insert(1);
+//         // assert_eq!(list.pop_back(), None);
+//     }
 
-    #[test]
-    fn test_list_combo_trait() {
-        trait ContainerStack<T> : Container<T> + Stack<T> {}
-        impl<T: Ord> ContainerStack<T> for LinkedList<T> {}
-        let list : &mut dyn ContainerStack<u32> = &mut LinkedList::<u32>::new();
-        assert_eq!(list.len(), 0);
-        list.insert(1);
-        list.insert(4);
-        assert_eq!(list.len(), 2);
-        assert_eq!(list.remove(9), None);
-        assert_eq!(list.remove(1), Some(1));
-        assert_eq!(list.len(), 1);
-        assert!(list.contains(&4));
-        list.clear();
-        assert_eq!(list.len(), 0);
-        //assert_eq!(list.pop_back(), None); // error
-    }
+//     #[test]
+//     fn test_list_combo_trait() {
+//         trait ContainerStack<T> : Container<T> + Stack<T> {}
+//         impl<T: Ord> ContainerStack<T> for LinkedList<T> {}
+//         let list : &mut dyn ContainerStack<u32> = &mut LinkedList::<u32>::new();
+//         assert_eq!(list.len(), 0);
+//         list.insert(1);
+//         list.insert(4);
+//         assert_eq!(list.len(), 2);
+//         assert_eq!(list.remove(9), None);
+//         assert_eq!(list.remove(1), Some(1));
+//         assert_eq!(list.len(), 1);
+//         assert!(list.contains(&4));
+//         list.clear();
+//         assert_eq!(list.len(), 0);
+//         //assert_eq!(list.pop_back(), None); // error
+//     }
 
-    #[test]
-    fn test_list_with_position() {
-        trait ContainerRandomAccess<T> : Container<T> + RandomAccess<T> {}
-        impl<T: Ord> ContainerRandomAccess<T> for LinkedList<T> {}
-        let list : &mut dyn ContainerRandomAccess<u32> = &mut LinkedList::<u32>::new();
-        list.insert(1);
-        list.insert(4);
-        list.insert(2);
-        assert_eq!(list.first(), Some(&1));
-        assert_eq!(list.last(), Some(&2));
-        assert_eq!(list.nth(1), Some(&4));
-    }
-}
+//     #[test]
+//     fn test_list_with_position() {
+//         trait ContainerRandomAccess<T> : Container<T> + RandomAccess<T> {}
+//         impl<T: Ord> ContainerRandomAccess<T> for LinkedList<T> {}
+//         let list : &mut dyn ContainerRandomAccess<u32> = &mut LinkedList::<u32>::new();
+//         list.insert(1);
+//         list.insert(4);
+//         list.insert(2);
+//         assert_eq!(list.first(), Some(&1));
+//         assert_eq!(list.last(), Some(&2));
+//         assert_eq!(list.nth(1), Some(&4));
+//     }
+// }

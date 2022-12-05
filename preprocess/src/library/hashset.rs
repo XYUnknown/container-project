@@ -108,6 +108,10 @@ fn abstraction<T: Ord>(h: HashSet<T>) -> ConsList<T> {
 }
 
 proptest!{
+    #![proptest_config(ProptestConfig {
+        cases: 100, .. ProptestConfig::default()
+      })]
+    
     #[test]
     fn test_hashset_len(ref mut h in hash_set(".*", 0..100)) {
         let abs_list = abstraction(h.clone());
@@ -173,23 +177,23 @@ proptest!{
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::traits::Container;
-    use std::collections::HashSet;
+// #[cfg(test)]
+// mod tests {
+//     use crate::traits::Container;
+//     use std::collections::HashSet;
 
-    #[test]
-    fn test_hashset_container_trait() {
-        let set : &mut dyn Container<u32> = &mut HashSet::<u32>::new();
-        assert_eq!(set.len(), 0);
-        set.insert(1);
-        set.insert(4);
-        assert_eq!(set.len(), 2);
-        assert_eq!(set.remove(9), None);
-        assert_eq!(set.remove(1), Some(1));
-        assert_eq!(set.len(), 1);
-        assert!(set.contains(&4));
-        set.clear();
-        assert_eq!(set.len(), 0);
-    }
-}
+//     #[test]
+//     fn test_hashset_container_trait() {
+//         let set : &mut dyn Container<u32> = &mut HashSet::<u32>::new();
+//         assert_eq!(set.len(), 0);
+//         set.insert(1);
+//         set.insert(4);
+//         assert_eq!(set.len(), 2);
+//         assert_eq!(set.remove(9), None);
+//         assert_eq!(set.remove(1), Some(1));
+//         assert_eq!(set.len(), 1);
+//         assert!(set.contains(&4));
+//         set.clear();
+//         assert_eq!(set.len(), 0);
+//     }
+// }

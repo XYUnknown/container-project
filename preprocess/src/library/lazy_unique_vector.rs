@@ -271,6 +271,10 @@ where T: Ord
 }
 
 proptest! {
+    #![proptest_config(ProptestConfig {
+        cases: 100, .. ProptestConfig::default()
+      })]
+    
     #[test]
     fn test_lazy_unique_vec_len(ref mut v in lazy_unique_vec(".*", 0..100)) {
         let abs_list = abstraction(v.clone());
@@ -361,23 +365,23 @@ proptest! {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::library::lazy_unique_vector::LazyUniqueVec;
-    /** Unique Vector*/
-    #[test]
-    fn unique_vec_creation() {
-        let mut vec = LazyUniqueVec::<u32>::new();
-        assert_eq!(vec.len(), 0);
-    }
+// #[cfg(test)]
+// mod tests {
+//     use crate::library::lazy_unique_vector::LazyUniqueVec;
+//     /** Unique Vector*/
+//     #[test]
+//     fn unique_vec_creation() {
+//         let mut vec = LazyUniqueVec::<u32>::new();
+//         assert_eq!(vec.len(), 0);
+//     }
 
-    #[test]
-    fn unique_vec_contains() {
-        let mut vec = LazyUniqueVec::<u32>::new();
-        for i in 0..10 {
-            vec.push(i);
-        }
-        assert_eq!(vec.contains(&10), false);
-        assert_eq!(vec.contains(&6), true);
-    }
-}
+//     #[test]
+//     fn unique_vec_contains() {
+//         let mut vec = LazyUniqueVec::<u32>::new();
+//         for i in 0..10 {
+//             vec.push(i);
+//         }
+//         assert_eq!(vec.contains(&10), false);
+//         assert_eq!(vec.contains(&6), true);
+//     }
+// }

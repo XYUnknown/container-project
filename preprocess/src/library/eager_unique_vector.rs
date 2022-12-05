@@ -233,6 +233,10 @@ where T: PartialEq
 }
 
 proptest! {
+    #![proptest_config(ProptestConfig {
+        cases: 100, .. ProptestConfig::default()
+      })]
+    
     #[test]
     fn test_eager_unique_vec_len(ref mut v in eager_unique_vec(".*", 0..100)) {
         let abs_list = abstraction(v.clone());
@@ -334,13 +338,13 @@ proptest! {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::library::eager_unique_vector::EagerUniqueVec;
-    /** Unique Vector*/
-    #[test]
-    fn unique_vec_creation() {
-        let mut vec = EagerUniqueVec::<u32>::new();
-        assert_eq!(vec.len(), 0);
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     use crate::library::eager_unique_vector::EagerUniqueVec;
+//     /** Unique Vector*/
+//     #[test]
+//     fn unique_vec_creation() {
+//         let mut vec = EagerUniqueVec::<u32>::new();
+//         assert_eq!(vec.len(), 0);
+//     }
+// }

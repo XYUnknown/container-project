@@ -259,6 +259,10 @@ where T: Ord
 }
 
 proptest! {
+    #![proptest_config(ProptestConfig {
+        cases: 100, .. ProptestConfig::default()
+      })]
+    
     #[test]
     fn test_lazy_sorted_vec_len(ref mut v in lazy_sorted_vec(".*", 0..100)) {
         let abs_list = abstraction(v.clone());
