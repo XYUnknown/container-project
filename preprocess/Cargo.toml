@@ -3,6 +3,7 @@ name = "preprocess"
 version = "0.1.0"
 authors = ["Xueying Qin <qinxy1995@gmail.com>"]
 edition = "2018"
+default-run = "main"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -24,4 +25,53 @@ name = "criterion_benchmark"
 harness = false
 
 [[bin]]
-name = "btreeset_1m"
+name = "main"
+path = "src/main.rs"
+
+[[bin]]
+name = "btreeset1"
+path = "mem_profiling/btreeset_1m.rs"
+
+[[bin]]
+name = "btreeset128"
+path = "mem_profiling/btreeset_128m.rs"
+
+[[bin]]
+name = "btreeset256"
+path = "mem_profiling/btreeset_256m.rs"
+
+[[bin]]
+name = "btreeset512"
+path = "mem_profiling/btreeset_512m.rs"
+
+[[bin]]
+name = "hashset1"
+path = "mem_profiling/hashset_1m.rs"
+
+[[bin]]
+name = "hashset128"
+path = "mem_profiling/hashset_128m.rs"
+
+[[bin]]
+name = "hashset256"
+path = "mem_profiling/hashset_256m.rs"
+
+[[bin]]
+name = "hashset512"
+path = "mem_profiling/hashset_512m.rs"
+
+[[bin]]
+name = "uveclazy1"
+path = "mem_profiling/uvec_lazy_1m.rs"
+
+[[bin]]
+name = "uveclazy128"
+path = "mem_profiling/uvec_lazy_128m.rs"
+
+[[bin]]
+name = "uveclazy256"
+path = "mem_profiling/uvec_lazy_256m.rs"
+
+[[bin]]
+name = "uveclazy512"
+path = "mem_profiling/uvec_lazy_512m.rs"
