@@ -233,176 +233,176 @@ pub grammar spec() for str {
             
 }}
 
-#[cfg(test)]
-mod tests {
-    use crate::parser::{Id, Type, spec};
+// #[cfg(test)]
+// mod tests {
+//     use crate::parser::{Id, Type, spec};
 
-    #[test]
-    fn test_id() {
-        assert_eq!(spec::id("unique"), Ok(Id::from("unique")));
-    }
+//     #[test]
+//     fn test_id() {
+//         assert_eq!(spec::id("unique"), Ok(Id::from("unique")));
+//     }
 
-    #[test]
-    fn test_lit() {
-        assert_eq!(spec::literal("true"), Ok(Id::from("true")));
-    }
+//     #[test]
+//     fn test_lit() {
+//         assert_eq!(spec::literal("true"), Ok(Id::from("true")));
+//     }
 
-    #[test]
-    fn test_ty() {
-        assert!(spec::ty("UniqueCon<T>").is_ok());
-    }
+//     #[test]
+//     fn test_ty() {
+//         assert!(spec::ty("UniqueCon<T>").is_ok());
+//     }
 
-    #[test]
-    fn test_ty_sim() {
-        assert!(spec::ty("T").is_ok());
-    }
+//     #[test]
+//     fn test_ty_sim() {
+//         assert!(spec::ty("T").is_ok());
+//     }
 
-    #[test]
-    fn test_litterm() {
-        assert!(spec::term("true").is_ok());
-    }
+//     #[test]
+//     fn test_litterm() {
+//         assert!(spec::term("true").is_ok());
+//     }
 
-    #[test]
-    fn test_varterm() {
-        assert!(spec::term("x").is_ok());
-    }
+//     #[test]
+//     fn test_varterm() {
+//         assert!(spec::term("x").is_ok());
+//     }
 
-    #[test]
-    fn test_lambdaterm() {
-        assert!(spec::term(r#"\c -> c"#).is_ok());
-    }
+//     #[test]
+//     fn test_lambdaterm() {
+//         assert!(spec::term(r#"\c -> c"#).is_ok());
+//     }
 
-    #[test]
-    fn test_appterm() {
-        assert!(spec::term("(f c)").is_ok());
-    }
+//     #[test]
+//     fn test_appterm() {
+//         assert!(spec::term("(f c)").is_ok());
+//     }
 
-    #[test]
-    fn test_property() {
-        assert!(spec::decl(
-            r#"property id<T> {
-                 \c -> c 
-                }"#
-            ).is_ok());
-    }
+//     #[test]
+//     fn test_property() {
+//         assert!(spec::decl(
+//             r#"property id<T> {
+//                  \c -> c 
+//                 }"#
+//             ).is_ok());
+//     }
 
-    #[test]
-    fn test_property_true() {
+//     #[test]
+//     fn test_property_true() {
         
-        assert!(spec::decl(
-            r#"property default<T> {
-                \c -> true
-            }"#
-            ).is_ok());
-    }
+//         assert!(spec::decl(
+//             r#"property default<T> {
+//                 \c -> true
+//             }"#
+//             ).is_ok());
+//     }
 
-    #[test]
-    fn test_property_unique() {
-        assert!(spec::decl(
-            r#"property unique<T> {
-                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
-            }"#
-            ).is_ok());
-    }
+//     #[test]
+//     fn test_property_unique() {
+//         assert!(spec::decl(
+//             r#"property unique<T> {
+//                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
+//             }"#
+//             ).is_ok());
+//     }
 
-    #[test]
-    fn test_contype() {
-        assert!(spec::decl(
-            "type UniqueCon<T> = {c impl (Container) | (unique c)}"
-            ).is_ok());
-    }
+//     #[test]
+//     fn test_contype() {
+//         assert!(spec::decl(
+//             "type UniqueCon<T> = {c impl (Container) | (unique c)}"
+//             ).is_ok());
+//     }
 
-    #[test]
-    fn test_spec() {
-        assert!(spec::spec( // raw string literal
-            r#"/*SPEC*
-            property unique<T> {
-                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
-            }
-            type UniqueCon<T> = {c impl (Container) | (unique c)}
-            *ENDSPEC*/"#
-        ).is_ok())
-    }
+//     #[test]
+//     fn test_spec() {
+//         assert!(spec::spec( // raw string literal
+//             r#"/*SPEC*
+//             property unique<T> {
+//                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
+//             }
+//             type UniqueCon<T> = {c impl (Container) | (unique c)}
+//             *ENDSPEC*/"#
+//         ).is_ok())
+//     }
 
-    #[test]
-    fn test_code() {
-        assert!(spec::code(
-            r#"/*CODE*/fn main () {
-                let mut c = UniqueCon::<u32>::new();
-                for x in 0..10 {
-                    c.insert(x);
-                    c.insert(x);
-                }
-                assert_eq!(c.len(), 10);
-            }/*ENDCODE*/"#
-        ).is_ok())
-    }
+//     #[test]
+//     fn test_code() {
+//         assert!(spec::code(
+//             r#"/*CODE*/fn main () {
+//                 let mut c = UniqueCon::<u32>::new();
+//                 for x in 0..10 {
+//                     c.insert(x);
+//                     c.insert(x);
+//                 }
+//                 assert_eq!(c.len(), 10);
+//             }/*ENDCODE*/"#
+//         ).is_ok())
+//     }
 
-    #[test]
-    fn test_block_spec() {
-        assert!(spec::block(
-            r#"/*SPEC*
-            property unique<T> {
-                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
-            }
-            type UniqueCon<T> = {c impl (Container) | (unique c)}
-            *ENDSPEC*/"#
-        ).is_ok())
-    }
+//     #[test]
+//     fn test_block_spec() {
+//         assert!(spec::block(
+//             r#"/*SPEC*
+//             property unique<T> {
+//                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
+//             }
+//             type UniqueCon<T> = {c impl (Container) | (unique c)}
+//             *ENDSPEC*/"#
+//         ).is_ok())
+//     }
 
-    #[test]
-    fn test_block_code() {
-        assert!(spec::block(
-            r#"/*CODE*/fn main () {
-                let mut c = UniqueCon::<u32>::new();
-                for x in 0..10 {
-                    c.insert(x);
-                    c.insert(x);
-                }
-                assert_eq!(c.len(), 10);
-            }/*ENDCODE*/"#
-        ).is_ok())
-    }
+//     #[test]
+//     fn test_block_code() {
+//         assert!(spec::block(
+//             r#"/*CODE*/fn main () {
+//                 let mut c = UniqueCon::<u32>::new();
+//                 for x in 0..10 {
+//                     c.insert(x);
+//                     c.insert(x);
+//                 }
+//                 assert_eq!(c.len(), 10);
+//             }/*ENDCODE*/"#
+//         ).is_ok())
+//     }
 
-    #[test]
-    fn test_prog() {
-        assert!(spec::prog(
-            r#"
-            /*SPEC*
-            property unique<T> {
-                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
-            }
-            type UniqueCon<T> = {c impl (Container) | (unique c) }
-            *ENDSPEC*/
+//     #[test]
+//     fn test_prog() {
+//         assert!(spec::prog(
+//             r#"
+//             /*SPEC*
+//             property unique<T> {
+//                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
+//             }
+//             type UniqueCon<T> = {c impl (Container) | (unique c) }
+//             *ENDSPEC*/
 
-            /*CODE*/
-            fn main () {
-                let mut c = UniqueCon::<u32>::new();
-                for x in 0..10 {
-                    c.insert(x);
-                    c.insert(x);
-                }
-                assert_eq!(c.len(), 10);
-            }
-            /*ENDCODE*/
+//             /*CODE*/
+//             fn main () {
+//                 let mut c = UniqueCon::<u32>::new();
+//                 for x in 0..10 {
+//                     c.insert(x);
+//                     c.insert(x);
+//                 }
+//                 assert_eq!(c.len(), 10);
+//             }
+//             /*ENDCODE*/
 
-            /*SPEC*
-            property unique<T> {
-                \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
-            }
-            type UniqueCon<T> = {c impl (Container) | (unique c) }
-            *ENDSPEC*/
+//             /*SPEC*
+//             property unique<T> {
+//                 \c -> ((for_all_unique_pairs c) \a -> \b -> ((neq a) b))
+//             }
+//             type UniqueCon<T> = {c impl (Container) | (unique c) }
+//             *ENDSPEC*/
             
-            /*CODE*/
-            fn main () {
-                let mut c = UniqueCon::<u32>::new();
-                for x in 0..10 {
-                    c.insert(x);
-                    c.insert(x);
-                }
-                assert_eq!(c.len(), 10);
-            }
-            /*ENDCODE*/"#
-        ).is_ok())
-    }
-}
+//             /*CODE*/
+//             fn main () {
+//                 let mut c = UniqueCon::<u32>::new();
+//                 for x in 0..10 {
+//                     c.insert(x);
+//                     c.insert(x);
+//                 }
+//                 assert_eq!(c.len(), 10);
+//             }
+//             /*ENDCODE*/"#
+//         ).is_ok())
+//     }
+// }

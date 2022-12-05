@@ -313,22 +313,22 @@ impl<{elem_type}: 'static + Ord + std::hash::Hash> {trait_name}<{elem_type}> for
 "#)
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::generator::{readfile, mark_src_blocks};
-    use crate::parser::{Decl, spec};
+// #[cfg(test)]
+// mod tests {
+//     use crate::generator::{readfile, mark_src_blocks};
+//     use crate::parser::{Decl, spec};
 
-    #[test]
-    fn test_read_file() {
-        assert!(
-            readfile("./spec_code/example.rs".to_string()).len() != 0
-        );
-    }
+//     #[test]
+//     fn test_read_file() {
+//         assert!(
+//             readfile("./spec_code/example.rs".to_string()).len() != 0
+//         );
+//     }
 
-    #[test]
-    fn test_parse_file() {
-        let f = readfile("./spec_code/example.rs".to_string());
-        assert!(spec::prog(&f).is_ok())
-    }
+//     #[test]
+//     fn test_parse_file() {
+//         let f = readfile("./spec_code/example.rs".to_string());
+//         assert!(spec::prog(&f).is_ok())
+//     }
 
-}
+// }
